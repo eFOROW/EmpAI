@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // useRouter import 추가
 import { auth } from '@/lib/firebase/firebase'; 
+import clientPromise from "@/lib/mongodb/mongodb";
 import { createUserWithEmailAndPassword } from 'firebase/auth'; // 회원가입만 사용
 import Link from 'next/link';
 
