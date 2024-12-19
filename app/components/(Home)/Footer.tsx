@@ -16,8 +16,8 @@ const Footer = () => (
     <div className="footer-gradient" />
     <div className="innerWidth mx-auto flex flex-col gap-8">
       <div className="flex items-center justify-between flex-wrap gap-5">
-        <h4 className="font-bold md:text-[64px] text-[44px] text-white">
-          Enter the EmpAI
+        <h4 className="font-bold md:text-[50px] text-[44px] text-primary-black">
+          EmpAI와 함께
         </h4>
         <button
           type="button"
@@ -31,15 +31,15 @@ const Footer = () => (
             className="object-contain"
           />
           <span className="font-normal text-[16px] text-white uppercase">
-            enter metaverse
+            회원가입
           </span>
         </button>
       </div>
       <div className="flex flex-col">
-        <div className="mb-[50px] h-[2px] bg-white opacity-10" />
+        <div className="mb-[50px] h-[2px] bg-black opacity-10" />
         <div className="flexCenter flex-wrap gap-8">
-          <h4 className="font-extrabold text-[24px] text-white">Employment with AI</h4>
-          <p className="font-normal text-[14px] text-white opacity-50">
+          <h4 className="font-extrabold text-[24px] text-primary-black">Employment with AI</h4>
+          <p className="font-normal text-[14px] text-primary-black">
             Copyright © 2024 - 2025 EmpAI. All rights reserved.
           </p>
           <div className="flex gap-4">
