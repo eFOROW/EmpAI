@@ -24,7 +24,7 @@ const Hero = () => (
         >
           <div className="heroDText" />
           <h3 className="heroHeading3">
-            esign <span className="text-[24px] lg:text-[40px] md:text-[30px] sm:text-[20px] font-bold leading-[35px] lg:leading-[50px] md:leading-[40px] sm:leading-[30px] uppercase text-white">with</span> AI
+            esign <span className="text-[24px] lg:text-[40px] md:text-[30px] sm:text-[20px] font-bold leading-[35px] lg:leading-[50px] md:leading-[40px] sm:leading-[30px] uppercase text-primary-black">with</span> AI
           </h3>
         </motion.div>
       </div>

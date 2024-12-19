@@ -13,7 +13,7 @@ export const TypingText = ({ title, textStyles }: textProps) => (
   <div>
     <motion.p
       variants={textContainer}
-      className={`font-normal text-[14px] text-secondary-white ${textStyles}`}
+      className={`font-normal text-[14px] text-secondary-black ${textStyles}`}
     >
       {typeof title === "string" &&
         Array.from(title).map((letter, index) => (
@@ -31,7 +31,7 @@ export const TitleText = ({ title, textStyles }: textProps) => (
       variants={textVariant2}
       initial="hidden"
       whileInView="show"
-      className={`mt-[8px] font-bold md:text-[64px] text-[40px] text-white ${textStyles}`}
+      className={`mt-[8px] font-bold md:text-[64px] text-[40px] text-primary-black ${textStyles}`}
     >
       {title}
     </motion.h2>

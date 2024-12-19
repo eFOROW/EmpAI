@@ -10,6 +10,7 @@ export default function Page_Login() {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -35,16 +36,26 @@ export default function Page_Login() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
+          placeholder="이메일"
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <input
-          type="password"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-          placeholder="Password"
-          className="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative w-full mb-6">
+      <input
+        type={showPassword ? 'text' : 'password'} // showPassword 상태에 따라 타입 변경
+        value={pass}
+        onChange={(e) => setPass(e.target.value)}
+        placeholder="비밀번호"
+        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {/* 비밀번호 표시 버튼 */}
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)} // 상태 토글
+        className="absolute right-3 top-3 text-gray-500 hover:text-blue-500"
+      >
+        {showPassword ? '숨기기' : '보기'} {/* 버튼 텍스트 */}
+      </button>
+    </div>
         <div className="flex justify-between items-center">
           <button
             onClick={handleLogin}
