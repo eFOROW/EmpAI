@@ -1,19 +1,18 @@
 "use client"
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // useRouter import 추가
+import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase/firebase'; 
-import clientPromise from "@/lib/mongodb/mongodb";
-import { createUserWithEmailAndPassword } from 'firebase/auth'; // 회원가입만 사용
+import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
 import Link from 'next/link';
 
 export default function Page_Register() {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
-  const [confirmPass, setConfirmPass] = useState(''); // 비밀번호 확인 상태 추가
-  const [name, setName] = useState('');  // 이름 상태 추가
-  const [ageRange, setAgeRange] = useState('');  // 나이대 상태 추가
-  const [gender, setGender] = useState('');  // 성별 상태 추가
+  const [confirmPass, setConfirmPass] = useState('');
+  const [name, setName] = useState('');
+  const [ageRange, setAgeRange] = useState('');
+  const [gender, setGender] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -24,16 +23,44 @@ export default function Page_Register() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      router.push('/'); // 회원가입 후 홈으로 리디렉션
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const user = userCredential.user;
+      
+      if(!user) {
+        throw new Error('회원가입에 실패했습니다.')
+      }
+
+      // 서버로 데이터 전송
+      const newUser = {
+        uid: user.uid,
+        email: user.email,
+        name,
+        ageRange,
+        gender,
+      };
+
+      // API를 통해 MongoDB에 사용자 데이터 저장
+      const response = await fetch('/api/db/Users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      if (!response.ok) {
+        await deleteUser(user); // 실패 시 사용자 삭제
+        setError('회원가입 중 오류가 발생했습니다.');
+      } else {      
+        router.push('/'); // 성공 시 홈 페이지로 이동
+      }
     } catch (error: any) {
       setError(error.message);
     }
   };
 
-  // 비밀번호와 비밀번호 확인이 일치할 때만 버튼 활성화
   const isPasswordMatch = pass === confirmPass;
-  const isFormValid = email && pass && confirmPass && isPasswordMatch && gender; // 폼이 유효한지 확인
+  const isFormValid = email && pass && confirmPass && isPasswordMatch && gender;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -45,7 +72,6 @@ export default function Page_Register() {
             <p>{error}</p>
           </div>
         )}
-        {/* 이메일 입력 란 */}
         <input
           type="email"
           value={email}
@@ -53,8 +79,6 @@ export default function Page_Register() {
           placeholder="이메일"
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
-        {/* 이름 입력 란 */}
         <input
           type="text"
           value={name}
@@ -62,8 +86,6 @@ export default function Page_Register() {
           placeholder="이름"
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
-        {/* 비밀번호 입력 란 */}
         <input
           type="password"
           value={pass}
@@ -71,8 +93,6 @@ export default function Page_Register() {
           placeholder="비밀번호"
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
-        {/* 비밀번호 확인 입력 란 */}
         <input
           type="password"
           value={confirmPass}
@@ -80,45 +100,40 @@ export default function Page_Register() {
           placeholder="비밀번호 확인"
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
-        {/* 나이대 선택 콤보박스 */}
         <select
           value={ageRange}
           onChange={(e) => setAgeRange(e.target.value)}
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="10s">10대</option>
-          <option value="20s">20대</option>
-          <option value="30s">30대</option>
-          <option value="40s">40대</option>
-          <option value="50s">50대</option>
-          <option value="60s">60대 이상</option>
+          <option value="10대">10대</option>
+          <option value="20대">20대</option>
+          <option value="30대">30대</option>
+          <option value="40대">40대</option>
+          <option value="50대">50대</option>
+          <option value="60대 이상">60대 이상</option>
         </select>
-
-        {/* 성별 선택 버튼 */}
         <div className="flex mb-6 w-full">
           <button
-            onClick={() => setGender('male')}
+            onClick={() => setGender('남자')}
             className={`${
-              gender === 'male' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+              gender === '남자' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
             } px-6 py-3 rounded-l-lg w-full text-center hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition`}
           >
             남자
           </button>
           <button
-            onClick={() => setGender('female')}
+            onClick={() => setGender('여자')}
             className={`${
-              gender === 'female' ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700'
+              gender === '여자' ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-700'
             } px-6 py-3 rounded-r-lg w-full text-center hover:bg-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition`}
           >
             여자
           </button>
         </div>
-
         <div className="flex justify-between items-center">
           <button
             onClick={handleRegister}
-            disabled={!isFormValid} // 폼이 유효하지 않으면 비활성화
+            disabled={!isFormValid}
             className={`w-full py-3 ${isFormValid ? 'bg-blue-500' : 'bg-gray-400'} text-white rounded-lg hover:${isFormValid ? 'bg-blue-700' : ''} focus:outline-none focus:ring-2 focus:ring-blue-500`}
           >
             회원가입
