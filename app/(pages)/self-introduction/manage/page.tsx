@@ -1,22 +1,22 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import getCurrentUser from '@/lib/firebase/auth_state_listener'; // 경로에 맞게 import
-import { useRouter } from 'next/navigation'; // 라우팅을 위한 useRouter import
+import { User } from "firebase/auth";
+import getCurrentUser from '@/lib/firebase/auth_state_listener';
+import { useRouter } from 'next/navigation';
 
 const Page = () => {
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter(); // 라우터 객체 생성
+  const router = useRouter();
 
   useEffect(() => {
-    // 페이지 로드시 현재 로그인 상태 가져오기
     getCurrentUser().then((user) => {
-      setUser(user); // user가 로그인 상태일 경우 user 객체, 아니면 null
+      setUser(user); 
     });
   }, []);
 
   const handleLoginRedirect = () => {
-    router.push('/login'); // 로그인 페이지로 리디렉션
+    router.push('/login');
   };
 
   return (
