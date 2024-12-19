@@ -2,27 +2,27 @@ export const exploreWorlds = [
   {
     id: "world-1",
     imgUrl: "/planet-01.png",
-    title: "The Hogwarts",
+    title: "지도기반ㆍ기업탐색",
   },
   {
     id: "world-2",
     imgUrl: "/planet-02.png",
-    title: "The Upside Down",
+    title: "자기소개서ㆍ관리 & 피드백",
   },
   {
     id: "world-3",
     imgUrl: "/planet-03.png",
-    title: "Kadirojo Permai",
+    title: "AI예상질문",
   },
   {
     id: "world-4",
     imgUrl: "/planet-04.png",
-    title: "Paradise Island",
+    title: "-----",
   },
   {
     id: "world-5",
     imgUrl: "/planet-05.png",
-    title: "Hawkins Labs",
+    title: "AI모의면접ㆍ피드백",
   },
 ];
 

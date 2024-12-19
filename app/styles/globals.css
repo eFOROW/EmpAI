@@ -28,12 +28,12 @@ html {
     hsl(221deg 73% 70%) 74%,
     hsl(220deg 76% 51%) 100%
   );
-  filter: blur(125px);
+  filter: blur(80px);
 }
 
 .hero-gradient {
   background: linear-gradient(
-    97.86deg,
+    57.86deg,
     #a509ff 0%,
     #34acc7 53.65%,
     #a134c7 100%
@@ -48,7 +48,7 @@ html {
   right: 0px;
 
   background: #7aebfb;
-  filter: blur(190px);
+  filter: blur(90px);
 }
 
 .glassmorphism {
@@ -67,7 +67,7 @@ html {
   top: 5%;
 
   background: rgba(149, 66, 232, 0.35);
-  filter: blur(175px);
+  filter: blur(90px);
   transform: rotate(-114.2deg);
 }
 
@@ -110,7 +110,7 @@ html {
   bottom: 0;
 
   background: #65c4fa;
-  filter: blur(150px);
+  filter: blur(100px);
 }
 
 @layer utilities {
@@ -150,12 +150,12 @@ html {
   }
   /* Hero Section */
   .heroHeading {
-    @apply font-bold lg:text-[144px] md:text-[100px] sm:text-[60px] text-[44px] lg:leading-[158.4px] md:leading-[114.4px] sm:leading-[74.4px] leading-[64.4px] uppercase text-white;
+    @apply font-bold lg:text-[144px] md:text-[100px] sm:text-[60px] text-[44px] lg:leading-[158.4px] md:leading-[114.4px] sm:leading-[74.4px] leading-[64.4px] uppercase text-primary-black;
   }
   .heroHeading3 {
-    @apply font-bold lg:text-[72px] md:text-[50px] sm:text-[40px] text-[30px] lg:leading-[80px] md:leading-[60px] sm:leading-[48px] leading-[42px] uppercase text-white;
+    @apply font-bold lg:text-[72px] md:text-[50px] sm:text-[40px] text-[30px] lg:leading-[80px] md:leading-[60px] sm:leading-[48px] leading-[42px] uppercase text-primary-black;
   }
   .heroDText {
-    @apply md:w-[120px] sm:w-[40px] w-[30px] md:h-[60px] sm:h-[30px] h-[20px] md:border-[9px] border-[5px] rounded-r-[25px] border-white sm:mx-2 mx-[6px];
+    @apply md:w-[120px] sm:w-[40px] w-[30px] md:h-[60px] sm:h-[30px] h-[20px] md:border-[9px] border-[5px] rounded-r-[25px] border-primary-black sm:mx-2 mx-[6px];
   }
 }

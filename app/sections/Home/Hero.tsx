@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { slideIn, staggerContainer, textVariant } from "../utils/motion";
+import { slideIn, staggerContainer, textVariant } from "../../utils/motion";
 
 const Hero = () => (
   <section className="yPaddings sm:pl-16 pl-6">
@@ -24,7 +24,7 @@ const Hero = () => (
         >
           <div className="heroDText" />
           <h3 className="heroHeading3">
-            Design <span className="text-[24px] lg:text-[40px] md:text-[30px] sm:text-[20px] font-bold leading-[35px] lg:leading-[50px] md:leading-[40px] sm:leading-[30px] uppercase text-white">with</span> AI
+            esign <span className="text-[24px] lg:text-[40px] md:text-[30px] sm:text-[20px] font-bold leading-[35px] lg:leading-[50px] md:leading-[40px] sm:leading-[30px] uppercase text-primary-black">with</span> AI
           </h3>
         </motion.div>
       </div>

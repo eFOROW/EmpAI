@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { TitleText, ExploreCard, TypingText } from "../components";
-import { staggerContainer } from "../utils/motion";
-import { exploreWorlds } from "../constants";
+import { TitleText, ExploreCard, TypingText } from "../../components/Home";
+import { staggerContainer } from "../../utils/motion";
+import { exploreWorlds } from "../../constants";
 
 const Explore = () => {
   const [active, setActive] = useState("world-2");
@@ -18,12 +18,11 @@ const Explore = () => {
         viewport={{ once: false, amount: 0.25 }}
         className="innerWidth mx-auto flex flex-col"
       >
-        <TypingText title="| The World" textStyles="text-center" />
+        <TypingText title="| Employment with AI" textStyles="text-center" />
         <TitleText
           title={
             <>
-              Choose the world you want <br className="md:block hidden" /> to
-              explore
+              다양한 AI서비스 제공 <br className="md:block hidden" />
             </>
           }
           textStyles="text-center"
