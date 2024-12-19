@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 // `User` 스키마 정의
 const userSchema = new Schema(
   {
+    uid: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     ageRange: {
@@ -11,9 +12,8 @@ const userSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ["남성", "여성"]
-    },
-    accountCreatedAt: { type: Date, default: Date.now },
+      enum: ["남자", "여자"]
+    }
   },
   { timestamps: true } // createdAt, updatedAt 자동 생성
 );
