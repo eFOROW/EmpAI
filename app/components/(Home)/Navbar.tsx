@@ -78,7 +78,7 @@ const Navbar = () => {
 
             {/* 마이페이지 */}
             <div className="nav-item">
-              <a href="/" className="text-black text-lg">
+              <a href="/mypage" className="text-black text-lg">
                 마이페이지
               </a>
             </div>
