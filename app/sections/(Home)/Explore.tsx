@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { TitleText, ExploreCard, TypingText } from "../../components";
+import { TitleText, ExploreCard, TypingText } from "../../components/(Home)";
 import { staggerContainer } from "../../utils/motion";
 import { exploreWorlds } from "../../constants";
 

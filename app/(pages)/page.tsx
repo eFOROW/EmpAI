@@ -1,4 +1,4 @@
-import { Footer, Navbar } from "../components";
+import { Footer, Navbar } from "../components/(Home)";
 import {
   About,
   Explore,
@@ -12,7 +12,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="bg-primary-black overflow-hidden">
+    <main className="bg-gray-900 overflow-hidden">
       <Navbar />
       <Hero />
       <section className="relative">
