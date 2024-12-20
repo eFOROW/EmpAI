@@ -43,7 +43,7 @@ const Navbar = () => {
 
             {/* 자기소개서 */}
             <div className="nav-item relative group">
-              <Link href="/self-introduction/manage" className="text-primary-black text-lg font-bold">자기소개서</Link>
+              <Link href="/self-introduction" className="text-primary-black text-lg font-bold">자기소개서</Link>
               <div className="absolute hidden group-hover:flex flex-col bg-white/50 p-2 rounded-lg min-w-[calc(100%+50px)] left-1/2 transform -translate-x-1/2">
                 <Link href="/self-introduction/manage" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">자기소개서 관리</Link>
                 <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">자기소개서 첨삭</Link>
@@ -52,11 +52,11 @@ const Navbar = () => {
 
             {/* AI면접 */}
             <div className="nav-item relative group">
-              <Link href="/" className="text-primary-black text-lg font-bold">AI면접</Link>
+              <Link href="/ai-interview" className="text-primary-black text-lg font-bold">AI면접</Link>
               <div className="absolute hidden group-hover:flex flex-col bg-white/50 p-2 rounded-lg min-w-[calc(100%+100px)] left-1/2 transform -translate-x-1/2">
-                <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI면접 예상질문</Link>
-                <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI 모의면접</Link>
-                <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">면접결과 보기</Link>
+                <Link href="/ai-interview/question" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI면접 예상질문</Link>
+                <Link href="/ai-interview" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI 모의면접</Link>
+                <Link href="/ai-interview/results" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">면접결과 보기</Link>
               </div>
             </div>
 
