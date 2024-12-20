@@ -24,9 +24,9 @@ const Navbar = () => {
 
         {/* 자기소개서 */}
         <div className="nav-item relative group">
-          <Link href="/" className="text-primary-black text-lg font-bold">자기소개서</Link>
+          <Link href="/self-introduction/manage" className="text-primary-black text-lg font-bold">자기소개서</Link>
           <div className="absolute hidden group-hover:flex flex-col bg-gray-100/90 p-2 rounded-lg min-w-[calc(100%+50px)] left-1/2 transform -translate-x-1/2">
-            <Link href="/" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">자기소개서 관리</Link>
+            <Link href="/self-introduction/manage" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">자기소개서 관리</Link>
             <Link href="/" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">자기소개서 첨삭</Link>
           </div>
         </div>

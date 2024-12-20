@@ -1,6 +1,5 @@
-import { User, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/firebase";
-import { Button, Spin, Alert, Card, Descriptions, Avatar } from "antd";
+import { User } from "firebase/auth";
+import { Spin, Alert, Card, Descriptions, Avatar } from "antd";
 import { useState, useEffect } from "react";
 
 interface MyProfileProps {
@@ -11,15 +10,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
   const [profileData, setProfileData] = useState<any | null>(null); // 사용자 데이터 상태
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
   const [error, setError] = useState<string>(""); // 에러 상태
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
 
   useEffect(() => {
     if (user?.uid) {
@@ -63,25 +53,19 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
 
           {profileData && (
             <div className="mt-6">
-              <Descriptions title="User Info" bordered column={1} className="rounded-md bg-gray-50 p-4">
-                <Descriptions.Item label="email">{profileData.email}</Descriptions.Item>
-                <Descriptions.Item label="uid">{profileData.uid}</Descriptions.Item>
-                <Descriptions.Item label="imgUrl">{profileData?.imgUrl || "null"}</Descriptions.Item>
-                <Descriptions.Item label="name">{profileData.name}</Descriptions.Item>
-                <Descriptions.Item label="Gender">{profileData.gender}</Descriptions.Item>
-                <Descriptions.Item label="ageRange">{profileData.ageRange}</Descriptions.Item>
-                <Descriptions.Item label="createdAt">
+              <Descriptions title="내 정보" bordered column={1} className="rounded-md bg-gray-50 p-4">
+                <Descriptions.Item label="이메일">{profileData.email}</Descriptions.Item>
+                <Descriptions.Item label="Uid">{profileData.uid}</Descriptions.Item>
+                <Descriptions.Item label="프로필 이미지">{profileData?.imgUrl || "null"}</Descriptions.Item>
+                <Descriptions.Item label="이름">{profileData.name}</Descriptions.Item>
+                <Descriptions.Item label="성별">{profileData.gender}</Descriptions.Item>
+                <Descriptions.Item label="나이대">{profileData.ageRange}</Descriptions.Item>
+                <Descriptions.Item label="가입일">
                   {new Date(profileData.createdAt).toLocaleString()}
                 </Descriptions.Item>
               </Descriptions>
             </div>
           )}
-
-          <div className="mt-6 text-center">
-            <Button type="primary" danger onClick={handleLogout} className="w-full">
-              Logout
-            </Button>
-          </div>
         </Card>
       ) : (
         <p className="text-center text-gray-500">Loading..</p>
