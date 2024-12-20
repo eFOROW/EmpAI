@@ -26,40 +26,24 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header>
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{
-          y: 0,
-          opacity: 1,
-          backgroundColor: isScrolled
-            ? "rgba(255, 255, 255, 0.2)" // 스크롤 시 화이트 반투명
-            : isLoaded
-            ? "rgba(255, 255, 255, 0)" // 로딩 완료 시 완전 투명
-            : "rgba(255, 255, 255, 0.9)", // 초기 로딩 시 기본 반투명 화이트
-        }}
-        transition={{
-          duration: 0.5,
-          ease: "easeInOut",
-        }}
-        className={`xPaddings py-8 z-50 ${
-          isScrolled ? "fixed top-0 left-0 w-full" : "relative"
-        }`}
-      >
+    <header className="bg-gray-200">
+      <nav className={`xPaddings py-8 z-50 ${isScrolled ? "fixed top-0 left-0 w-full bg-white/20" : "relative bg-transparent"}`}>
         <div className="absolute w-[50%] inset-0 gradient-01" />
           <div className="innerWidth mx-auto flex justify-between items-center gap-8">
-            <h2 className="font-extrabold text-[24px] leading-[30.24px] text-black">
-              EmpAI
-            </h2>
+            <Link href="/" className="block relative z-10">
+              <h2 className="font-extrabold text-[24px] leading-[30.24px] text-primary-black cursor-pointer block">
+                EmpAI
+              </h2>
+            </Link>
             <div className="flex items-center space-x-[100px]">
             {/* 기업탐색 */}
             <div className="nav-item">
-              <Link href="/" className="text-black text-lg">기업탐색</Link>
+              <Link href="/" className="text-primary-black text-lg font-bold">기업탐색</Link>
             </div>
 
             {/* 자기소개서 */}
             <div className="nav-item relative group">
-              <Link href="/" className="text-black text-lg">자기소개서</Link>
+              <Link href="/" className="text-primary-black text-lg font-bold">자기소개서</Link>
               <div className="absolute hidden group-hover:flex flex-col bg-white/50 p-2 rounded-lg min-w-[calc(100%+50px)] left-1/2 transform -translate-x-1/2">
                 <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">자기소개서 관리</Link>
                 <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">자기소개서 첨삭</Link>
@@ -68,7 +52,7 @@ const Navbar = () => {
 
             {/* AI면접 */}
             <div className="nav-item relative group">
-              <Link href="/" className="text-black text-lg">AI면접</Link>
+              <Link href="/" className="text-primary-black text-lg font-bold">AI면접</Link>
               <div className="absolute hidden group-hover:flex flex-col bg-white/50 p-2 rounded-lg min-w-[calc(100%+100px)] left-1/2 transform -translate-x-1/2">
                 <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI면접 예상질문</Link>
                 <Link href="/" className="text-black text-sm  hover:bg-gray-200 p-2 rounded-lg">AI 모의면접</Link>
@@ -78,13 +62,11 @@ const Navbar = () => {
 
             {/* 마이페이지 */}
             <div className="nav-item">
-              <a href="/mypage" className="text-black text-lg">
-                마이페이지
-              </a>
+              <Link href="/mypage" className="text-primary-black text-lg font-bold">마이페이지</Link>
             </div>
           </div>
         </div>
-      </motion.nav>
+      </nav>
     </header>
   );
 };

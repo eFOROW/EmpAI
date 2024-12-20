@@ -11,7 +11,7 @@ const Page = () => {
 
   useEffect(() => {
     getCurrentUser().then((user) => {
-      setUser(user); 
+      setUser(user);
     });
   }, []);
 

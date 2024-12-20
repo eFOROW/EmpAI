@@ -5,6 +5,7 @@ const userSchema = new Schema(
   {
     uid: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
+    imgUrl: { type: String },
     name: { type: String, required: true },
     ageRange: {
       type: String,
