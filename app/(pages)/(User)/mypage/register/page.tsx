@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase/firebase'; 
 import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
-import Link from 'next/link';
+import { Footer2 } from '@/app/components/Home';
 
 export default function Page_Register() {
   const [email, setEmail] = useState('');
@@ -65,9 +65,8 @@ export default function Page_Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <Link href="/" className="text-blue-500 hover:text-blue-700 mb-4">Go back to home page</Link>
       <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
-        <h2 className="text-2xl font-bold text-center mb-6">Create an Account</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">회원가입</h2>
         {error && (
           <div className="bg-red-100 text-red-600 p-4 mb-4 border border-red-300 rounded-lg">
             <p>{error}</p>
@@ -141,6 +140,7 @@ export default function Page_Register() {
           </button>
         </div>
       </div>
+      <Footer2 />
     </div>
   );
 }
