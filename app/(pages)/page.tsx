@@ -1,10 +1,10 @@
-import { Footer, Navbar } from "../components/(Home)";
+import { Footer, Navbar } from "../components/Home";
 import {
   About,
   Explore,
   Hero,
   WhatsNew,
-} from "../sections/(Home)";
+} from "../sections/Home";
 
 export default function Home() {
   return (

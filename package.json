@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@types/js-cookie": "^3.0.6",
+    "antd": "^5.22.5",
+    "empai": "file:",
     "EmpAI": "file:",
     "firebase": "^11.1.0",
     "framer-motion": "^10.18.0",

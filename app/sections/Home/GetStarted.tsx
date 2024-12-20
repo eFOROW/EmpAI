@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { StartSteps, TitleText, TypingText } from "../../components/(Home)";
+import { StartSteps, TitleText, TypingText } from "../../components/Home";
 import { staggerContainer, fadeIn, planetVariants } from "../../utils/motion";
 import { startingFeatures } from "../../constants";
 

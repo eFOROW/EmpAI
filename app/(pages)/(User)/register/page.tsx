@@ -34,6 +34,7 @@ export default function Page_Register() {
       const newUser = {
         uid: user.uid,
         email: user.email,
+        imgUrl: null,
         name,
         ageRange,
         gender,

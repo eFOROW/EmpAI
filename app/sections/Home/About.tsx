@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { TypingText } from "../../components/(Home)";
+import { TypingText } from "../../components/Home";
 import { fadeIn, staggerContainer } from "../../utils/motion";
 
 const About = () => (
