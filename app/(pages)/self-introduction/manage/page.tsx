@@ -16,7 +16,7 @@ const Page = () => {
   }, []);
 
   const handleLoginRedirect = () => {
-    router.push('/login');
+    router.push('/mypage');
   };
 
   return (

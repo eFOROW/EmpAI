@@ -1,4 +1,4 @@
-import { Navbar2 } from "@/app/components/Home";
+import { Footer2, Navbar2 } from "@/app/components/Home";
 
 export default function RootLayout({
     children,
@@ -9,6 +9,7 @@ export default function RootLayout({
       <div>
         <Navbar2 />
         {children}
+        <Footer2 />
       </div>
     );
   }

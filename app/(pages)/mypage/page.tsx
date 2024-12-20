@@ -1,6 +1,5 @@
 "use client";
 
-import { Footer2 } from "@/app/components/Home";
 import { useEffect, useState } from "react";
 import { Button, Modal } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
@@ -99,9 +98,6 @@ export default function Page() {
                     </div>
                 </section>
             </div>
-
-            {/* Footer */}
-            <Footer2 />
         </div>
     );
 }
