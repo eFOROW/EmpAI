@@ -63,7 +63,7 @@ const ManagePage = () => {
         getCurrentUser().then((user) => {
           if (!user) {
             // 유저가 null인 경우 '/'로 리다이렉트
-            router.push('/');
+            router.push('/self-introduction');
           } else {
             setUser(user);
           }
