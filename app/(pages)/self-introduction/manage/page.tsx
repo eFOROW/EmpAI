@@ -46,7 +46,7 @@ const ListPage = ({ user }: ListPageProps) => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const API_URL = `http://localhost:3000/api/self-introduction?uid=${user.uid}`;
+        const API_URL = `/api/self-introduction?uid=${user.uid}`;
         const response = await fetch(API_URL);
         if (!response.ok) {
           throw new Error("Failed to fetch documents");
