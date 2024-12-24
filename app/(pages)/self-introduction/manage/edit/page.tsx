@@ -73,7 +73,7 @@ const options = [
 ];
 
 
-const questionsData = {
+const questionsData: {[key: string]: string[]} = {
     "기획·전략": [
         "기획 업무에서 가장 중요한 점은 무엇인가요?",
         "전략 수립 시 어떤 데이터를 분석하나요?",
@@ -265,19 +265,19 @@ const ManagePage: React.FC = () => {
         }
     }, [router, selectedValue]);
 
-    const handleTitleChange = (e) => {
+    const handleTitleChange = (e:any) => {
         setTitle(e.target.value);
     };
 
-    const handleSelectChange = (e) => {
+    const handleSelectChange = (e:any) => {
         setSelectedValue(e.target.value); // 직무 선택 변경
     };
 
-    const handleSelectJobChange = (e) => {
+    const handleSelectJobChange = (e:any) => {
         setSelectJobQ(e.target.value); // 질문 선택 변경
     };
 
-    const handleJobAnswerChange = (value) => {
+    const handleJobAnswerChange = (value:any) => {
         setJobAnswer(value); // 답변 변경
     };
 
