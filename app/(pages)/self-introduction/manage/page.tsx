@@ -46,7 +46,7 @@ const ListPage = ({ user }: ListPageProps) => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const API_URL = `/api/self-introduction?uid=${user.uid}`;
+        const API_URL = `http://localhost:3000/api/self-introduction?uid=${user.uid}`;
         const response = await fetch(API_URL);
         if (!response.ok) {
           throw new Error("Failed to fetch documents");
@@ -77,6 +77,10 @@ const ListPage = ({ user }: ListPageProps) => {
       setUpdatedAnswers(initialAnswers);
     }
   }, [selectedDocument]);
+
+  const filteredDocuments = selectedJobCode
+    ? documents.filter((doc) => doc.job_code === selectedJobCode) // 직무 코드로 필터링
+    : documents; // 선택된 직무 코드가 없으면 전체 문서 표시
 
   const handleDocumentClick = (document: Document) => {
     setSelectedDocument(document);
@@ -150,63 +154,67 @@ const ListPage = ({ user }: ListPageProps) => {
   }
 
   return (
-    <div  style={{maxWidth: 1000}}>
-      <div className="flex items-center justify-between mb-4 mt-8">
-        <h1 className="text-2xl font-bold">자기소개서 리스트</h1>
-        <select
-          value={selectedJobCode}
-          onChange={(e) => setSelectedJobCode(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md"
-        >
-          <option value="">직무 선택</option>
-          {jobOptions.map((job, index) => (
-            <option key={index} value={job}>
-              {job}
-            </option>
-          ))}
-        </select>
+    <div style={{minWidth: 520, maxWidth: 1000}}>
+      <div className="relative mb-4 mt-8" style={{minWidth: 860, maxWidth: 1000}}>
+        <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-2 px-4">
+          {/* "자기소개서 리스트" */}
+          <h1 className="text-2xl font-bold" style={{ flex: '0 0 auto' }}>
+            자기소개서 리스트
+          </h1>
+          {/* 직무 선택 드롭다운 */}
+          <select
+            value={selectedJobCode}
+            onChange={(e) => setSelectedJobCode(e.target.value)}
+            className="p-2 border border-gray-300 rounded-md"
+            style={{ flex: '0 0 auto', minWidth: '200px' }}
+          >
+            <option value="">직무 선택</option>
+            {jobOptions.map((job, index) => (
+              <option key={index} value={job}>
+                {job}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
       <Row gutter={[16, 16]}>
-        {documents.map((document) => (
-          <Col key={document.id}>
-            <Card
-              hoverable
-              onClick={() => handleDocumentClick(document)}
-              cover={
-                <div>
-                  <Text
-                    type="secondary"
-                    className="text-xs"
-                    style={{
-                      border: "1px solid #e9d5ff",
-                      backgroundColor: "#faf5ff",
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "0.25rem",
-                      color: "#9333ea"
-                    }}
-                  >
-                    {document?.job_code || 'N/A'}
-                  </Text>
-                </div>
-              }
-              style={{
-                padding: "10px 0px 0 10px",
-                width: 320,  // 고정 너비
-                height: 130  // 고정 높이
-              }}
-            >
-              <div className="text-lg font-semibold">
-                {document.title}
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  {document.last_modified.toLocaleDateString()}{" "}
-                  {document.last_modified.toLocaleTimeString()}
+        {filteredDocuments.map((document) => (
+        <Col key={document.id} flex="0 1 auto">
+          <Card
+            hoverable
+            onClick={() => handleDocumentClick(document)}
+            cover={
+              <div>
+                <Text
+                  type="secondary"
+                  className="text-xs"
+                  style={{
+                    border: "1px solid #e9d5ff",
+                    backgroundColor: "#faf5ff",
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "0.25rem",
+                    color: "#9333ea"
+                  }}
+                >
+                  {document?.job_code || "N/A"}
                 </Text>
               </div>
-            </Card>
-          </Col>
-        ))}
+            }
+            style={{ padding: "10px 0px 0 10px", maxWidth: 320 }}
+          >
+            <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
+              {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                {document.last_modified.toLocaleDateString()}{" "}
+                {document.last_modified.toLocaleTimeString()}
+              </Text>
+            </div>
+          </Card>
+        </Col>
+      ))}
         <Col>
           <Card
             hoverable
@@ -214,7 +222,7 @@ const ListPage = ({ user }: ListPageProps) => {
             className="flex items-center justify-center cursor-pointer"
             style={{
               height: 130,
-              width: 320  // 고정 너비
+              minWidth: 250  // 고정 너비
             }}
           >
             <Text className="text-3xl text-blue-500 font-bold">+</Text>
