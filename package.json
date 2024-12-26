@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/js-cookie": "^3.0.6",
+    "@types/navermaps": "^3.7.8",
     "antd": "^5.22.5",
     "empai": "file:",
     "EmpAI": "file:",
