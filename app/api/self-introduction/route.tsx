@@ -20,18 +20,40 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  // 데이터베이스 연결
   await connectToDatabase();
 
   try {
-    const { id, ...data } = await request.json(); // 요청 본문에서 id와 나머지 데이터를 분리합니다.
+    // 요청 본문에서 데이터 파싱
+    const { _id, title, job_code, last_modified, data } = await request.json();
 
-    // 문서를 찾아서 업데이트합니다.
-    const updatedDocument = await SelfIntroduction.findByIdAndUpdate(id, data, {
-      new: true, // 업데이트된 문서를 반환
-      runValidators: true, // 유효성 검사
-    });
+    // _id가 없으면 오류 반환
+    if (!_id) {
+      return NextResponse.json(
+        { message: "Document ID is required" },
+        { status: 400 }
+      );
+    }
 
-    // 문서가 없다면 오류 처리
+    // 업데이트할 필드 구성
+    const updateData = {
+      title,
+      job_code,
+      last_modified,
+      data,
+    };
+
+    // 문서 업데이트
+    const updatedDocument = await SelfIntroduction.findByIdAndUpdate(
+      _id,
+      updateData,
+      {
+        new: true, // 업데이트된 문서를 반환
+        runValidators: true, // 유효성 검사 수행
+      }
+    );
+
+    // 문서가 없을 경우 처리
     if (!updatedDocument) {
       return NextResponse.json(
         { message: "Document not found" },
@@ -39,14 +61,17 @@ export async function PUT(request: Request) {
       );
     }
 
+    // 성공적으로 업데이트된 문서 반환
     return NextResponse.json(updatedDocument, { status: 200 });
   } catch (error) {
+    // 예외 처리
     return NextResponse.json(
       { message: "Failed to update document", error: (error as Error).message },
       { status: 500 }
     );
   }
 }
+
 
 
 export async function GET(request: Request) {

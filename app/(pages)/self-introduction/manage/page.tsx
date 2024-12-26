@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
-import { Button, Card, Col, Row, Typography, Input } from "antd";
-import { LeftOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
+import { LeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 
 interface ListPageProps {
@@ -14,7 +14,7 @@ interface ListPageProps {
 
 // 문서 타입 정의
 interface Document {
-  id: string;
+  _id: string;
   title: string;
   job_code: string;
   last_modified: Date;
@@ -35,6 +35,8 @@ const ListPage = ({ user }: ListPageProps) => {
   const [updatedAnswers, setUpdatedAnswers] = useState<{ [key: string]: string }>({}); // 사용자가 수정한 답변을 저장하는 상태
   const [selectedJobCode, setSelectedJobCode] = useState<string>(""); // 선택된 직무 코드
 
+  const [modal, contextHolder] = Modal.useModal();
+
   const jobOptions = [
     "기획·전략", "마케팅·홍보·조사", "회계·세무·재무", "인사·노무·HRD",
     "총무·법무·사무", "IT개발·데이터", "디자인", "영업·판매·무역",
@@ -43,29 +45,29 @@ const ListPage = ({ user }: ListPageProps) => {
     "금융·보험", "공공·복지"
   ];
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const API_URL = `/api/self-introduction?uid=${user.uid}`;
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error("Failed to fetch documents");
-        }
-        const data: Document[] = await response.json();
-        const transformedData = data.map((doc) => ({
-          ...doc,
-          last_modified: new Date(doc.last_modified),
-        }));
-        setDocuments(transformedData);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchDocuments = async () => {
+    try {
+      const API_URL = `/api/self-introduction?uid=${user.uid}`;
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error("Failed to fetch documents");
       }
-    };
-
+      const data: Document[] = await response.json();
+      const transformedData = data.map((doc) => ({
+        ...doc,
+        last_modified: new Date(doc.last_modified),
+      }));
+      setDocuments(transformedData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchDocuments();
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (selectedDocument) {
@@ -97,8 +99,74 @@ const ListPage = ({ user }: ListPageProps) => {
     }));
   };
 
-  const handleSaveAnswers = () => {
-    // 저장된 답변을 서버나 DB에 저장하는 로직을 여기에 추가할 수 있음
+    const confirm = () => {
+      modal.confirm({
+          title: '알림',
+          centered: true,
+          icon: <ExclamationCircleOutlined />,
+          content: (
+            <div>
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>정말로 수정하시겠습니까?</span>
+              <p style={{ fontSize: '14px', color: '#6b7280' }}>수정 후 되돌릴 수 없습니다.</p>
+            </div>
+          ),
+          okText: '수정하기',
+          cancelText: '취소',
+          okButtonProps: {
+              style: {
+                  backgroundColor: '#3B82F6',
+                  borderColor: '#3B82F6',
+                  color: 'white',
+              }
+          },
+          onOk: () => {
+            handleSaveAnswers()
+          },
+      });
+    };
+
+  const handleSaveAnswers = async () => {
+    if (!selectedDocument) {
+      console.error("selectedDocument is null.");
+      return;
+    }
+  
+    // 기존 문서의 데이터를 업데이트
+    const updatedData = selectedDocument.data.map((item) => ({
+      question: item.question,
+      answer: updatedAnswers[item.question] || item.answer,
+    }));
+  
+    // _id 포함한 업데이트된 문서 생성
+    const updatedDocument: Document = {
+      _id: selectedDocument._id, // _id 추가
+      title: selectedDocument.title,
+      job_code: selectedDocument.job_code,
+      last_modified: new Date(),
+      data: updatedData,
+    };
+  
+    try {
+      const response = await fetch("/api/self-introduction", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedDocument),
+      });
+  
+      if (response.ok) {
+        // ...
+      } else {
+        console.error("Failed to update document:", await response.json());
+      }
+    } catch (error) {
+      console.error("Error while updating document:", error);
+    } finally {
+      fetchDocuments();
+      setSelectedDocument(null);
+      window.scrollTo(0, 0);
+    }
   };
 
   if (loading) {
@@ -144,9 +212,16 @@ const ListPage = ({ user }: ListPageProps) => {
             ))}
           </ul>
           <div className="mt-4">
-            <Button type="primary" onClick={handleSaveAnswers}>
+          <div className="flex justify-center items-center">
+            <Button
+              type="primary"
+              onClick={confirm}
+              className="bg-blue-500 text-white px-12 py-4 rounded-lg font-semibold text-xl transition-all duration-300 transform hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
+            >
               수정
             </Button>
+            {contextHolder}
+          </div>
           </div>
         </div>
       </div>
@@ -180,7 +255,7 @@ const ListPage = ({ user }: ListPageProps) => {
 
       <Row gutter={[16, 16]}>
         {filteredDocuments.map((document) => (
-        <Col key={document.id} flex="0 1 auto">
+        <Col key={document._id} flex="0 1 auto">
           <Card
             hoverable
             onClick={() => handleDocumentClick(document)}
