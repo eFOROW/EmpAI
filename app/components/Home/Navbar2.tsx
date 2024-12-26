@@ -19,7 +19,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-[100px]">
             {/* 기업탐색 */}
             <div className="nav-item">
-              <Link href="/" className="text-primary-black text-lg font-bold">기업탐색</Link>
+              <Link href="/job-search" className="text-primary-black text-lg font-bold">기업탐색</Link>
             </div>
 
             {/* 자기소개서 */}

@@ -1,0 +1,11 @@
+<svg width="50" height="50" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 집 모양 지붕 -->
+  <path d="M10 1 L1 7 L4 7 L4 18 L16 18 L16 7 L19 7 L10 1 Z" fill="#F9A826"/>
+  <!-- 집 본체 -->
+  <path d="M4 7 L16 7 L16 18 L4 18 Z" fill="#5CC9D5"/>
+  <!-- 집 문 -->
+  <path d="M7 12 L13 12 L13 18 L7 18 Z" fill="#F1C27D"/>
+  <!-- 창문 -->
+  <path d="M6 8 L8 8 L8 10 L6 10 Z" fill="#FFFFFF"/>
+  <path d="M12 8 L14 8 L14 10 L12 10 Z" fill="#FFFFFF"/>
+</svg>
