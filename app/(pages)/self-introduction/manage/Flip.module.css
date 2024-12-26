@@ -1,0 +1,96 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    flex-direction: column;
+  }
+  
+  .head2 {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+  }
+  
+  .textWrapper {
+    width: 30rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 12rem;
+  }
+  
+  @media screen and (min-width: 450px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  
+    .head2 {
+      font-size: 6rem;
+      font-weight: 800;
+    }
+  
+    .textWrapper {
+      width: 30rem;
+      min-height: 25rem;
+    }
+  }
+  
+  @media screen and (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 120rem;
+    }
+  
+    .head2 {
+      font-size: 8rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+  
+    .textWrapper {
+      width: 40rem;
+      min-height: 33rem;
+    }
+  
+    .imageWrapper {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+    }
+  
+    .flipCard {
+      transition: transform 0.8s ease-in-out; /* 부드러운 전환을 위해 easing을 추가 */
+      transform-style: preserve-3d;
+      position: relative;
+      width: 240px;
+      height: 240px;
+    }
+  
+    .profileImg {
+      border-radius: 0.5rem;
+      border: 2px solid white;
+      object-fit: cover;
+    }
+  
+    .front,
+    .back {
+      backface-visibility: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s ease-in-out;
+    }
+  
+    .back {
+      transform: rotateY(180deg);
+    }
+  
+    .flipped {
+      transform: rotateY(180deg);
+    }
+  }
