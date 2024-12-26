@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
 import { LeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
+import style from "./Flip.module.css";
+
+
 
 interface ListPageProps {
   user: User;
@@ -36,6 +39,15 @@ const ListPage = ({ user }: ListPageProps) => {
   const [selectedJobCode, setSelectedJobCode] = useState<string>(""); // 선택된 직무 코드
 
   const [modal, contextHolder] = Modal.useModal();
+  const [flippedCards, setFlippedCards] = useState<{ [key: string]: boolean }>({});
+
+    
+  const handleFlip = (documentId: string) => {
+    setFlippedCards((prev) => ({
+      ...prev,
+      [documentId]: !prev[documentId],
+    }));
+  };
 
   const jobOptions = [
     "기획·전략", "마케팅·홍보·조사", "회계·세무·재무", "인사·노무·HRD",
@@ -255,39 +267,54 @@ const ListPage = ({ user }: ListPageProps) => {
 
       <Row gutter={[16, 16]}>
         {filteredDocuments.map((document) => (
-        <Col key={document._id} flex="0 1 auto">
-          <Card
-            hoverable
-            onClick={() => handleDocumentClick(document)}
-            cover={
-              <div>
-                <Text
-                  type="secondary"
-                  className="text-xs"
-                  style={{
-                    border: "1px solid #e9d5ff",
-                    backgroundColor: "#faf5ff",
-                    padding: "0.25rem 0.5rem",
-                    borderRadius: "0.25rem",
-                    color: "#9333ea"
-                  }}
-                >
-                  {document?.job_code || "N/A"}
-                </Text>
-              </div>
-            }
-            style={{ padding: "10px 0px 0 10px", maxWidth: 320 }}
-          >
-            <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
-              {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+        <Col key={document._id} flex="0 1 auto" className={style.imageWrapper}>
+          <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
+            <div className={`${style.front}`}>
+              <Card
+                hoverable
+                cover={
+                  <div>
+                    <Text
+                      type="secondary"
+                      className="text-xs"
+                      style={{
+                        border: "1px solid #e9d5ff",
+                        backgroundColor: "#faf5ff",
+                        padding: "0.25rem 0.5rem",
+                        borderRadius: "0.25rem",
+                        color: "#9333ea"
+                      }}
+                    >
+                      {document?.job_code || "N/A"}
+                    </Text>
+                    <button className="more-button flex items-center text-gray-800 bg-transparent border-none cursor-pointer"
+                      onClick={() => handleFlip(document._id)}>
+                      <span className="mr-2 text-xl">...</span>
+                    </button>
+                  </div>
+                }
+                style={{ padding: "10px 0px 0 10px", maxWidth: 320 }}
+              >
+                <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
+                  onClick={() => handleDocumentClick(document)}>
+                  {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {document.last_modified.toLocaleDateString()}{" "}
+                    {document.last_modified.toLocaleTimeString()}
+                  </Text>
+                </div>
+              </Card>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <Text type="secondary" style={{ fontSize: "12px" }}>
-                {document.last_modified.toLocaleDateString()}{" "}
-                {document.last_modified.toLocaleTimeString()}
-              </Text>
+            <div className={`${style.back} border-2 border-gray-300 shadow-lg`}>
+                <p>Success~~~!</p>
+                <button className="more-button flex items-center text-gray-800 bg-transparent border-none cursor-pointer"
+                    onClick={() => handleFlip(document._id)}>
+                    <span className="mr-2 text-xl">...</span>
+                </button>
             </div>
-          </Card>
+          </div>
         </Col>
       ))}
         <Col>
