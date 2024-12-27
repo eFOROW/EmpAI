@@ -28,7 +28,7 @@ const Navbar = () => {
   return (
     <header className="bg-gray-200">
       <nav className={`xPaddings py-8 z-50 ${isScrolled ? "fixed top-0 left-0 w-full bg-white/20" : "relative bg-transparent"}`}>
-        <div className="absolute w-[50%] inset-0 gradient-01" />
+        <div className="absolute w-[50%] inset-0 gradient-01 pointer-events-none" />
           <div className="innerWidth mx-auto flex justify-between items-center gap-8">
             <Link href="/" className="block relative z-10">
               <h2 className="font-extrabold text-[24px] leading-[30.24px] text-primary-black cursor-pointer block">
