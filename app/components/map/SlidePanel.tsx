@@ -123,7 +123,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange }) => 
               className="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
               step={0.5}
               min={0.5}
-              max={6}
+              max={7}
             />
             <span className="text-sm">{radius} km</span>
           </div>
