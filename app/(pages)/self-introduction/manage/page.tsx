@@ -138,6 +138,58 @@ const ListPage = ({ user }: ListPageProps) => {
       });
     };
 
+    const confirm_Delete = (_id:string) => {
+      modal.confirm({
+          title: '알림',
+          centered: true,
+          icon: <ExclamationCircleOutlined />,
+          content: (
+            <div>
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>정말로 삭제하시겠습니까?</span>
+              <p style={{ fontSize: '14px', color: '#6b7280' }}>이 작업은 되돌릴 수 없습니다.</p>
+            </div>
+          ),
+          okText: '삭제하기',
+          cancelText: '취소',
+          okButtonProps: {
+              style: {
+                  backgroundColor: '#FF0000',
+                  borderColor: '#FF0000',
+                  color: 'white',
+              }
+          },
+          onOk: async () => {
+            alert(_id)
+            //await handleDelete(_id);
+          },
+      });
+    };
+
+    const handleDelete = async (_id: string) => {
+      try {
+        const response = await fetch('/api/self-introduction', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ _id }), // _id를 요청 본문에 담아 보냄
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+          alert('Document deleted successfully');
+          // 삭제 성공 후 추가 동작 (UI 업데이트 등)
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        alert('Failed to delete document');
+      }
+    };
+    
+
   const handleSaveAnswers = async () => {
     if (!selectedDocument) {
       console.error("selectedDocument is null.");
@@ -325,10 +377,11 @@ const ListPage = ({ user }: ListPageProps) => {
                   color="danger" 
                   variant="solid" 
                   className="px-4 py-2"
-                  onClick={() => alert(document._id)}
+                  onClick={() => confirm_Delete(document._id)}
                 >
                   삭제하기
                 </Button>
+                {contextHolder}
                 <Button 
                   color="primary" 
                   variant="solid" 
