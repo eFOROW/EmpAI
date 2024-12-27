@@ -72,8 +72,6 @@ export async function PUT(request: Request) {
   }
 }
 
-
-
 export async function GET(request: Request) {
   await connectToDatabase();
 
@@ -103,6 +101,42 @@ export async function GET(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { message: "Failed to retrieve document", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  await connectToDatabase();
+
+  // 요청에서 _id 추출
+  const { _id } = await request.json();
+
+  if (!_id) {
+    return NextResponse.json(
+      { message: "Document ID is required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // 문서 삭제
+    const deletedDocument = await SelfIntroduction.findByIdAndDelete(_id);
+
+    if (!deletedDocument) {
+      return NextResponse.json(
+        { message: "Document not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Document successfully deleted" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Failed to delete document", error: (error as Error).message },
       { status: 500 }
     );
   }
