@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
-import Image from 'next/image'
 import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
 import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined } from '@ant-design/icons';
 
@@ -159,8 +158,7 @@ const ListPage = ({ user }: ListPageProps) => {
               }
           },
           onOk: async () => {
-            alert(_id)
-            //await handleDelete(_id);
+            await handleDelete(_id);
           },
       });
     };
@@ -178,8 +176,9 @@ const ListPage = ({ user }: ListPageProps) => {
         const data = await response.json();
     
         if (response.ok) {
-          alert('Document deleted successfully');
-          // 삭제 성공 후 추가 동작 (UI 업데이트 등)
+          fetchDocuments();
+          setSelectedDocument(null);
+          window.scrollTo(0, 0);
         } else {
           alert(`Error: ${data.message}`);
         }
@@ -294,8 +293,8 @@ const ListPage = ({ user }: ListPageProps) => {
   }
 
   return (
-    <div style={{minWidth: 520, maxWidth: 1000}}>
-      <div className="relative mb-4 mt-8" style={{minWidth: 840, maxWidth: 1000}}>
+    <div style={{minWidth: 520, maxWidth: 1250}}>
+      <div className="relative mb-4 mt-8" style={{minWidth: 840, maxWidth: 1250}}>
         <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-2 px-4">
           {/* "자기소개서 리스트" */}
           <h1 className="text-2xl font-bold" style={{ flex: '0 0 auto' }}>
@@ -386,7 +385,7 @@ const ListPage = ({ user }: ListPageProps) => {
                   color="primary" 
                   variant="solid" 
                   className="px-4 py-2"
-                  onClick={() => alert(document.title)}
+                  onClick={() => router.push(`/self-introduction/feedback?_id=${document._id}`)}
                 >
                   첨삭받기
                 </Button>
