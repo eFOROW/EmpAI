@@ -5,8 +5,10 @@ import React, { useState } from 'react';
 import { Button } from 'antd';
 
 interface SlidePanelProps {
-  children: React.ReactNode; // 패널 내부에 렌더링될 콘텐츠
-  onRadiusChange: (radius: number) => void; // 반경 변경 핸들러
+  children: React.ReactNode;
+  onRadiusChange: (radius: number) => void;
+  markerPosition: { lat: number; lng: number };
+  onJobLocationsFound: (locations: Array<{ lat: number; lng: number }>) => void;
 }
 
 const jobOptions = [
@@ -21,7 +23,7 @@ const careerOptions = [ "신입", "신입/경력", "경력", "경력무관" ];
 
 const eduOptions = [ "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
 
-const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange }) => {
+const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
   const [isInnerPanelOpen, setIsInnerPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
   const [loadings, setLoadings] = useState<boolean[]>([]);  // 검생 로딩상태 관리
@@ -37,19 +39,82 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange }) => 
   };
 
   const enterLoading = (index: number) => {
+    // 로딩 상태 시작
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings];
       newLoadings[index] = true;
       return newLoadings;
     });
+  
+    let experienceLevelCode = 0;
+    switch (selectedCareerCode) {
+      case "신입":
+        experienceLevelCode = 1; // 신입
+        break;
+      case "경력":
+        experienceLevelCode = 2; // 경력
+        break;
+      case "신입/경력":
+        experienceLevelCode = 3; // 신입/경력
+        break;
+      case "경력무관":
+        experienceLevelCode = 0; // 경력무관
+        break;
+      default:
+        experienceLevelCode = 0; // 기본값 (경력무관)
+        break;
+    }
+    
 
-    setTimeout(() => {
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings];
-        newLoadings[index] = false;
-        return newLoadings;
-      });
-    }, 3000);
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+      const R = 6371; // 지구의 반지름 (단위: km)
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c; // 거리 (km)
+      
+      return distance;
+    };
+
+    const url = `/api/job?midCodeName=${encodeURIComponent(selectedJobCode)}&experienceLevelCode=${experienceLevelCode}&educationLevelName=${encodeURIComponent(selectedEduCode)}`;
+
+    // GET 요청 보내기
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const jobsWithinRadius = data.filter((job: any) => {
+          const distance = calculateDistance(
+            markerPosition.lat,
+            markerPosition.lng,
+            parseFloat(job.Latitude),
+            parseFloat(job.Longitude)
+          );
+          return distance <= radius;
+        });
+
+        // 반경 내 채용공고의 위치 정보만 추출
+        const locationData = jobsWithinRadius.map((job: any) => ({
+          lat: parseFloat(job.Latitude),
+          lng: parseFloat(job.Longitude)
+        }));
+
+        // 부모 컴포넌트로 위치 정보 전달
+        onJobLocationsFound(locationData);
+
+        console.log(`총 ${data.length}개 중 ${jobsWithinRadius.length}개가 ${radius}km 반경 내에 있습니다.`);
+
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings];
+          newLoadings[index] = false;
+          return newLoadings;
+        });
+      })
   };
 
   return (
