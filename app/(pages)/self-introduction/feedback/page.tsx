@@ -1,27 +1,32 @@
-'use client'
+// app/self-introduction/feedback/page.tsx
+'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function Page() {
+export default function FeedbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // searchParams를 가져옵니다.
-  const [_id, set_Id] = useState<string | null>(null);
+  const [id, setId] = useState<string | null>(null);
 
-  // URL에서 _id를 가져옵니다.
   useEffect(() => {
-    const _id = searchParams.get('_id'); // _id 값을 URL에서 가져옵니다.
+    const urlParams = new URLSearchParams(window.location.search);
+    const _id = urlParams.get('_id');
+
     if (_id) {
-        set_Id(_id);
+      setId(_id); // _id 값 설정
     } else {
-      router.push('/self-introduction');
+      router.push('/self-introduction'); // _id 없으면 리다이렉트
     }
-  }, [router, searchParams]);
+  }, [router]);
+
+  if (id === null) {
+    return null; // 로딩 중에는 아무것도 렌더링하지 않음
+  }
 
   return (
     <div>
       <h1>FeedBack Page</h1>
-      <span>{_id}</span>
+      <span>{id}</span>
     </div>
   );
 }
