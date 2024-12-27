@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
+import Image from 'next/image'
 import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
-import { LeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined } from '@ant-design/icons';
 
 import style from "./Flip.module.css";
 
@@ -242,7 +243,7 @@ const ListPage = ({ user }: ListPageProps) => {
 
   return (
     <div style={{minWidth: 520, maxWidth: 1000}}>
-      <div className="relative mb-4 mt-8" style={{minWidth: 860, maxWidth: 1000}}>
+      <div className="relative mb-4 mt-8" style={{minWidth: 840, maxWidth: 1000}}>
         <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-2 px-4">
           {/* "자기소개서 리스트" */}
           <h1 className="text-2xl font-bold" style={{ flex: '0 0 auto' }}>
@@ -255,7 +256,7 @@ const ListPage = ({ user }: ListPageProps) => {
             className="p-2 border border-gray-300 rounded-md"
             style={{ flex: '0 0 auto', minWidth: '200px' }}
           >
-            <option value="">직무 선택</option>
+            <option value="">전체</option>
             {jobOptions.map((job, index) => (
               <option key={index} value={job}>
                 {job}
@@ -273,23 +274,23 @@ const ListPage = ({ user }: ListPageProps) => {
               <Card
                 hoverable
                 cover={
-                  <div>
+                  <div className="flex justify-between items-center w-full">
                     <Text
-                      type="secondary"
-                      className="text-xs"
-                      style={{
-                        border: "1px solid #e9d5ff",
-                        backgroundColor: "#faf5ff",
-                        padding: "0.25rem 0.5rem",
-                        borderRadius: "0.25rem",
-                        color: "#9333ea"
-                      }}
+                      className="text-xs border border-[#e9d5ff] bg-[#faf5ff] px-2 py-1 rounded text-[#9333ea]"
                     >
                       {document?.job_code || "N/A"}
                     </Text>
-                    <button className="more-button flex items-center text-gray-800 bg-transparent border-none cursor-pointer"
-                      onClick={() => handleFlip(document._id)}>
-                      <span className="mr-2 text-xl">...</span>
+                    <button
+                      className="text-gray-800 bg-transparent border-none cursor-pointer"
+                      onClick={() => handleFlip(document._id)}
+                    >
+                      <EllipsisOutlined
+                        style={{
+                          fontSize: '24px',
+                          cursor: 'pointer',
+                          transform: 'rotate(90deg)',  // 90도 회전
+                        }}
+                      />
                     </button>
                   </div>
                 }
@@ -307,12 +308,36 @@ const ListPage = ({ user }: ListPageProps) => {
                 </div>
               </Card>
             </div>
-            <div className={`${style.back} border-2 border-gray-300 shadow-lg`}>
-                <p>Success~~~!</p>
-                <button className="more-button flex items-center text-gray-800 bg-transparent border-none cursor-pointer"
-                    onClick={() => handleFlip(document._id)}>
-                    <span className="mr-2 text-xl">...</span>
-                </button>
+            <div
+              className={`${style.back} border border-gray-150 p-4 min-h-[135px] min-w-[270px] max-w-[320px] rounded-lg hover:shadow-lg relative`}
+            >
+              {/* 우측 상단 뒤집기 버튼 */}
+              <button
+                className="absolute top-2 right-2 text-gray-800 bg-transparent border-none cursor-pointer"
+                onClick={() => handleFlip(document._id)}
+              >
+                <CloseOutlined style={{ fontSize: '15px', cursor: 'pointer' }} />
+              </button>
+
+              {/* 중앙의 두 개 버튼 */}
+              <div className="flex justify-center space-x-4 mt-10">
+                <Button 
+                  color="danger" 
+                  variant="solid" 
+                  className="px-4 py-2"
+                  onClick={() => alert(document._id)}
+                >
+                  삭제하기
+                </Button>
+                <Button 
+                  color="primary" 
+                  variant="solid" 
+                  className="px-4 py-2"
+                  onClick={() => alert(document.title)}
+                >
+                  첨삭받기
+                </Button>
+              </div>
             </div>
           </div>
         </Col>
@@ -321,9 +346,9 @@ const ListPage = ({ user }: ListPageProps) => {
           <Card
             hoverable
             onClick={handleAddNewDocument}
-            className="flex items-center justify-center cursor-pointer"
+            className="flex items-center justify-center cursor-pointer p-2"
             style={{
-              height: 130,
+              minHeight: 130,
               minWidth: 250  // 고정 너비
             }}
           >
