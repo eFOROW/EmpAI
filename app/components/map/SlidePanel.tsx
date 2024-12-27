@@ -139,13 +139,6 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange }) => 
             </Button>
           </div>
         </div>
-        {/* 하단 패널 토글 버튼 */}
-        <button
-          onClick={() => setIsInnerPanelOpen(!isInnerPanelOpen)}
-          className={`w-full bg-gray-200 text-primary-black py-2 mt-4 rounded-b-md`}
-        >
-          {isPanelOpen ? '패널 닫기' : '패널 열기'}
-        </button>
       </div>
 
       {/* 패널버튼 */}

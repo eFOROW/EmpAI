@@ -9,7 +9,7 @@ const Navbar = () => {
   return (
     <header className="bg-white shadow-sm">
       <nav className="py-7">
-        <div className="absolute w-[50%] inset-0" />
+        <div className="absolute w-[50%] inset-0 pointer-events-none"/>
         <div className="innerWidth mx-auto flex justify-between items-center gap-8 z-10">
           <Link href="/" className="block relative z-10">
             <h2 className="font-extrabold text-[24px] leading-[30.24px] text-primary-black cursor-pointer block">
