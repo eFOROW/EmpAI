@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface MapProps {
   clientId: string;
@@ -7,15 +7,28 @@ interface MapProps {
   lng: number;
   zoom?: number;
   radius: number;
+  markerPosition: { lat: number; lng: number } | null;
+  onMarkerPositionChange: (position: { lat: number; lng: number }) => void;
+  jobLocations: Array<{ lat: number; lng: number }>;
+  isLocked?: boolean;
 }
 
-const Map: React.FC<MapProps> = ({ clientId, lat, lng, zoom = 15, radius }) => {
-  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
+const Map: React.FC<MapProps> = ({
+  clientId,
+  lat,
+  lng,
+  zoom = 15,
+  radius,
+  markerPosition,
+  onMarkerPositionChange,
+  isLocked = false,
+  jobLocations
+}) => {
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
-  const circleRef = useRef<any>(null); // 원을 위한 ref
+  const circleRef = useRef<any>(null);
   const clickListenerRef = useRef<any>(null);
+  const jobMarkersRef = useRef<any[]>([]);
 
   useEffect(() => {
     const initMap = () => {
@@ -34,41 +47,60 @@ const Map: React.FC<MapProps> = ({ clientId, lat, lng, zoom = 15, radius }) => {
       });
 
       markerRef.current = marker;
+      
       if(markerPosition != null) {
         marker.setPosition(markerPosition);
         marker.setVisible(true);
         marker.setIcon({
-          url: "./home.svg", // 새로운 아이콘 URL
-          size: new naver.maps.Size(40, 40), // 아이콘 크기 설정 (필요에 맞게 수정)
-          anchor: new naver.maps.Point(20, 40) // 아이콘의 앵커 설정
+          url: "./home.svg",
+          size: new naver.maps.Size(40, 40),
+          anchor: new naver.maps.Point(20, 40)
         });
         map.setCenter(markerPosition);
 
-        // 원을 그리는 부분
         if (circleRef.current) {
-          circleRef.current.setMap(null); // 이전에 그려진 원 제거
+          circleRef.current.setMap(null);
         }
         const circle = new naver.maps.Circle({
-          center: marker.getPosition(),    // 마커의 위치
-          radius: radius * 1000,           // 반경 값 (km -> m 변환)
-          strokeColor: '#FF0000',          // 원 테두리 색
-          strokeWeight: 2,                 // 테두리 두께
-          strokeOpacity: 0.6,              // 테두리 투명도
-          fillColor: '#FF0000',            // 원 채우기 색
-          fillOpacity: 0.1,                // 원 채우기 투명도
+          center: marker.getPosition(),
+          radius: radius * 1000,
+          strokeColor: '#FF0000',
+          strokeWeight: 2,
+          strokeOpacity: 0.6,
+          fillColor: '#FF0000',
+          fillOpacity: 0.1,
         });
 
-        circle.setMap(map);                // 지도에 원 추가
-        circleRef.current = circle; 
+        circle.setMap(map);
+        circleRef.current = circle;
+
+        // 기존 채용공고 마커들 제거
+        jobMarkersRef.current.forEach(marker => {
+          if (marker) marker.setMap(null);
+        });
+        jobMarkersRef.current = [];
+
+        // 새로운 채용공고 마커들 생성
+        jobLocations.forEach(location => {
+          const jobMarker = new naver.maps.Marker({
+            position: new naver.maps.LatLng(location.lat, location.lng),
+            map: map,  // map 객체에 직접 연결
+            icon: {
+              url: "./job-marker.svg", // 채용공고용 다른 마커 아이콘 사용
+              size: new naver.maps.Size(30, 30),
+              anchor: new naver.maps.Point(12, 12)
+            }
+          });
+          jobMarkersRef.current.push(jobMarker);
+        });
       }
-      
 
       const clickListener = naver.maps.Event.addListener(map, 'click', function(e) {
         if (!isLocked) {
           const clickedLatLng = e.coord;
           marker.setPosition(clickedLatLng);
           marker.setVisible(true);
-          setMarkerPosition({
+          onMarkerPositionChange({
             lat: clickedLatLng.lat(),
             lng: clickedLatLng.lng()
           });
@@ -91,34 +123,11 @@ const Map: React.FC<MapProps> = ({ clientId, lat, lng, zoom = 15, radius }) => {
         naver.maps.Event.removeListener(clickListenerRef.current);
       }
     };
-  }, [clientId, lat, lng, zoom, isLocked, radius, markerPosition]);
-
-  // 위치고정용
-  // const handleLockPosition = () => {
-  //   if (markerPosition && markerRef.current) {
-  //     setIsLocked(true);
-  //     markerRef.current.setIcon({
-  //       url: "https://cdn-icons-png.flaticon.com/512/3771/3771140.png", // 새로운 아이콘 URL
-  //       size: new naver.maps.Size(40, 40), // 아이콘 크기 설정 (필요에 맞게 수정)
-  //       anchor: new naver.maps.Point(20, 40) // 아이콘의 앵커 설정
-  //     });
-  //   }
-  // };
+  }, [clientId, lat, lng, zoom, isLocked, radius, markerPosition, onMarkerPositionChange, jobLocations]);
 
   return (
     <div className="relative w-full h-screen">
       <div id="map" className="w-full h-full"></div>
-      
-      {/* {markerPosition && !isLocked && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
-          <button
-            onClick={handleLockPosition}
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600"
-          >
-            위치 고정하기
-          </button>
-        </div>
-      )} */}
     </div>
   );
 };
