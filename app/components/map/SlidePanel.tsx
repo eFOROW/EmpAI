@@ -9,6 +9,7 @@ interface SlidePanelProps {
   onRadiusChange: (radius: number) => void;
   markerPosition: { lat: number; lng: number };
   onJobLocationsFound: (jobs: Array<{[key: string]: any }>) => void;
+  onJobSelect?: (jobId: string) => void;
 }
 
 const jobOptions = [
@@ -23,7 +24,7 @@ const careerOptions = [ "신입", "신입/경력", "경력", "경력무관" ];
 
 const eduOptions = [ "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
 
-const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound }) => {
+const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound, onJobSelect }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
   const [isInnerPanelOpen, setIsInnerPanelOpen] = useState(true); // 내부 패널 열림/닫힘 상태 추가
   const [loadings, setLoadings] = useState<boolean[]>([]);  // 검생 로딩상태 관리
@@ -218,7 +219,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
           {/* 회사 리스트 섹션 추가 */}
           <div className="overflow-y-auto max-h-[80vh] space-y-6 mt-4 px-6">
             {jobList.map((job, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"  onClick={() => onJobSelect?.(job.url)}>
                 {/* 회사명 */}
                 <h3 className="text-xl font-semibold text-gray-800">{job.company_name}</h3>
 
