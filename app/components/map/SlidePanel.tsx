@@ -3,6 +3,14 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Button } from 'antd';
+import { 
+  BankOutlined, 
+  EnvironmentOutlined, 
+  RiseOutlined,
+  BookOutlined,
+  ClockCircleOutlined,
+  WalletOutlined 
+} from '@ant-design/icons';
 
 interface SlidePanelProps {
   children: React.ReactNode;
@@ -22,7 +30,7 @@ const jobOptions = [
 
 const careerOptions = [ "신입", "신입/경력", "경력", "경력무관" ];
 
-const eduOptions = [ "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
+const eduOptions = [ "학력무관", "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
 
 const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound, onJobSelect }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
@@ -33,6 +41,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
   const [selectedCareerCode, setSelectedCareerCode] = useState<string>("신입"); 
   const [selectedEduCode, setSelectedEduCode] = useState<string>("고등학교졸업이상");
   const [jobList, setJobList] = useState<Array<{[key: string]: any}>>([]);
+  const [selectedJobIndex, setSelectedJobIndex] = useState<number | null>(null);
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRadius = parseFloat(e.target.value);
@@ -187,7 +196,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                 className="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
                 step={0.5}
                 min={0.5}
-                max={7}
+                max={9}
               />
               <span className="text-sm">{radius} km</span>
             </div>
@@ -217,51 +226,78 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
             </span>
           </div>
           {/* 회사 리스트 섹션 추가 */}
-          <div className="overflow-y-auto max-h-[80vh] space-y-6 mt-4 px-6">
-            {jobList.map((job, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"  onClick={() => onJobSelect?.(job.url)}>
-                {/* 회사명 */}
-                <h3 className="text-xl font-semibold text-gray-800">{job.company_name}</h3>
+          <div className="w-full h-[80vh] overflow-y-auto">
+            <div className="flex flex-col gap-6 p-6">
+              {jobList.map((job, index) => (
+                <div 
+                  key={index}
+                  className={`w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border ${
+                    selectedJobIndex === index 
+                    ? 'border-blue-500 ring-2 ring-blue-500' 
+                    : 'border-gray-200'
+                  }`}
+                  onClick={() => {
+                    setSelectedJobIndex(index);
+                    onJobSelect?.(job.url);
+                  }}
+                >
+                  <div>
+                    {/* 회사명 */}
+                    <div className="bg-cyan-100 text-cyan-900 rounded-lg p-4">
+                      <div className="flex items-center gap-2">
+                        <BankOutlined className="text-lg" />
+                        <h3 className="font-bold text-lg">{job.company_name}</h3>
+                      </div>
+                    </div>
 
-                {/* 직무 제목 */}
-                <h4 className="text-lg font-medium text-gray-700 mt-2">{job.position_title}</h4>
+                    <div className='p-4'>
+                      {/* 직무 제목 */}
+                    <h4 className="text-xl font-semibold text-gray-800">
+                      {job.position_title}
+                    </h4>
 
-                {/* 직무 위치 */}
-                <p className="text-gray-600 mt-2">
-                  <span className="font-bold">위치:</span> {job.Address}
-                </p>
+                    {/* 정보 그리드 */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <EnvironmentOutlined />
+                        <span>{job.Address}</span>
+                      </div>
 
-                {/* 경력 요구사항 */}
-                <p className="text-gray-600 mt-2">
-                  <span className="font-bold">경력:</span> {job.position_experience_level_name}
-                </p>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <RiseOutlined />
+                        <span>{job.position_experience_level_name}</span>
+                      </div>
 
-                {/* 교육 요구사항 */}
-                <p className="text-gray-600 mt-2">
-                  <span className="font-bold">교육 수준:</span> {job.position_required_education_level_name}
-                </p>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <BookOutlined />
+                        <span>{job.position_required_education_level_name}</span>
+                      </div>
 
-                {/* 직무 유형 */}
-                <p className="text-gray-600 mt-2">
-                  <span className="font-bold">직무 유형:</span> {job.position_job_type_name}
-                </p>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <ClockCircleOutlined />
+                        <span>{job.position_job_type_name}</span>
+                      </div>
 
-                {/* 급여 */}
-                <p className="text-gray-600 mt-2">
-                  <span className="font-bold">급여:</span> {job.salary_name}
-                </p>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <WalletOutlined />
+                        <span>{job.salary_name}</span>
+                      </div>
+                    </div>
 
-                {/* 링크 버튼 */}
-                {/* <div className="mt-4">
-                  <button
-                    onClick={() => window.open(job.url, '_blank')}
-                    className="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition-colors duration-200"
-                  >
-                    상세보기
-                  </button>
-                </div> */}
-              </div>
-            ))}
+                    {/* 태그들 */}
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                        {job.position_experience_level_name}
+                      </span>
+                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                        {job.position_job_type_name}
+                      </span>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
