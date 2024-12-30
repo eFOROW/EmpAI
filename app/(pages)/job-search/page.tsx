@@ -6,7 +6,7 @@ import Map from '@/app/components/map/dynamic_Map';
 
 const Page = () => {
   const [radius, setRadius] = useState(0.5);
-  const [jobLocations, setJobLocations] = useState<Array<{ lat: number; lng: number }>>([]);
+  const [jobLocations, setJobLocations] = useState<Array<{[key: string]: any }>>([]);
   const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number }>({
     lat: 36.35060201641992,
     lng: 127.3848240170031
@@ -20,8 +20,8 @@ const Page = () => {
     setMarkerPosition(position);
   };
 
-  const handleJobLocationsFound = (locations: Array<{ lat: number; lng: number }>) => {
-    setJobLocations(locations);
+  const handleJobLocationsFound = (jobs: Array<{[key: string]: any }>) => {
+    setJobLocations(jobs);
   };
 
   return (
@@ -43,7 +43,7 @@ const Page = () => {
           radius={radius}
           markerPosition={markerPosition}
           onMarkerPositionChange={handleMarkerPositionChange}
-          jobLocations={jobLocations}
+          jobs={jobLocations}
         />
       </div>
     </div>

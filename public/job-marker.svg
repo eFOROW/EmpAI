@@ -1,10 +1,16 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g clip-path="url(#clip0_1_3561)">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.4 0 0 5.43 0 12.067C0 18.033 4.333 22.994 10 24V15.333H7V12H10V9.333C10 6.333 11.933 4.667 14.667 4.667C15.533 4.667 16.467 4.8 17.333 4.933V8H15.8C14.333 8 14 8.733 14 9.667V12H17.2L16.667 15.333H14V24C19.667 22.994 24 18.034 24 12.067C24 5.43 18.6 0 12 0ZM12 4.5C10.4 4.5 9.133 5.633 9.133 7.333V9.333H10.667V7.333H13.333V9.333H15.2C15.467 9.333 15.8 9.467 15.933 9.733C16.267 10.267 15.867 11 15.333 11H12.667V12.667H14.667V14H12.667V16H10.667V14H7.667V12.667H9.667V11H7.333C6.8 11 6.4 10.267 6.733 9.733C6.867 9.467 7.2 9.333 7.467 9.333H9.333V7.333H9.667C9.667 5.633 10.933 4.5 12 4.5Z" fill="#3B82F6"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none">
+  <!-- 그라디언트를 이용한 외곽 원 (입체감 추가) -->
   <defs>
-    <clipPath id="clip0_1_3561">
-      <rect width="24" height="24" fill="white"/>
-    </clipPath>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+    </linearGradient>
   </defs>
+  <path fill="url(#grad1)" d="M12 2C7 2 4 7 4 9.5C4 13.5 12 22 12 22C12 22 20 13.5 20 9.5C20 7 17 2 12 2Z"/>
+
+  <!-- 중심 원 (핵심 위치) - 흰 동그라미로 변경 -->
+  <circle cx="12" cy="9" r="4" fill="white" stroke="#3B82F6" stroke-width="2"/>
+
+  <!-- 핵심 아이콘 (작은 파란 원) -->
+  <circle cx="12" cy="9" r="2" fill="#3B82F6"/>
 </svg>
