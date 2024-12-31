@@ -243,7 +243,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                 >
                   <div>
                     {/* 회사명 */}
-                    <div className="bg-cyan-100 text-cyan-900 rounded-lg p-4">
+                    <div className="text-white rounded-lg p-4" style={{ backgroundColor: 'hsl(221deg 73% 70%)' }}>
                       <div className="flex items-center gap-2">
                         <BankOutlined className="text-lg" />
                         <h3 className="font-bold text-lg">{job.company_name}</h3>
