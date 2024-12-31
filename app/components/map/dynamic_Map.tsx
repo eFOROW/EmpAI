@@ -280,77 +280,76 @@ const Map: React.FC<MapProps> = ({
               위치: <span style="color: #1f2937;">${location.Address}</span>
             </p>
             
-            <div style="display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1rem;">
-              <a 
-                href="${location.url}" 
-                target="_blank" 
-                style="
-                  display: inline-block; 
-                  padding: 0.5rem 1rem; 
-                  font-size: 0.875rem; 
-                  font-weight: 500; 
-                  color: #ffffff; 
-                  background-color: #3b82f6; 
-                  border-radius: 0.375rem; 
-                  text-decoration: none; 
-                  transition: background-color 0.3s ease;
-                "
-                onmouseover="this.style.backgroundColor='#2563eb'"
-                onmouseout="this.style.backgroundColor='#3b82f6'"
-              >
-                공고보기
-              </a>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+              <!-- 첫 번째 줄: 공고보기, AI 면접 -->
               <button 
-                style="
-                  display: inline-block; 
-                  padding: 0.5rem 1rem; 
-                  font-size: 0.875rem; 
-                  font-weight: 500; 
-                  color: #ffffff; 
-                  background-color: #10b981; 
-                  border-radius: 0.375rem; 
-                  text-decoration: none; 
-                  transition: background-color 0.3s ease;
-                "
-                onmouseover="this.style.backgroundColor='#059669'"
-                onmouseout="this.style.backgroundColor='#10b981'"
-              >
+                onclick="window.open('${location.url}', '_blank');"
+                style="display: inline-block; 
+                      padding: 0.5rem 1rem; 
+                      font-size: 0.875rem; 
+                      font-weight: 500; 
+                      color: #ffffff; 
+                      background-color: #3b82f6; 
+                      border-radius: 0.375rem; 
+                      text-decoration: none; 
+                      transition: background-color 0.3s ease;
+                      width: calc(50% - 0.5rem); /* 2개의 버튼을 첫 번째 줄에 배치 */
+                      box-sizing: border-box;"
+                onmouseover="this.style.backgroundColor='#2563eb'" 
+                onmouseout="this.style.backgroundColor='#3b82f6'">
+                공고보기
+              </button>
+              <button 
+                style="display: inline-block; 
+                      padding: 0.5rem 1rem; 
+                      font-size: 0.875rem; 
+                      font-weight: 500; 
+                      color: #ffffff; 
+                      background-color: #10b981; 
+                      border-radius: 0.375rem; 
+                      text-decoration: none; 
+                      transition: background-color 0.3s ease;
+                      width: calc(50% - 0.5rem); /* 2개의 버튼을 첫 번째 줄에 배치 */
+                      box-sizing: border-box;" 
+                onmouseover="this.style.backgroundColor='#059669'" 
+                onmouseout="this.style.backgroundColor='#10b981'">
                 AI 면접
               </button>
+
+              <!-- 두 번째 줄: 길 찾기, 로드뷰 -->
               <button 
-                onclick="window.drawRouteToJob && window.drawRouteToJob(${location.Latitude}, ${location.Longitude})"
-                style="
-                  display: inline-block; 
-                  padding: 0.5rem 1rem; 
-                  font-size: 0.875rem; 
-                  font-weight: 500; 
-                  color: #ffffff; 
-                  background-color: #f59e0b; 
-                  border-radius: 0.375rem; 
-                  text-decoration: none; 
-                  transition: background-color 0.3s ease;
-                "
-                onmouseover="this.style.backgroundColor='#d97706'"
-                onmouseout="this.style.backgroundColor='#f59e0b'"
-              >
+                onclick="window.drawRouteToJob && window.drawRouteToJob(${location.Latitude}, ${location.Longitude})" 
+                style="display: inline-block; 
+                      padding: 0.5rem 1rem; 
+                      font-size: 0.875rem; 
+                      font-weight: 500; 
+                      color: #ffffff; 
+                      background-color: #f59e0b; 
+                      border-radius: 0.375rem; 
+                      text-decoration: none; 
+                      transition: background-color 0.3s ease;
+                      width: calc(50% - 0.5rem); /* 2개의 버튼을 두 번째 줄에 배치 */
+                      box-sizing: border-box;" 
+                onmouseover="this.style.backgroundColor='#d97706'" 
+                onmouseout="this.style.backgroundColor='#f59e0b'">
                 길 찾기
               </button>
+
               <button 
-                onclick="window.showRoadview && window.showRoadview(${location.Latitude}, ${location.Longitude})"
-                style="
-                  display: inline-block; 
-                  padding: 0.5rem 1rem; 
-                  font-size: 0.875rem; 
-                  font-weight: 500; 
-                  color: #ffffff; 
-                  background-color: #6366f1; 
-                  border-radius: 0.375rem; 
-                  text-decoration: none; 
-                  transition: background-color 0.3s ease;
-                "
-                onmouseover="this.style.backgroundColor='#4f46e5'"
-                onmouseout="this.style.backgroundColor='#6366f1'"
-              >
+                onclick="window.showRoadview && window.showRoadview(${location.Latitude}, ${location.Longitude})" 
+                style="display: inline-block; 
+                      padding: 0.5rem 1rem; 
+                      font-size: 0.875rem; 
+                      font-weight: 500; 
+                      color: #ffffff; 
+                      background-color: #6366f1; 
+                      border-radius: 0.375rem; 
+                      text-decoration: none; 
+                      transition: background-color 0.3s ease;
+                      width: calc(50% - 0.5rem); /* 2개의 버튼을 두 번째 줄에 배치 */
+                      box-sizing: border-box;" 
+                onmouseover="this.style.backgroundColor='#4f46e5'" 
+                onmouseout="this.style.backgroundColor='#6366f1'">
                 로드뷰
               </button>
             </div>
