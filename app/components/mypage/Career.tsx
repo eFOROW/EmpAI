@@ -68,8 +68,8 @@ export default function Career() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12">
-            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <div className="min-h-screen py-12">
+            <div className="max-w-4xl mx-auto bg-gray-50 rounded-xl shadow-lg p-8">
                 <div className="flex items-center mb-8">
                     <BookOutlined className="text-3xl text-blue-500 mr-4" />
                     <h2 className="text-3xl font-bold text-gray-800">이력 정보 등록</h2>
@@ -84,7 +84,7 @@ export default function Career() {
                     className="space-y-6"
                 >
                     {/* 학력 섹션 */}
-                    <div className="bg-gray-50 p-6 rounded-lg">
+                    <div className="bg-white p-6 rounded-lg">
                         <Divider orientation="left" className="text-xl font-semibold text-blue-600">
                             <span className="flex items-center">
                                 <BookOutlined className="mr-2" />
