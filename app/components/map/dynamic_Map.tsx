@@ -1,5 +1,7 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal } from 'antd';
 
 interface MapProps {
   clientId: string;
@@ -32,6 +34,9 @@ const Map: React.FC<MapProps> = ({
   const clickListenerRef = useRef<any>(null);
   const jobMarkersRef = useRef<any[]>([]);
   const polylineRef = useRef<any>(null);
+  const roadviewRef = useRef<any>(null);
+  const [isRoadviewVisible, setIsRoadviewVisible] = useState(false);
+  const [currentRoadviewPosition, setCurrentRoadviewPosition] = useState<{lat: number, lng: number} | null>(null);
   const jobMarkersMapRef = useRef<{[key: string]: {
     marker: any;
     infoWindow: any;
@@ -99,6 +104,51 @@ const Map: React.FC<MapProps> = ({
       alert('길찾기 중 오류가 발생했습니다.');
     }
   };
+
+  const showRoadview = (lat: number, lng: number) => {
+    setCurrentRoadviewPosition({ lat, lng });
+    setIsRoadviewVisible(true);
+  };
+
+  useEffect(() => {
+    if (isRoadviewVisible && currentRoadviewPosition) {
+      const roadviewContainer = document.getElementById('roadview');
+      if (!roadviewContainer) return;
+
+      var panoramaOptions = {
+        position: new naver.maps.LatLng(currentRoadviewPosition.lat, currentRoadviewPosition.lng),
+        size: new naver.maps.Size(1150, 600),
+        pov: {
+            pan: -135,
+            tilt: 29,
+            fov: 100
+        },
+        visible: true,
+        aroundControl: true,
+        minScale: 0,
+        maxScale: 10,
+        minZoom: 0,
+        maxZoom: 4,
+        flightSpot: false,
+        logoControl: false,
+        logoControlOptions: {
+            position: naver.maps.Position.BOTTOM_RIGHT
+        },
+        zoomControl: true,
+        zoomControlOptions: {
+            position: naver.maps.Position.TOP_LEFT,
+            style: naver.maps.ZoomControlStyle.SMALL
+        },
+        aroundControlOptions: {
+            position: naver.maps.Position.TOP_RIGHT
+        }
+    };
+
+      const roadview = new naver.maps.Panorama(roadviewContainer, panoramaOptions);
+
+      roadviewRef.current = roadview;
+    }
+  }, [isRoadviewVisible, currentRoadviewPosition]);
   
   useEffect(() => {
     const initMap = () => {
@@ -145,7 +195,7 @@ const Map: React.FC<MapProps> = ({
     } else {
       const mapScript = document.createElement('script');
       mapScript.onload = () => initMap();
-      mapScript.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
+      mapScript.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}&submodules=panorama`;
       document.head.appendChild(mapScript);
     }
   
@@ -180,7 +230,7 @@ const Map: React.FC<MapProps> = ({
       strokeWeight: 2,
       strokeOpacity: 0.6,
       fillColor: '#FF0000',
-      fillOpacity: 0.03,
+      fillOpacity: 0.04,
     });
   
     circle.setMap(mapRef.current);
@@ -285,6 +335,24 @@ const Map: React.FC<MapProps> = ({
               >
                 길 찾기
               </button>
+              <button 
+                onclick="window.showRoadview && window.showRoadview(${location.Latitude}, ${location.Longitude})"
+                style="
+                  display: inline-block; 
+                  padding: 0.5rem 1rem; 
+                  font-size: 0.875rem; 
+                  font-weight: 500; 
+                  color: #ffffff; 
+                  background-color: #6366f1; 
+                  border-radius: 0.375rem; 
+                  text-decoration: none; 
+                  transition: background-color 0.3s ease;
+                "
+                onmouseover="this.style.backgroundColor='#4f46e5'"
+                onmouseout="this.style.backgroundColor='#6366f1'"
+              >
+                로드뷰
+              </button>
             </div>
           </div>
         `,
@@ -311,9 +379,14 @@ const Map: React.FC<MapProps> = ({
         );
       }
     };
+
+    window.showRoadview = (destLat: number, destLng: number) => {
+      showRoadview(destLat, destLng);
+    };
   
     return () => {
       window.drawRouteToJob = undefined;
+      window.showRoadview = undefined;
     };
   }, [markerPosition, jobs]);
 
@@ -329,6 +402,15 @@ const Map: React.FC<MapProps> = ({
   return (
     <div className="relative w-full h-screen">
       <div id="map" className="w-full h-full"></div>
+      <Modal
+        title="로드뷰"
+        open={isRoadviewVisible}
+        onCancel={() => setIsRoadviewVisible(false)}
+        width={1200}
+        footer={null}
+      >
+        <div id="roadview" style={{ width: '100%', height: '400px' }}></div>
+      </Modal>
     </div>
   );
 };
@@ -337,6 +419,7 @@ const Map: React.FC<MapProps> = ({
 declare global {
   interface Window {
     drawRouteToJob?: (destLat: number, destLng: number) => void;
+    showRoadview?: (destLat: number, destLng: number) => void;
   }
 }
 
