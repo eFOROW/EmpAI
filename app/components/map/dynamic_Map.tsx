@@ -180,7 +180,7 @@ const Map: React.FC<MapProps> = ({
       strokeWeight: 2,
       strokeOpacity: 0.6,
       fillColor: '#FF0000',
-      fillOpacity: 0.1,
+      fillOpacity: 0.03,
     });
   
     circle.setMap(mapRef.current);
@@ -228,12 +228,6 @@ const Map: React.FC<MapProps> = ({
             </p>
             <p style="margin: 0.25rem 0; color: #4b5563;">
               위치: <span style="color: #1f2937;">${location.Address}</span>
-            </p>
-            <p style="margin: 0.25rem 0; color: #4b5563;">
-              고용 형태: <span style="color: #1f2937;">${location.position_job_type_name}</span>
-            </p>
-            <p style="margin: 0.25rem 0; color: #4b5563;">
-              급여: <span style="color: #1f2937;">${location.salary_name}</span>
             </p>
             
             <div style="display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1rem;">
