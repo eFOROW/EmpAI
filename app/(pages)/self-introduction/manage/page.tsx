@@ -5,7 +5,14 @@ import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
 import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
-import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined,
+  CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
+  FileTextOutlined, DesktopOutlined, SketchOutlined, ShoppingOutlined,
+  CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
+  CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
+  ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
+  BankOutlined, SafetyOutlined
+} from '@ant-design/icons';
 
 import style from "./Flip.module.css";
 
@@ -26,6 +33,39 @@ interface Document {
     answer: string;
   }[];
 }
+
+// jobStyles 타입 정의 추가
+interface JobStyle {
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}
+
+// jobStyles 객체에 타입 지정
+const jobStyles: { [key: string]: JobStyle } = {
+  "기획·전략": { icon: <ProjectOutlined />, color: "#1890ff", bgColor: "#e6f7ff", borderColor: "#91d5ff" },
+  "마케팅·홍보·조사": { icon: <ShoppingOutlined />, color: "#eb2f96", bgColor: "#fff0f6", borderColor: "#ffadd2" },
+  "회계·세무·재무": { icon: <DollarOutlined />, color: "#52c41a", bgColor: "#f6ffed", borderColor: "#b7eb8f" },
+  "인사·노무·HRD": { icon: <TeamOutlined />, color: "#722ed1", bgColor: "#f9f0ff", borderColor: "#d3adf7" },
+  "총무·법무·사무": { icon: <FileTextOutlined />, color: "#13c2c2", bgColor: "#e6fffb", borderColor: "#87e8de" },
+  "IT개발·데이터": { icon: <CodeOutlined />, color: "#2f54eb", bgColor: "#f0f5ff", borderColor: "#adc6ff" },
+  "디자인": { icon: <SketchOutlined />, color: "#fa541c", bgColor: "#fff2e8", borderColor: "#ffbb96" },
+  "영업·판매·무역": { icon: <ShoppingCartOutlined />, color: "#faad14", bgColor: "#fffbe6", borderColor: "#ffe58f" },
+  "고객상담·TM": { icon: <CustomerServiceOutlined />, color: "#a0d911", bgColor: "#fcffe6", borderColor: "#eaff8f" },
+  "구매·자재·물류": { icon: <ShopOutlined />, color: "#1890ff", bgColor: "#e6f7ff", borderColor: "#91d5ff" },
+  "상품기획·MD": { icon: <ShoppingCartOutlined />, color: "#eb2f96", bgColor: "#fff0f6", borderColor: "#ffadd2" },
+  "운전·운송·배송": { icon: <CarOutlined />, color: "#52c41a", bgColor: "#f6ffed", borderColor: "#b7eb8f" },
+  "서비스": { icon: <CoffeeOutlined />, color: "#722ed1", bgColor: "#f9f0ff", borderColor: "#d3adf7" },
+  "생산": { icon: <ExperimentOutlined />, color: "#13c2c2", bgColor: "#e6fffb", borderColor: "#87e8de" },
+  "건설·건축": { icon: <BuildOutlined />, color: "#2f54eb", bgColor: "#f0f5ff", borderColor: "#adc6ff" },
+  "의료": { icon: <MedicineBoxOutlined />, color: "#fa541c", bgColor: "#fff2e8", borderColor: "#ffbb96" },
+  "연구·R&D": { icon: <ResearchIcon />, color: "#faad14", bgColor: "#fffbe6", borderColor: "#ffe58f" },
+  "교육": { icon: <ReadOutlined />, color: "#a0d911", bgColor: "#fcffe6", borderColor: "#eaff8f" },
+  "미디어·문화·스포츠": { icon: <PlaySquareOutlined />, color: "#1890ff", bgColor: "#e6f7ff", borderColor: "#91d5ff" },
+  "금융·보험": { icon: <BankOutlined />, color: "#eb2f96", bgColor: "#fff0f6", borderColor: "#ffadd2" },
+  "공공·복지": { icon: <SafetyOutlined />, color: "#52c41a", bgColor: "#f6ffed", borderColor: "#b7eb8f" }
+} as const;
 
 const { Text } = Typography;
 
@@ -243,49 +283,73 @@ const ListPage = ({ user }: ListPageProps) => {
 
   if (selectedDocument) {
     return (
-      <div className="p-4 max-w-3xl w-full mt-8" style={{width: 800}}>
-        <div className="flex items-center justify-between mb-6">
-          <Button
-            onClick={() => setSelectedDocument(null)}
-            icon={<LeftOutlined />}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full"
-          />
-          <h2 className="text-2xl font-bold flex-grow text-center text-gray-800">
-            {selectedDocument.title}
-          </h2>
-        </div>
+      <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="p-6 mx-auto mt-8">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex items-start mb-8">
+            <Button
+              onClick={() => setSelectedDocument(null)}
+              icon={<LeftOutlined />}
+              className="mr-4 hover:bg-gray-100 rounded-full h-10 w-10 flex items-center justify-center border-none absolute"
+            />
+            <div className="w-full flex justify-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                  {selectedDocument.title}
+                </h2>
+                <div className="flex items-center gap-4">
+                  <Text
+                    className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                    style={{
+                      color: jobStyles[selectedDocument.job_code]?.color ?? "#666",
+                      backgroundColor: jobStyles[selectedDocument.job_code]?.bgColor ?? "#f5f5f5",
+                      border: `1px solid ${jobStyles[selectedDocument.job_code]?.borderColor ?? "#d9d9d9"}`,
+                      width: 'fit-content',
+                      display: 'inline-flex'
+                    }}
+                  >
+                    {jobStyles[selectedDocument.job_code]?.icon ?? null}
+                    {selectedDocument.job_code}
+                  </Text>
+                  <span className="text-sm text-gray-500">
+                    최근 수정: {selectedDocument.last_modified.toLocaleDateString()}{" "}
+                    {selectedDocument.last_modified.toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-
-        <div className="text-gray-700">
-          <p>직무 분야 : {selectedDocument.job_code}</p>
-          <p>
-            최근 수정 : {selectedDocument.last_modified.toLocaleDateString()}{" "}
-            {selectedDocument.last_modified.toLocaleTimeString()}
-          </p>
-          <ul className="mt-4">
+          {/* 질문/답변 영역 */}
+          <div className="space-y-8">
             {selectedDocument.data.map((item, index) => (
-              <li key={index} className="mb-4">
-                <p className="font-semibold">{item.question}</p>
+              <div 
+                key={index} 
+                className="bg-gray-50 rounded-lg p-6 transition-all duration-200 hover:shadow-md"
+              >
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Q{index + 1}. {item.question}
+                </h3>
                 <Input.TextArea
                   value={updatedAnswers[item.question] || ""}
                   onChange={(e) => handleAnswerChange(item.question, e.target.value)}
                   rows={8}
-                  className="mt-2"
+                  className="border-2 focus:border-blue-400 hover:border-blue-300 transition-colors duration-200"
+                  style={{ resize: 'none' }}
                 />
-              </li>
+              </div>
             ))}
-          </ul>
-          <div className="mt-4">
-          <div className="flex justify-center items-center">
+          </div>
+
+          {/* 수정 버튼 */}
+          <div className="mt-8 flex justify-center">
             <Button
               type="primary"
               onClick={confirm}
-              className="bg-blue-500 text-white px-12 py-4 rounded-lg font-semibold text-xl transition-all duration-300 transform hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-6 h-auto rounded-lg text-lg font-medium transition-all duration-300 border-none shadow-md hover:shadow-lg"
             >
-              수정
+              수정하기
             </Button>
             {contextHolder}
-          </div>
           </div>
         </div>
       </div>
@@ -293,8 +357,8 @@ const ListPage = ({ user }: ListPageProps) => {
   }
 
   return (
-    <div style={{minWidth: 520, maxWidth: 1250}}>
-      <div className="relative mb-4 mt-8" style={{minWidth: 840, maxWidth: 1250}}>
+    <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="mx-auto">
+      <div className="relative mb-4 mt-8 w-full">
         <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-2 px-4">
           {/* "자기소개서 리스트" */}
           <h1 className="text-2xl font-bold" style={{ flex: '0 0 auto' }}>
@@ -317,7 +381,7 @@ const ListPage = ({ user }: ListPageProps) => {
         </div>
       </div>
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[32, 32]}>
         {filteredDocuments.map((document) => (
         <Col key={document._id} flex="0 1 auto" className={style.imageWrapper}>
           <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
@@ -326,11 +390,19 @@ const ListPage = ({ user }: ListPageProps) => {
                 hoverable
                 cover={
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
-                    <div style={{ flex: '1' }}>
+                    <div style={{ display: 'inline-flex' }}>
                       <Text
-                        className="text-xs border border-[#e9d5ff] bg-[#faf5ff] px-2 py-1 rounded text-[#9333ea]"
+                        className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                        style={{
+                          color: jobStyles[document.job_code]?.color ?? "#666",
+                          backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
+                          border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
+                          width: 'fit-content',
+                          display: 'inline-flex'
+                        }}
                       >
-                        {document?.job_code || "N/A"}
+                        {jobStyles[document.job_code]?.icon ?? null}
+                        {document.job_code || "N/A"}
                       </Text>
                     </div>
                     <div style={{ marginLeft: 'auto' }}>

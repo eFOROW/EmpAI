@@ -56,33 +56,43 @@ export default function Page() {
             <div className="flex flex-grow">
                 {/* user가 존재할 때만 메뉴를 렌더링 */}
                 {user ? (
-                    <div className="bg-white p-6 rounded-lg w-60 space-y-4 mt-4 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.1)]">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-gray-900">마이페이지</h2>
-                        </div>
+                    <div className="w-64 min-h-screen bg-gradient-to-b from-gray-50 to-white border-r">
+                        <div className="p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-8">마이페이지</h2>
+                            
+                            <div className="space-y-2">
+                                <Button
+                                    type="text"
+                                    className={`w-full flex items-center px-4 py-3 rounded-lg transition-all
+                                        ${control_id === 0 
+                                        ? 'bg-white shadow-md text-blue-700 font-semibold' 
+                                        : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
+                                    onClick={() => setID(0)}
+                                >
+                                    내 정보
+                                </Button>
+                                <Button
+                                    type="text"
+                                    className={`w-full flex items-center px-4 py-3 rounded-lg transition-all
+                                        ${control_id === 2 
+                                        ? 'bg-white shadow-md text-blue-700 font-semibold' 
+                                        : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
+                                    onClick={() => setID(2)}
+                                >
+                                    이력정보 등록
+                                </Button>
+                            </div>
 
-                        <Button
-                            type="text"
-                            className="w-full text-xl text-gray-800 hover:text-blue-600 transition-colors duration-300"
-                            onClick={() => setID(0)} // user가 있으므로 항상 0
-                        >
-                            내 정보
-                        </Button>
-                        <Button
-                            type="text"
-                            className="w-full text-xl text-gray-800 hover:text-blue-600 transition-colors duration-300"
-                            onClick={() => setID(2)}
-                        >
-                            이력정보 등록
-                        </Button>
-                        <Button
-                            color="danger"
-                            variant="solid"
-                            onClick={confirm}
-                            className={`w-full text-xl text-white bg-red-500 hover:bg-red-600 transition-colors duration-300`}
-                        >
-                            로그아웃
-                        </Button>
+                            <div className="mt-8">
+                                <Button
+                                    onClick={confirm}
+                                    className="w-full py-2.5 text-red-500 hover:text-white border border-red-500 
+                                    hover:bg-red-500 rounded-lg transition-colors duration-200"
+                                >
+                                    로그아웃
+                                </Button>
+                            </div>
+                        </div>
                         {contextHolder}
                     </div>
                 ) : null} {/* user가 없으면 null을 렌더링하여 메뉴 숨김 */}
