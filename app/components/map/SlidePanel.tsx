@@ -282,6 +282,22 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                         <WalletOutlined />
                         <span>{job.salary_name}</span>
                       </div>
+
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <ClockCircleOutlined />
+                        <span>마감일: {
+                          (() => {
+                            const expirationDate = new Date(job.expiration_date);
+                            const today = new Date();
+                            const oneYearFromNow = new Date();
+                            oneYearFromNow.setFullYear(today.getFullYear() + 1);
+                            
+                            return expirationDate > oneYearFromNow 
+                              ? '채용시' 
+                              : expirationDate.toLocaleDateString('ko-KR')
+                          })()
+                        }</span>
+                      </div>
                     </div>
 
                     {/* 태그들 */}
