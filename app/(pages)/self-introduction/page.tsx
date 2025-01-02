@@ -2,19 +2,22 @@ import React from "react";
 
 const Home: React.FC = () => {
   return (
-    <div className="flex h-screen w-full m-0 p-0">
+    <div className="flex h-screen w-full m-0 p-0 bg-white">
       {/* 왼쪽 섹션 */}
-      <div className="flex-1 flex justify-center items-center relative">
+      <div className="flex-1 flex justify-center items-center relative p-6">
         {/* 왼쪽 사각형 */}
         <div
-          className="w-4/5 h-3/4 rounded-lg flex justify-center bg-white
-          items-center text-xl text-[#333] border-2 border-[rgba(0, 0, 0, 0.4)] relative"
+          className="w-4/5 h-3/4 rounded-2xl flex justify-center 
+          items-center text-xl text-[#333] 
+          relative shadow-md hover:shadow-lg transition-shadow duration-300
+          bg-gradient-to-b from-pink-50/50 to-white"
         >
           {/* 동그란 원 - 자기소개서 관리 */}
           <div
             className="absolute -top-[85px] left-1/2 transform -translate-x-1/2
             w-[200px] h-[200px] rounded-full text-[30px] leading-[1.4]
-            flex justify-center items-center text-center font-semibold bg-pink-100"
+            flex justify-center items-center text-center font-semibold bg-pink-100
+            shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300"
           >
             <span>
               자기소개서<br />
@@ -22,7 +25,7 @@ const Home: React.FC = () => {
             </span>
           </div>
           {/* 왼쪽 섹션 내용 */}
-          <div className="text-center space-y-6 px-8 py-6">
+          <div className="text-center space-y-8 px-10 py-8 animate-fadeIn">
             {/* 섹션 제목 */}
             <p className="text-xl text-gray-800 font-bold">
                 사용자가 자기소개서를 체계적으로 관리할 수 있는 관리 기능을 제공
@@ -50,17 +53,20 @@ const Home: React.FC = () => {
       </div>
 
       {/* 오른쪽 섹션 */}
-      <div className="flex-1 flex justify-center items-center relative">
+      <div className="flex-1 flex justify-center items-center relative p-6">
         {/* 오른쪽 사각형 */}
         <div
-          className="w-4/5 h-3/4 rounded-lg flex justify-center bg-white
-          items-center text-xl text-[#333] border-2 border-[rgba(0, 0, 0, 0.4)] relative"
+          className="w-4/5 h-3/4 rounded-2xl flex justify-center 
+          items-center text-xl text-[#333] 
+          relative shadow-md hover:shadow-lg transition-shadow duration-300
+          bg-gradient-to-b from-blue-50/50 to-white"
         >
           {/* 동그란 원 - 자기소개서 첨삭 */}
           <div
             className="absolute -top-[85px] left-1/2 transform -translate-x-1/2
             w-[200px] h-[200px] rounded-full text-[30px] leading-[1.4] 
-            flex justify-center items-center text-center font-semibold bg-blue-100"
+            flex justify-center items-center text-center font-semibold bg-blue-100
+            shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300"
           >
             <span>
               자기소개서<br />
@@ -68,7 +74,7 @@ const Home: React.FC = () => {
             </span>
           </div>
           {/* 오른쪽 섹션 내용 */}
-          <div className="text-center space-y-6 px-8 py-6">
+          <div className="text-center space-y-8 px-10 py-8 animate-fadeIn">
             {/* 섹션 제목 */}
             <p className="text-xl text-gray-800 font-bold">
                 자기소개서를 검토하고 개선할 수 있는 첨삭 기능을 제공

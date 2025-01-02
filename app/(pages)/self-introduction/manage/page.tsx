@@ -325,27 +325,31 @@ const ListPage = ({ user }: ListPageProps) => {
               <Card
                 hoverable
                 cover={
-                  <div className="flex justify-between items-center w-full">
-                    <Text
-                      className="text-xs border border-[#e9d5ff] bg-[#faf5ff] px-2 py-1 rounded text-[#9333ea]"
-                    >
-                      {document?.job_code || "N/A"}
-                    </Text>
-                    <button
-                      className="text-gray-800 bg-transparent border-none cursor-pointer"
-                      onClick={() => handleFlip(document._id)}
-                    >
-                      <EllipsisOutlined
-                        style={{
-                          fontSize: '24px',
-                          cursor: 'pointer',
-                          transform: 'rotate(90deg)',  // 90도 회전
-                        }}
-                      />
-                    </button>
+                  <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
+                    <div style={{ flex: '1' }}>
+                      <Text
+                        className="text-xs border border-[#e9d5ff] bg-[#faf5ff] px-2 py-1 rounded text-[#9333ea]"
+                      >
+                        {document?.job_code || "N/A"}
+                      </Text>
+                    </div>
+                    <div style={{ marginLeft: 'auto' }}>
+                      <button
+                        className="text-gray-800 bg-transparent border-none cursor-pointer"
+                        onClick={() => handleFlip(document._id)}
+                      >
+                        <EllipsisOutlined
+                          style={{
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            transform: 'rotate(90deg)',
+                          }}
+                        />
+                      </button>
+                    </div>
                   </div>
                 }
-                style={{ padding: "10px 0px 0 10px", maxWidth: 320 }}
+                style={{ padding: 0, maxWidth: 320 }}
               >
                 <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
                   onClick={() => handleDocumentClick(document)}>
@@ -427,21 +431,35 @@ const Page = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4">
+    <div className="flex flex-col items-center min-h-screen bg-gray-50 p-4">
       {user ? (
         <div>
           <ListPage user={user} />
         </div>
       ) : (
-        <div className="text-center">
-          <p>해당 서비스는 로그인 후 사용 가능합니다.</p>
-          <Button
-            onClick={handleLoginRedirect}
-            type="primary"
-            className="mt-4"
-          >
-            로그인 하러 가기
-          </Button>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] w-[600px] mx-auto p-12 rounded-xl bg-white shadow-md border border-gray-100">
+          <div className="text-center space-y-8 w-full">
+            <div className="mb-8">
+              <svg className="w-16 h-16 mx-auto text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
+              <div className="w-16 h-0.5 mx-auto bg-blue-500 rounded-full"></div>
+            </div>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              자기소개서 관리 서비스를 이용하시려면<br />
+              로그인이 필요합니다.<br />
+              로그인 후 다양한 기능을 사용해보세요.
+            </p>
+            <Button
+              onClick={handleLoginRedirect}
+              type="primary"
+              size="large"
+              className="mt-8 h-12 px-10 text-lg bg-blue-500 hover:bg-blue-600 border-0 rounded-lg transition-all duration-200"
+            >
+              로그인 하러 가기
+            </Button>
+          </div>
         </div>
       )}
     </div>

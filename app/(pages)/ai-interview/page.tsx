@@ -11,6 +11,8 @@ import {
   ArrowRightOutlined 
 } from "@ant-design/icons";
 import { ConfigProvider } from "antd";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ServiceCardProps {
   title: string;
@@ -73,6 +75,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
 export default function Page() {
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     getCurrentUser().then((user) => {
@@ -84,22 +87,25 @@ export default function Page() {
     {
       title: "AI 면접 예상질문",
       description: "AI가 분석한 최신 면접 트렌드와 직무별 맞춤 예상 질문을 제공합니다. 취업을 준비하는 과정에서 가장 중요한 면접 준비를 도와드립니다.",
-      icon: <RobotOutlined />
+      icon: <RobotOutlined />,
+      path: "/ai-interview/question"
     },
     {
       title: "AI 모의면접",
       description: "실제 면접과 같은 환경에서 AI 면접관과 1:1 모의면접을 진행해보세요. 답변을 녹화하고 실시간 피드백을 받을 수 있습니다.",
-      icon: <VideoCameraOutlined />
+      icon: <VideoCameraOutlined />,
+      path: "/ai-interview/evaluation"
     },
     {
       title: "면접 결과보기",
       description: "AI가 분석한 당신의 면접 결과를 확인하세요. 답변 내용, 목소리 톤, 표정 등을 종합적으로 분석하여 개선점을 제시합니다.",
-      icon: <FileSearchOutlined />
+      icon: <FileSearchOutlined />,
+      path: "/ai-interview/results"
     }
   ];
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/50 to-purple-50/80">
       <ConfigProvider
         theme={{
           token: {
@@ -107,30 +113,76 @@ export default function Page() {
           },
         }}
       >
-        <div className="min-h-screen bg-gradient-to-br flex flex-col">
-          {/* 페이지 상단 설명 추가 */}
-          <div className="mt-20 text-center rounded-xl mx-4">
-            <h2 className="text-3xl font-semibold text-gray-900">AI 기반 면접 준비 플랫폼</h2>
-            <p className="mt-4 text-lg text-gray-700">
-              취업을 준비하는 모든 사람들을 위한 AI 기반 면접 준비 솔루션을 제공합니다. AI의 힘을 빌려 예상질문을 분석하고, 모의면접을 통해 실력을 쌓고, 면접 후 피드백을 통해 개선점을 찾을 수 있습니다. 이 모든 과정을 통해 면접 준비를 완벽하게 마칠 수 있습니다.
-            </p>
+        {/* 히어로 섹션 개선 */}
+        <div className="relative pt-20 pb-16 text-center">
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 backdrop-blur-[100px]" />
           </div>
+          
+          <div className="relative z-10 max-w-4xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                AI 기반 면접 준비 플랫폼
+              </h1>
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
+                취업을 준비하는 모든 분들을 위한{" "}
+                <span className="text-indigo-600 font-semibold">스마트한 면접 준비 솔루션</span>
+                을 제공합니다.
+              </p>
+              <p className="mt-4 text-gray-600">
+                AI의 힘을 빌려 예상질문을 분석하고, 모의면접을 통해 실력을 쌓아보세요.
+              </p>
+            </motion.div>
 
-
-          {/* 서비스 카드 */}
-          <div className="flex-grow w-full max-w-7xl mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-              {services.map((service, index) => (
-                <ServiceCard
+            {/* 통계 섹션 추가 */}
+            <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
+              {[
+                { number: "98%", label: "사용자 만족도" },
+                { number: "50,000+", label: "면접 질문 데이터" },
+                { number: "24/7", label: "AI 지원" },
+              ].map((stat, index) => (
+                <motion.div
                   key={index}
-                  title={service.title}
-                  description={service.description}
-                  icon={service.icon}
-                  onClick={() => console.log(`Clicked ${service.title}`)}
-                  delay={index * 0.1}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="text-2xl md:text-3xl font-bold text-indigo-600">{stat.number}</div>
+                  <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
+                </motion.div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* 서비스 카드 섹션 */}
+        <div className="max-w-7xl mx-auto px-4 py-16 pb-32">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-gray-900">주요 서비스</h2>
+            <p className="mt-4 text-gray-600">면접 준비의 모든 단계를 AI와 함께 준비하세요</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-16">
+            {services.map((service, index) => (
+              <ServiceCard
+                key={index}
+                title={service.title}
+                description={service.description}
+                icon={service.icon}
+                onClick={() => router.push(service.path)}
+                delay={index * 0.1}
+              />
+            ))}
           </div>
         </div>
       </ConfigProvider>

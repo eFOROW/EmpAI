@@ -37,23 +37,49 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
 
   return (
     <div className="profile-container p-5 max-w-4xl mx-auto">
-      {loading && <Spin tip="Loading..." />}
-      {error && <Alert message="Error" description={error} type="error" showIcon />}
+      {loading && (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Spin size="large" tip="로딩중..." />
+        </div>
+      )}
+      {error && <Alert message="오류 발생" description={error} type="error" showIcon className="mb-4" />}
       {user ? (
-        <Card className="bg-white shadow-lg rounded-lg">
-          <div className="text-center">
-            {/* 프로필 이미지 */}
-            <Avatar
-              size={100}
-              src={profileData?.imgUrl || "https://www.studiopeople.kr/common/img/default_profile.png"}
-              alt={user.email || "Profile Image"}
-              className="mx-auto"
-            />
+        <Card className="bg-white shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300">
+          <div className="text-center space-y-4">
+            <div className="relative inline-block">
+              <Avatar
+                size={120}
+                src={profileData?.imgUrl || "https://www.studiopeople.kr/common/img/default_profile.png"}
+                alt={user.email || "Profile Image"}
+                className="border-4 border-white shadow-lg hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            {profileData && (
+              <h2 className="text-2xl font-bold text-gray-800">{profileData.name}</h2>
+            )}
           </div>
 
           {profileData && (
-            <div className="mt-6">
-              <Descriptions title="내 정보" bordered column={1} className="rounded-md bg-gray-50 p-4">
+            <div className="mt-8 px-6">
+              <Descriptions 
+                title={
+                  <span className="text-xl font-semibold text-gray-700 block pb-4 pt-2 px-4">
+                    내 정보
+                  </span>
+                } 
+                bordered 
+                column={1} 
+                className="rounded-lg bg-gray-50 shadow-inner"
+                labelStyle={{ 
+                  fontWeight: 600,
+                  backgroundColor: '#f8fafc',
+                  padding: '16px 24px'
+                }}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  padding: '16px 24px'
+                }}
+              >
                 <Descriptions.Item label="이메일">{profileData.email}</Descriptions.Item>
                 <Descriptions.Item label="Uid">{profileData.uid}</Descriptions.Item>
                 <Descriptions.Item label="프로필 이미지">{profileData?.imgUrl || "null"}</Descriptions.Item>
@@ -68,7 +94,9 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
           )}
         </Card>
       ) : (
-        <p className="text-center text-gray-500">Loading..</p>
+        <div className="text-center p-8 bg-gray-50 rounded-lg shadow">
+          <p className="text-gray-500 text-lg">사용자 정보를 불러오는 중입니다...</p>
+        </div>
       )}
     </div>
   );
