@@ -9,7 +9,10 @@ import {
   RiseOutlined,
   BookOutlined,
   ClockCircleOutlined,
-  WalletOutlined 
+  WalletOutlined,
+  CalendarOutlined,
+  LeftOutlined,
+  RightOutlined
 } from '@ant-design/icons';
 
 interface SlidePanelProps {
@@ -123,214 +126,204 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
 
   return (
     <div className="relative z-50">
-      {/* 패널 */}
       <div
-        className={`absolute top-0 left-0 h-full bg-white shadow-lg transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`absolute top-0 left-0 h-full bg-[#f8f9fa] shadow-xl transition-all duration-300 ease-in-out overflow-hidden ${
           isPanelOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
         }`}
         style={{ zIndex: 50, width: '500px' }}
       >
-        {/* 패널 내용 */}
         <div className="p-4">
-          <Link href="/" className="block relative z-10 m-4 w-full">
-            <h1 className="font-extrabold text-[28px] leading-[30.24px] text-primary-black cursor-pointer block">
+          <Link href="/" className="block relative z-10 m-4">
+            <h1 className="font-extrabold text-3xl text-blue-600 cursor-pointer hover:text-blue-700 transition-colors">
               EmpAI
             </h1>
           </Link>
-          {/* 내부 패널 - 토글 가능한 부분 */}
+
           <div className={`transition-all duration-300 overflow-hidden ${
             isInnerPanelOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
           }`}>
-            <h3 className="text-lg font-semibold mt-12">근무직군</h3>
-            {/* 직무 선택 드롭다운 */}
-            <select
-              value={selectedJobCode}
-              onChange={(e) => setSelectedJobCode(e.target.value)}
-              className="p-2 mt-4 mb-8 border border-gray-300 rounded-md"
-              style={{ flex: '0 0 auto', minWidth: '150px' }}
-            >
-              {jobOptions.map((job, index) => (
-                <option key={index} value={job}>
-                  {job}
-                </option>
-              ))}
-            </select>
-            <h3 className="text-lg font-semibold mb-2">학력/경력</h3>
-            <div className="flex items-center space-x-4 mb-8">
-              {/* 경력 선택 드롭다운 */}
+            {/* 검색 옵션 영역 */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">근무직군</h3>
               <select
-                value={selectedCareerCode}
-                onChange={(e) => setSelectedCareerCode(e.target.value)}
-                className="p-2 border border-gray-300 rounded-md"
-                style={{ flex: '0 0 auto', minWidth: '130px' }}
+                value={selectedJobCode}
+                onChange={(e) => setSelectedJobCode(e.target.value)}
+                className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
-                {careerOptions.map((code, index) => (
-                  <option key={index} value={code}>
-                    {code}
-                  </option>
+                {jobOptions.map((job, index) => (
+                  <option key={index} value={job}>{job}</option>
                 ))}
               </select>
 
-              {/* 학력 선택 드롭다운 */}
-              <select
-                value={selectedEduCode}
-                onChange={(e) => setSelectedEduCode(e.target.value)}
-                className="p-2 border border-gray-300 rounded-md"
-                style={{ flex: '0 0 auto', minWidth: '130px' }}
-              >
-                {eduOptions.map((edu_code, index) => (
-                  <option key={index} value={edu_code}>
-                    {edu_code}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <h3 className="text-lg font-semibold mb-2">거리 설정</h3>
-            <div className="flex items-center space-x-2">
-              <input
-                id="radius"
-                type="range"
-                value={radius}
-                onChange={handleRadiusChange}
-                className="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
-                step={0.5}
-                min={0.5}
-                max={10}
-              />
-              <span className="text-sm">{radius} km</span>
-            </div>
-            {children}
-            <div className="flex flex-col items-center mt-4">
-              <Button
-                type="primary"
-                loading={loadings[0]}
-                onClick={() => {enterLoading(0); setIsInnerPanelOpen(!isInnerPanelOpen)}}
-                className={`w-2/3 h-10 text-lg font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-md mb-4`}
-              >
-                검색
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-center mt-4">
-            {/* 내부 패널 토글 버튼 추가 */}
-            <button
-              onClick={() => setIsInnerPanelOpen(!isInnerPanelOpen)}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              {isInnerPanelOpen ? '검색 옵션 접기 ▲' : '검색 옵션 펼치기 ▼'}
-            </button>
-            {/* 검색결과 개수 출력 */}
-            <span className="text-base font-semibold mt-2">
-              검색결과: {jobList.length}개
-            </span>
-          </div>
-          {/* 회사 리스트 섹션 추가 */}
-          <div className="w-full h-[80vh] overflow-y-auto">
-            <div className="flex flex-col gap-6 p-6">
-              {jobList.map((job, index) => (
-                <div 
-                  key={index}
-                  className={`w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border ${
-                    selectedJobIndex === index 
-                    ? 'border-blue-500 ring-2 ring-blue-500' 
-                    : 'border-gray-200'
-                  }`}
-                  onClick={() => {
-                    setSelectedJobIndex(index);
-                    onJobSelect?.(job.url);
-                  }}
+              <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-4">학력/경력</h3>
+              <div className="flex gap-4 mb-6">
+                <select
+                  value={selectedCareerCode}
+                  onChange={(e) => setSelectedCareerCode(e.target.value)}
+                  className="flex-1 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
-                  <div>
-                    {/* 회사명 */}
-                    <div className="text-white rounded-lg p-4" style={{ backgroundColor: 'hsl(221deg 73% 70%)' }}>
+                  {careerOptions.map((code, index) => (
+                    <option key={index} value={code}>{code}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedEduCode}
+                  onChange={(e) => setSelectedEduCode(e.target.value)}
+                  className="flex-1 p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                >
+                  {eduOptions.map((edu_code, index) => (
+                    <option key={index} value={edu_code}>{edu_code}</option>
+                  ))}
+                </select>
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">거리 설정</h3>
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  value={radius}
+                  onChange={handleRadiusChange}
+                  className="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                  step={0.5}
+                  min={0.5}
+                  max={10}
+                />
+                <span className="text-sm font-medium text-gray-600 min-w-[60px]">{radius} km</span>
+              </div>
+            </div>
+
+            <Button
+              type="primary"
+              loading={loadings[0]}
+              onClick={() => {enterLoading(0); setIsInnerPanelOpen(!isInnerPanelOpen)}}
+              className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all"
+            >
+              검색하기
+            </Button>
+          </div>
+
+          {/* 검색 결과 영역 */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setIsInnerPanelOpen(!isInnerPanelOpen)}
+                className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                {isInnerPanelOpen ? '검색 옵션 접기 ▲' : '검색 옵션 펼치기 ▼'}
+              </button>
+              <span className="text-base font-semibold text-blue-600">
+                검색결과: {jobList.length}개
+              </span>
+            </div>
+
+            {/* 채용 공고 리스트 - 높이 조정 */}
+            <div className="h-[calc(100vh-200px)] overflow-y-auto pr-2">
+              <div className="space-y-4">
+                {jobList.map((job, index) => (
+                  <div 
+                    key={index}
+                    className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border-2 ${
+                      selectedJobIndex === index 
+                      ? 'border-blue-500' 
+                      : 'border-transparent'
+                    }`}
+                    onClick={() => {
+                      setSelectedJobIndex(index);
+                      onJobSelect?.(job.url);
+                    }}
+                  >
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-t-xl">
                       <div className="flex items-center gap-2">
-                        <BankOutlined className="text-lg" />
+                        <BankOutlined className="text-xl" />
                         <h3 className="font-bold text-lg">{job.company_name}</h3>
                       </div>
                     </div>
 
-                    <div className='p-4'>
-                      {/* 직무 제목 */}
-                    <h4 className="text-xl font-semibold text-gray-800">
-                      {job.position_title}
-                    </h4>
+                    <div className="p-4">
+                      <h4 className="text-xl font-semibold text-gray-800 mb-3">
+                        {job.position_title}
+                      </h4>
 
-                    {/* 정보 그리드 */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <EnvironmentOutlined />
-                        <span>{job.Address}</span>
+                      <div className="space-y-2 text-gray-600">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <EnvironmentOutlined />
+                          <span>{job.Address}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <RiseOutlined />
+                          <span>{job.position_experience_level_name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <BookOutlined />
+                          <span>{job.position_required_education_level_name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <ClockCircleOutlined />
+                          <span>{job.position_job_type_name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <WalletOutlined />
+                          <span>{job.salary_name}</span>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <CalendarOutlined />
+                            <span>게시일: {new Date(job.posting_date).toLocaleDateString('ko-KR')}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <ClockCircleOutlined />
+                            <span>마감일: {
+                              (() => {
+                                const expirationDate = new Date(job.expiration_date);
+                                const today = new Date();
+                                const oneYearFromNow = new Date();
+                                oneYearFromNow.setFullYear(today.getFullYear() + 1);
+                                
+                                return expirationDate > oneYearFromNow 
+                                  ? '채용시' 
+                                  : expirationDate.toLocaleDateString('ko-KR')
+                              })()
+                            }</span>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <RiseOutlined />
-                        <span>{job.position_experience_level_name}</span>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
+                          {job.position_experience_level_name}
+                        </span>
+                        <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
+                          {job.position_job_type_name}
+                        </span>
                       </div>
-
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <BookOutlined />
-                        <span>{job.position_required_education_level_name}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <ClockCircleOutlined />
-                        <span>{job.position_job_type_name}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <WalletOutlined />
-                        <span>{job.salary_name}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <ClockCircleOutlined />
-                        <span>마감일: {
-                          (() => {
-                            const expirationDate = new Date(job.expiration_date);
-                            const today = new Date();
-                            const oneYearFromNow = new Date();
-                            oneYearFromNow.setFullYear(today.getFullYear() + 1);
-                            
-                            return expirationDate > oneYearFromNow 
-                              ? '채용시' 
-                              : expirationDate.toLocaleDateString('ko-KR')
-                          })()
-                        }</span>
-                      </div>
-                    </div>
-
-                    {/* 태그들 */}
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                        {job.position_experience_level_name}
-                      </span>
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                        {job.position_job_type_name}
-                      </span>
-                    </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 패널버튼 */}
       <button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className={`absolute top-1/2 transform -translate-y-1/2 bg-white text-primary-black p-2 rounded-r-md z-50 transition-all duration-300`}
+        className={`absolute top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-r-lg shadow-md transition-all duration-300 flex items-center justify-center ${
+          isPanelOpen ? 'hover:translate-x-1' : 'hover:-translate-x-1'
+        }`}
         style={{
-          zIndex: 50,
           left: isPanelOpen ? '500px' : '0',
-          borderTopLeftRadius: '0',
-          borderBottomLeftRadius: '0',
-          boxShadow: 'none',
+          zIndex: 50,
+          width: '32px',
+          height: '40px',
         }}
       >
-        {isPanelOpen ? '<' : '>'}
+        {isPanelOpen ? <LeftOutlined /> : <RightOutlined />}
       </button>
     </div>
   );
