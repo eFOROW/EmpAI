@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Input, Button, Divider, Select } from 'antd';
 import { PlusOutlined, TrophyOutlined, BookOutlined, DeleteOutlined } from '@ant-design/icons';
 
@@ -11,10 +11,55 @@ interface CareerFormProps {
 
 const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
     const [form] = Form.useForm();
-    const [certifications, setCertifications] = useState([{ id: 0, name: '', description: '' }]);
-    const [isHighSchoolDisabled, setIsHighSchoolDisabled] = useState(false);
-    const [isUniversityDisabled, setIsUniversityDisabled] = useState(false);
-    const [isGraduateSchoolDisabled, setIsGraduateSchoolDisabled] = useState(false);
+    
+    const [certifications, setCertifications] = useState<Array<{id: number, name: string, description: string}>>(() => {
+        if (initialValues?.certifications && Array.isArray(initialValues.certifications)) {
+            return initialValues.certifications.map((cert: any, index: number) => ({
+                id: index,
+                name: cert.name || '',
+                description: cert.description || ''
+            }));
+        }
+        return [{ id: 0, name: '', description: '' }];
+    });
+
+    const [isHighSchoolDisabled, setIsHighSchoolDisabled] = useState(initialValues?.highSchoolStatus === '해당없음');
+    const [isUniversityDisabled, setIsUniversityDisabled] = useState(initialValues?.universityStatus === '해당없음');
+    const [isGraduateSchoolDisabled, setIsGraduateSchoolDisabled] = useState(initialValues?.graduateSchoolStatus === '해당없음');
+
+    useEffect(() => {
+        if (initialValues) {
+            try {
+                const safeInitialValues = {
+                    highSchoolStatus: initialValues.highSchoolStatus || '',
+                    highSchoolField: initialValues.highSchoolField || '',
+                    universityStatus: initialValues.universityStatus || '',
+                    universityMajor: initialValues.universityMajor || '',
+                    graduateSchoolStatus: initialValues.graduateSchoolStatus || '',
+                    graduateSchoolMajor: initialValues.graduateSchoolMajor || '',
+                    certifications: initialValues.certifications || []
+                };
+
+                form.setFieldsValue(safeInitialValues);
+
+                setIsHighSchoolDisabled(safeInitialValues.highSchoolStatus === '해당없음');
+                setIsUniversityDisabled(safeInitialValues.universityStatus === '해당없음');
+                setIsGraduateSchoolDisabled(safeInitialValues.graduateSchoolStatus === '해당없음');
+
+                if (Array.isArray(initialValues.certifications) && initialValues.certifications.length > 0) {
+                    setCertifications(
+                        initialValues.certifications.map((cert: any, index: number) => ({
+                            id: index,
+                            name: cert.name || '',
+                            description: cert.description || ''
+                        }))
+                    );
+                }
+            } catch (error) {
+                console.error('폼 데이터 초기화 중 오류 발생:', error);
+            }
+        }
+    }, [initialValues, form]);
 
     const onFinish = (values: any) => {
         console.log('Success:', values);
