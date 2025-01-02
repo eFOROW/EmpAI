@@ -456,7 +456,7 @@ const Map: React.FC<MapProps> = ({
       window.drawRouteToJob = undefined;
       window.showRoadview = undefined;
     };
-  }, [markerPosition, jobs]);
+  }, [markerPosition, jobs, onJobSelect]);
 
   
   useEffect(() => {
