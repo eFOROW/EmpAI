@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { 
   BankOutlined, 
@@ -21,6 +21,7 @@ interface SlidePanelProps {
   markerPosition: { lat: number; lng: number };
   onJobLocationsFound: (jobs: Array<{[key: string]: any }>) => void;
   onJobSelect?: (jobId: string) => void;
+  selectedJobId?: string | null;
 }
 
 const jobOptions = [
@@ -35,7 +36,7 @@ const careerOptions = [ "신입", "신입/경력", "경력", "경력무관" ];
 
 const eduOptions = [ "학력무관", "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
 
-const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound, onJobSelect }) => {
+const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound, onJobSelect, selectedJobId }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
   const [isInnerPanelOpen, setIsInnerPanelOpen] = useState(true); // 내부 패널 열림/닫힘 상태 추가
   const [loadings, setLoadings] = useState<boolean[]>([]);  // 검생 로딩상태 관리
@@ -123,6 +124,20 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
         });
       })
   };
+
+  useEffect(() => {
+    if (selectedJobId) {
+      const jobIndex = jobList.findIndex(job => job.url === selectedJobId);
+      if (jobIndex !== -1) {
+        setSelectedJobIndex(jobIndex);
+        
+        const element = document.getElementById(`job-item-${jobIndex}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+  }, [selectedJobId, jobList]);
 
   return (
     <div className="relative z-50">
@@ -222,6 +237,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                 {jobList.map((job, index) => (
                   <div 
                     key={index}
+                    id={`job-item-${index}`}
                     className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border-2 ${
                       selectedJobIndex === index 
                       ? 'border-blue-500' 

@@ -136,7 +136,7 @@ export default function FeedbackPage() {
         <div className="space-y-6">
           {document.data.map((item, index) => (
             <div key={index} className="space-y-2">
-              <Typography.Title level={4} className="mb-2">
+              <Typography.Title level={4} className="mb-2 px-4">
                 Q{index + 1}. {item.question}
               </Typography.Title>
               <Input.TextArea

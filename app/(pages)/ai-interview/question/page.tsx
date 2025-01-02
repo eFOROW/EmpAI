@@ -276,49 +276,51 @@ type QuestionCardProps = {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, isOpen, onToggle }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-4 hover:shadow-md transition-all duration-200">
       <button
         onClick={onToggle}
-        className="w-full px-6 py-4 text-left flex justify-between items-start hover:bg-gray-50 transition-colors"
+        className="w-full px-6 py-5 text-left flex justify-between items-start hover:bg-gray-50 transition-colors"
       >
-        <div className="flex flex-col">
-          <div className="flex gap-2 mb-2">
-            <span className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-800">
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <span className="px-3 py-1 text-sm rounded-full bg-blue-50 text-blue-600 font-medium">
               {question.category}
             </span>
-            <span className="px-2 py-1 text-sm rounded-full bg-gray-100 text-gray-800">
+            <span className="px-3 py-1 text-sm rounded-full bg-gray-50 text-gray-600 font-medium">
               {question.level}
             </span>
           </div>
-          <span className="text-lg font-medium">{question.question}</span>
+          <span className="text-lg font-semibold text-gray-800">{question.question}</span>
         </div>
-        <span className="text-xl font-bold text-gray-500">
-          {isOpen ? '−' : '+'}
+        <span className="text-2xl text-gray-400 transition-transform duration-200" style={{
+          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+        }}>
+          ⌵
         </span>
       </button>
       
       {isOpen && (
-        <div className="px-6 py-4 border-t border-gray-200">
+        <div className="px-6 py-5 border-t border-gray-100 bg-gray-50">
           <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-blue-600 mb-3 flex items-center gap-2">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-blue-600 mb-4 flex items-center gap-2">
                 <span className="text-xl">💡</span> 답변 꿀팁
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {question.tips.map((tip: string, index: number) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="text-blue-500">•</span>
-                    <span className="text-gray-600">{tip}</span>
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-blue-500 font-bold">•</span>
+                    <span className="text-gray-700 leading-relaxed">{tip}</span>
                   </li>
                 ))}
               </ul>
             </div>
             
-            <div className="border-t border-gray-100 pt-4">
-              <h3 className="font-semibold text-green-600 mb-3 flex items-center gap-2">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-green-600 mb-4 flex items-center gap-2">
                 <span className="text-xl">📝</span> 답변 예시
               </h3>
-              <p className="text-gray-600 leading-relaxed">{question.example}</p>
+              <p className="text-gray-700 leading-relaxed">{question.example}</p>
             </div>
           </div>
         </div>
@@ -380,27 +382,26 @@ export default function InterviewPage() {
   });
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">면접 예상 질문</h1>
-          <p className="text-gray-600">실전 면접을 위한 예상 질문과 모범 답안</p>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">면접 예상 질문</h1>
+          <p className="text-lg text-gray-600">실전 면접을 위한 예상 질문과 모범 답안을 준비했습니다</p>
         </div>
   
-        <div className="bg-white rounded-lg shadow-md mb-6 p-4">
-          <div className="space-y-4">
+        <div className="bg-white rounded-2xl shadow-md mb-8 p-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">카테고리</h3>
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">카테고리</h3>
               <div className="flex flex-wrap gap-2">
                 {categories.map(category => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                       ${selectedCategory === category 
-                        ? "bg-blue-500 text-white" 
+                        ? "bg-blue-500 text-white shadow-sm" 
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
-                    style={{ pointerEvents: 'auto' }}
                   >
                     {category}
                   </button>
@@ -409,15 +410,15 @@ export default function InterviewPage() {
             </div>
             
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">난이도</h3>
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">난이도</h3>
               <div className="flex gap-2">
                 {levels.map(level => (
                   <button
                     key={level}
                     onClick={() => setSelectedLevel(level)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                       ${selectedLevel === level
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-500 text-white shadow-sm"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                   >
                     {level}
@@ -428,10 +429,9 @@ export default function InterviewPage() {
           </div>
         </div>
   
-        {/* 스크롤 가능한 질문 목록 컨테이너 */}
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div className="p-4">
+        <div className="bg-white rounded-2xl shadow-md">
+          <div className="h-[650px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="p-6">
               {filteredQuestions.map((question) => (
                 <QuestionCard
                   key={question.id}
@@ -443,8 +443,8 @@ export default function InterviewPage() {
                 />
               ))}
               {filteredQuestions.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  해당하는 질문이 없습니다.
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">해당하는 질문이 없습니다.</p>
                 </div>
               )}
             </div>
