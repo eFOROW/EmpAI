@@ -1,17 +1,58 @@
 import { BookOutlined } from '@ant-design/icons';
 import CareerForm from './Career_Form';
 import { User } from "firebase/auth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface MyProfileProps {
     user: User | null;
 }
 
 export default function Career({ user }: MyProfileProps) {
+    const [careerData, setCareerData] = useState<any>(null);
+    const [exists, setExists] = useState(false);
+
+    const fetchCareerData = useCallback(async () => {
+        if (!user?.uid) return;
+        
+        try {
+            const response = await fetch(`/api/career?uid=${user.uid}`);
+            if (response.status === 404) {
+                setExists(false);
+                return;
+            }
+            
+            if (!response.ok) {
+                throw new Error('데이터를 가져오는데 실패했습니다');
+            }
+
+            const data = await response.json();
+            setExists(true);
+            
+            const formattedData = {
+                highSchoolStatus: data.highSchool?.status || '',
+                highSchoolField: data.highSchool?.field || '',
+                universityStatus: data.university?.status || '',
+                universityMajor: data.university?.major || '',
+                graduateSchoolStatus: data.graduateSchool?.status || '',
+                graduateSchoolMajor: data.graduateSchool?.major || '',
+                certifications: data.certifications?.map((cert: any) => ({
+                    name: cert.name,
+                    description: cert.description
+                })) || [{ name: '', description: '' }]
+            };
+            
+            setCareerData(formattedData);
+        } catch (error) {
+            console.error('데이터 조회 중 오류 발생:', error);
+        }
+    }, [user?.uid]);
+
+    useEffect(() => {
+        fetchCareerData();
+    }, [fetchCareerData]);
+
     const handleSubmit = async (values: any) => {
         try {
-            console.log('Form submitted with values:', values);
-
             const data = {
                 uid: user?.uid,
                 highSchool: {
@@ -31,13 +72,13 @@ export default function Career({ user }: MyProfileProps) {
                     description: cert.description
                 })) || []
             }
-    
+
             const response = await fetch(`/api/career?uid=${user?.uid}`, {
-                method: 'POST',
+                method: exists ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data), // Form 데이터를 JSON으로 변환
+                body: JSON.stringify(data),
             });
     
             if (!response.ok) {
@@ -48,6 +89,10 @@ export default function Career({ user }: MyProfileProps) {
             }
             
             alert('데이터가 성공적으로 저장되었습니다!');
+            setExists(true);
+            
+            await fetchCareerData();
+            
         } catch (error) {
             console.error('Unexpected error:', error);
             alert('예기치 않은 문제가 발생했습니다.');
@@ -62,7 +107,10 @@ export default function Career({ user }: MyProfileProps) {
                     <h2 className="text-3xl font-bold text-gray-800">이력 정보 등록</h2>
                 </div>
 
-                <CareerForm onSubmit={handleSubmit} />
+                <CareerForm 
+                    onSubmit={handleSubmit} 
+                    initialValues={careerData}
+                />
             </div>
         </div>
     );

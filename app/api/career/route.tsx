@@ -97,38 +97,3 @@ export async function PUT(request: Request) {
     );
   }
 }
-
-export async function DELETE(request: Request) {
-  await connectToDatabase();
-
-  const { searchParams } = new URL(request.url);
-  const uid = searchParams.get("uid");
-
-  if (!uid) {
-    return NextResponse.json(
-      { message: "사용자 UID가 필요합니다" },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const deletedCareer = await Career.findOneAndDelete({ uid });
-
-    if (!deletedCareer) {
-      return NextResponse.json(
-        { message: "해당 경력 정보를 찾을 수 없습니다" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { message: "경력 정보가 성공적으로 삭제되었습니다" },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { message: "경력 정보 삭제 실패", error: (error as Error).message },
-      { status: 500 }
-    );
-  }
-}
