@@ -466,13 +466,38 @@ const Map: React.FC<MapProps> = ({
     <div className="relative w-full h-screen">
       <div id="map" className="w-full h-full"></div>
       <Modal
-        title="로드뷰"
+        title={
+          <div style={{
+            fontSize: '1.25rem',
+            fontWeight: 600,
+            color: '#1f2937',
+            padding: '0.5rem 0'
+          }}>
+            🚗 로드뷰
+          </div>
+        }
         open={isRoadviewVisible}
         onCancel={() => setIsRoadviewVisible(false)}
         width={1200}
+        centered
         footer={null}
+        bodyStyle={{ 
+          padding: '1rem',
+          backgroundColor: 'white'
+        }}
+        style={{
+          top: 20
+        }}
       >
-        <div id="roadview" style={{ width: '100%', height: '400px' }}></div>
+        <div 
+          id="roadview" 
+          style={{ 
+            width: '100%', 
+            height: '600px',
+            borderRadius: '0.5rem',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}
+        />
       </Modal>
     </div>
   );

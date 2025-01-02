@@ -24,19 +24,19 @@ const Navbar = () => {
 
             {/* 자기소개서 */}
             <div className="nav-item relative group">
-              <Link href="/self-introduction" className="text-primary-black text-lg font-bold">자기소개서</Link>
-              <div className="absolute hidden group-hover:flex flex-col bg-gray-100/90 p-2 rounded-lg min-w-[calc(100%+50px)] left-1/2 transform -translate-x-1/2 z-20">
-                <Link href="/self-introduction/manage" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">자기소개서 관리</Link>
+              <Link href="/self-introduction" className="text-primary-black text-lg font-bold hover:text-blue-600 transition-colors">자기소개서</Link>
+              <div className="absolute hidden group-hover:flex flex-col bg-white shadow-lg p-3 rounded-lg min-w-[calc(100%+80px)] left-1/2 transform -translate-x-1/2 z-20 top-[100%] pt-5">
+                <Link href="/self-introduction/manage" className="text-gray-700 text-sm hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-all">자기소개서 관리</Link>
               </div>
             </div>
 
             {/* AI면접 */}
             <div className="nav-item relative group">
-              <Link href="/ai-interview" className="text-primary-black text-lg font-bold">AI면접</Link>
-              <div className="absolute hidden group-hover:flex flex-col bg-gray-100/90 p-2 rounded-lg min-w-[calc(100%+100px)] left-1/2 transform -translate-x-1/2 z-20">
-                <Link href="/ai-interview/question" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">AI면접 예상질문</Link>
-                <Link href="/ai-interview/evaluation" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">AI 모의면접</Link>
-                <Link href="/ai-interview/results" className="text-black text-sm hover:bg-gray-200 p-2 rounded-lg">면접결과 보기</Link>
+              <Link href="/ai-interview" className="text-primary-black text-lg font-bold hover:text-blue-600 transition-colors">AI면접</Link>
+              <div className="absolute hidden group-hover:flex flex-col bg-white shadow-lg p-3 rounded-lg min-w-[calc(100%+100px)] left-1/2 transform -translate-x-1/2 z-20 top-[100%] pt-5">
+                <Link href="/ai-interview/question" className="text-gray-700 text-sm hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-all">AI면접 예상질문</Link>
+                <Link href="/ai-interview/evaluation" className="text-gray-700 text-sm hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-all">AI 모의면접</Link>
+                <Link href="/ai-interview/results" className="text-gray-700 text-sm hover:text-blue-600 hover:bg-gray-50 p-2 rounded-lg transition-all">면접결과 보기</Link>
               </div>
             </div>
 
