@@ -2,6 +2,7 @@ import { BookOutlined } from '@ant-design/icons';
 import CareerForm from './Career_Form';
 import { User } from "firebase/auth";
 import { useState, useEffect, useCallback } from "react";
+import { message } from 'antd';
 
 interface MyProfileProps {
     user: User | null;
@@ -88,7 +89,14 @@ export default function Career({ user }: MyProfileProps) {
                 return;
             }
             
-            alert('데이터가 성공적으로 저장되었습니다!');
+            message.success({
+                content: '데이터가 성공적으로 저장되었습니다',
+                duration: 3,
+                className: 'custom-message',
+                style: {
+                    marginTop: '20px'
+                }
+            });
             setExists(true);
             
             await fetchCareerData();

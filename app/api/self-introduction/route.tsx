@@ -1,6 +1,7 @@
 import connectToDatabase from "@/lib/mongodb/mongodb";
 import SelfIntroduction from "@/lib/mongodb/models/Self-introduction";
 import { NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 
 export async function POST(request: Request) {
   await connectToDatabase();
@@ -75,22 +76,27 @@ export async function PUT(request: Request) {
 export async function GET(request: Request) {
   await connectToDatabase();
 
-  // URL에서 query 파라미터(uid) 추출
   const url = new URL(request.url);
+  const _id = url.searchParams.get("_id");
   const uid = url.searchParams.get("uid");
 
-  if (!uid) {
+  if (!_id && !uid) {
     return NextResponse.json(
-      { message: "UID parameter is required" },
+      { message: "Either _id or uid parameter is required" },
       { status: 400 }
     );
   }
 
   try {
-    // 'uid'로 필터링하여 해당하는 문서를 찾음
-    const document = await SelfIntroduction.find({ uid });
+    let document;
 
-    if (!document) {
+    if (_id) {
+      document = await SelfIntroduction.findById(new ObjectId(_id));
+    } else if (uid) {
+      document = await SelfIntroduction.find({ uid });
+    }
+
+    if (!document || (Array.isArray(document) && document.length === 0)) {
       return NextResponse.json(
         { message: "Document not found" },
         { status: 404 }
