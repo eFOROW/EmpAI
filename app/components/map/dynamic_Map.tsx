@@ -44,9 +44,12 @@ const Map: React.FC<MapProps> = ({
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
     try {
-      // 기존 경로가 있다면 제거
+      // 기존 경로들이 있다면 모두 제거
       if (polylineRef.current) {
-        polylineRef.current.setMap(null);
+        polylineRef.current.forEach((polyline: any) => {
+          polyline.setMap(null);
+        });
+        polylineRef.current = []; // 배열 초기화
       }
   
       const response = await fetch(
@@ -58,39 +61,100 @@ const Map: React.FC<MapProps> = ({
       }
   
       const data = await response.json();
-      const route = data.route.traoptimal[0].path;
-  
-      // 경로 좌표 배열
-      const polylinePath = route.map(
-        (coord: number[]) => new naver.maps.LatLng(coord[1], coord[0])
-      );
-  
-      const polyline = new naver.maps.Polyline({
-        map: mapRef.current,
-        path: polylinePath,
-        strokeColor: '#007AFF',
-        strokeWeight: 5,
+      const route = data.route.traoptimal[0];
+      
+      // 각 구간별로 다른 polyline 생성
+      route.path.forEach((coord: number[], index: number) => {
+        if (index === 0) return; // 첫 좌표는 건너뜀
+        
+        const section = route.section[Math.floor(index / 30)]; // 구간 정보 가져오기
+        const congestion = section?.congestion || 0;
+        
+        // 혼잡도에 따른 색상 설정
+        let strokeColor;
+        switch (congestion) {
+          case 0: // 원활
+            strokeColor = '#2EA52C';  // 초록색으로 변경
+            break;
+          case 1: // 서행
+            strokeColor = '#F7B500';  // 노란색
+            break;
+          case 2: // 지체
+            strokeColor = '#E03131';  // 더 진한 빨간색으로 변경
+            break;
+          default:
+            strokeColor = '#2EA52C';  // 기본값도 초록색으로 변경
+        }
+
+        const polyline = new naver.maps.Polyline({
+          map: mapRef.current,
+          path: [
+            new naver.maps.LatLng(route.path[index-1][1], route.path[index-1][0]),
+            new naver.maps.LatLng(coord[1], coord[0])
+          ],
+          strokeColor: strokeColor,
+          strokeWeight: 5,
+          strokeOpacity: 0.8
+        });
+
+        if (!polylineRef.current) {
+          polylineRef.current = [];
+        }
+        polylineRef.current.push(polyline);
       });
-  
-      polylineRef.current = polyline;
-  
-      // 경로의 중간 좌표 계산
-      const middleIndex = Math.floor(polylinePath.length / 2);
-      const middlePosition = polylinePath[middleIndex];
-  
-      // InfoWindow 생성
+
+      // InfoWindow 내용에 혼잡도 범례 추가
       const infoWindow = new naver.maps.InfoWindow({
         content: `
-          <div style="padding: 1rem; font-family: 'Arial', sans-serif; font-size: 1rem; color: #333;">
-            예상 이동거리: ${(data.route.traoptimal[0].summary.distance / 1000).toFixed(1)} km<br />
-            예상 소요시간: ${Math.round(data.route.traoptimal[0].summary.duration / 60000)}분
+          <div style="padding: 1rem; font-family: 'Arial', sans-serif; font-size: 0.875rem; color: #333;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <!-- 시간과 거리 정보 -->
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center;">
+                  <svg style="width: 20px; height: 20px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6V12L16 14" stroke="#4B5563" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="12" r="9" stroke="#4B5563" stroke-width="2"/>
+                  </svg>
+                  <span style="font-size: 1rem; font-weight: 600; color: #111827;">
+                    ${Math.round(route.summary.duration / 60000)}분
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <svg style="width: 20px; height: 20px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="#4B5563"/>
+                  </svg>
+                  <span style="font-size: 1rem; font-weight: 600; color: #111827;">
+                    ${(route.summary.distance / 1000).toFixed(1)}km
+                  </span>
+                </div>
+              </div>
+
+              <!-- 구분선 -->
+              <div style="width: 1px; height: 40px; background-color: #e5e7eb;"></div>
+
+              <!-- 교통 정보 (수직 정렬) -->
+              <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <div style="display: flex; align-items: center;">
+                  <div style="width: 20px; height: 3px; background: #2EA52C; margin-right: 4px; border-radius: 2px;"></div>
+                  <span style="color: #4B5563; font-size: 0.75rem;">원활</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <div style="width: 20px; height: 3px; background: #F7B500; margin-right: 4px; border-radius: 2px;"></div>
+                  <span style="color: #4B5563; font-size: 0.75rem;">서행</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <div style="width: 20px; height: 3px; background: #E03131; margin-right: 4px; border-radius: 2px;"></div>
+                  <span style="color: #4B5563; font-size: 0.75rem;">지체</span>
+                </div>
+              </div>
+            </div>
           </div>
         `,
-        maxWidth: 200,  // InfoWindow의 최대 너비
+        maxWidth: 400,
       });
   
       // InfoWindow를 경로의 중간 지점에 띄우기
-      infoWindow.open(mapRef.current, middlePosition);
+      infoWindow.open(mapRef.current, new naver.maps.LatLng(route.path[Math.floor(route.path.length / 2)][1], route.path[Math.floor(route.path.length / 2)][0]));
   
       // 경로가 모두 보이도록 지도 영역 조정
       const bounds = new naver.maps.LatLngBounds(
@@ -226,10 +290,10 @@ const Map: React.FC<MapProps> = ({
     const circle = new naver.maps.Circle({
       center: marker.getPosition(),
       radius: radius * 1000,
-      strokeColor: '#FF0000',
+      strokeColor: '#2B98F0',
       strokeWeight: 2,
       strokeOpacity: 0.6,
-      fillColor: '#FF0000',
+      fillColor: '#2B98F0',
       fillOpacity: 0.04,
     });
   
