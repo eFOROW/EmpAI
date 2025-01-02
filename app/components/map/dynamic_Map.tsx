@@ -14,6 +14,7 @@ interface MapProps {
   jobs: Array<{[key: string]: any }>;
   isLocked?: boolean;
   selectedJobId?: string | null;
+  onJobSelect?: (jobId: string) => void;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -26,7 +27,8 @@ const Map: React.FC<MapProps> = ({
   onMarkerPositionChange,
   isLocked = false,
   jobs,
-  selectedJobId
+  selectedJobId,
+  onJobSelect
 }) => {
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -40,6 +42,7 @@ const Map: React.FC<MapProps> = ({
   const jobMarkersMapRef = useRef<{[key: string]: {
     marker: any;
     infoWindow: any;
+    jobIndex: number;
   }}>({})
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
@@ -94,7 +97,7 @@ const Map: React.FC<MapProps> = ({
           ],
           strokeColor: strokeColor,
           strokeWeight: 5,
-          strokeOpacity: 0.8
+          strokeOpacity: 0.9
         });
 
         if (!polylineRef.current) {
@@ -310,7 +313,7 @@ const Map: React.FC<MapProps> = ({
     });
     jobMarkersRef.current = [];
   
-    jobs.forEach(location => {
+    jobs.forEach((location, index) => {
       const jobMarker = new naver.maps.Marker({
         position: new naver.maps.LatLng(location.Latitude, location.Longitude),
         map: mapRef.current,
@@ -424,11 +427,13 @@ const Map: React.FC<MapProps> = ({
   
       jobMarkersMapRef.current[location.url] = {
         marker: jobMarker,
-        infoWindow: jobInfoWindow
+        infoWindow: jobInfoWindow,
+        jobIndex: index
       };
       
       naver.maps.Event.addListener(jobMarker, 'click', () => {
         jobInfoWindow.open(mapRef.current, jobMarker);
+        onJobSelect?.(location.url);
       });
   
       jobMarkersRef.current.push(jobMarker);

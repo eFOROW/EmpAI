@@ -54,6 +54,7 @@ const Page = () => {
         markerPosition={markerPosition}
         onJobLocationsFound={handleJobLocationsFound}
         onJobSelect={handleJobSelect}
+        selectedJobId={selectedJobId}
       >
         <></>
       </SlidePanel>
@@ -69,6 +70,7 @@ const Page = () => {
           onMarkerPositionChange={handleMarkerPositionChange}
           jobs={jobLocations}
           selectedJobId={selectedJobId}
+          onJobSelect={handleJobSelect}
         />
       </div>
 
