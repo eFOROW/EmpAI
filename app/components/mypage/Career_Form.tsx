@@ -45,7 +45,6 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            console.log('유효한 값:', values);
             onSubmit(values);
         } catch (errorInfo) {
             console.error('유효성 검사 실패:', errorInfo);
@@ -116,6 +115,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                             <Option value="인문계">인문계</Option>
                             <Option value="이공계">이공계</Option>
                             <Option value="예체능계">예체능계</Option>
+                            <Option value="검정고시">검정고시</Option>
                         </Select>
                     </Form.Item>
                 </div>

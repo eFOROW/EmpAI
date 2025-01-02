@@ -1,10 +1,57 @@
 import { BookOutlined } from '@ant-design/icons';
 import CareerForm from './Career_Form';
+import { User } from "firebase/auth";
+import { useState, useEffect } from "react";
 
-export default function Career() {
-    const handleSubmit = (values: any) => {
-        console.log('Form submitted with values:', values);
-        // 저장 로직
+interface MyProfileProps {
+    user: User | null;
+}
+
+export default function Career({ user }: MyProfileProps) {
+    const handleSubmit = async (values: any) => {
+        try {
+            console.log('Form submitted with values:', values);
+
+            const data = {
+                uid: user?.uid,
+                highSchool: {
+                    status: values.highSchoolStatus,
+                    field: values.highSchoolField,
+                },
+                university: {
+                    status: values.universityStatus,
+                    major: values.universityMajor,
+                },
+                graduateSchool: {
+                    status: values.graduateSchoolStatus,
+                    major: values.graduateSchoolMajor,
+                },
+                certifications: values.certifications?.map((cert: { name: any; description: any; }) => ({
+                    name: cert.name,
+                    description: cert.description
+                })) || []
+            }
+    
+            const response = await fetch(`/api/career?uid=${user?.uid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data), // Form 데이터를 JSON으로 변환
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error:', errorData);
+                alert('저장 중 문제가 발생했습니다: ' + errorData.message);
+                return;
+            }
+            
+            alert('데이터가 성공적으로 저장되었습니다!');
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            alert('예기치 않은 문제가 발생했습니다.');
+        }
     };
 
     return (
