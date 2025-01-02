@@ -1,16 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="none">
-  <!-- 그라디언트를 이용한 외곽 원 (입체감 추가) -->
+  <!-- 세련된 그라디언트 정의 -->
   <defs>
     <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:1" />
     </linearGradient>
+    <!-- 부드러운 그림자 효과 -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feFlood flood-color="rgba(0,0,0,0.2)"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <path fill="url(#grad1)" d="M12 2C7 2 4 7 4 9.5C4 13.5 12 22 12 22C12 22 20 13.5 20 9.5C20 7 17 2 12 2Z"/>
-
-  <!-- 중심 원 (핵심 위치) - 흰 동그라미로 변경 -->
-  <circle cx="12" cy="9" r="4" fill="white" stroke="#3B82F6" stroke-width="2"/>
-
-  <!-- 핵심 아이콘 (작은 파란 원) -->
-  <circle cx="12" cy="9" r="2" fill="#3B82F6"/>
+  
+  <!-- 메인 마커 모양 - 더 부드럽고 현대적인 형태 -->
+  <path fill="url(#grad1)" 
+        d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"
+        filter="url(#shadow)"/>
+  
+  <!-- 중심 원 - 더 작고 세련되게 -->
+  <circle cx="12" cy="9" r="3" fill="white" filter="drop-shadow(0 1px 1px rgba(0,0,0,0.1))"/>
+  
+  <!-- 내부 원 - 미니멀한 포인트 -->
+  <circle cx="12" cy="9" r="1.2" fill="#4F46E5"/>
 </svg>
