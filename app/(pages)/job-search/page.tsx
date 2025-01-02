@@ -10,6 +10,7 @@ import { Button } from "antd";
 
 const Page = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const router = useRouter();
   const [radius, setRadius] = useState(0.5);
   const [jobLocations, setJobLocations] = useState<Array<{[key: string]: any }>>([]);
@@ -22,6 +23,7 @@ const Page = () => {
   useEffect(() => {
     getCurrentUser().then((user) => {
       setUser(user);
+      setIsAuthChecked(true);
     });
   }, []);
 
@@ -70,7 +72,7 @@ const Page = () => {
         />
       </div>
 
-      {!user && (
+      {isAuthChecked && !user && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="text-center">
