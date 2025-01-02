@@ -92,7 +92,7 @@ export default function Page() {
                         {user ? ( // user가 있을 때
                             <>
                                 {control_id === 0 && <MyProfile user={user} />}
-                                {control_id === 2 && <Career />}
+                                {control_id === 2 && <Career user={user} />}
                             </>
                         ) : ( // user가 없을 때
                             <LoginForm />
