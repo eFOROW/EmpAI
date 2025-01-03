@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
+import { useRouter } from 'next/navigation';
 
 interface MapProps {
   clientId: string;
@@ -44,6 +45,7 @@ const Map: React.FC<MapProps> = ({
     infoWindow: any;
     jobIndex: number;
   }}>({})
+  const router = useRouter();
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
     try {
@@ -367,6 +369,7 @@ const Map: React.FC<MapProps> = ({
                 공고보기
               </button>
               <button 
+                onclick="window.navigateToAIInterview && window.navigateToAIInterview('${encodeURIComponent(location.position_job_mid_code_name)}', '${encodeURIComponent(location.company_name)}')"
                 style="display: inline-block; 
                       padding: 0.5rem 1rem; 
                       font-size: 0.875rem; 
@@ -376,7 +379,7 @@ const Map: React.FC<MapProps> = ({
                       border-radius: 0.375rem; 
                       text-decoration: none; 
                       transition: background-color 0.3s ease;
-                      width: calc(50% - 0.5rem); /* 2개의 버튼을 첫 번째 줄에 배치 */
+                      width: calc(50% - 0.5rem);
                       box-sizing: border-box;" 
                 onmouseover="this.style.backgroundColor='#059669'" 
                 onmouseout="this.style.backgroundColor='#10b981'">
@@ -451,12 +454,17 @@ const Map: React.FC<MapProps> = ({
     window.showRoadview = (destLat: number, destLng: number) => {
       showRoadview(destLat, destLng);
     };
+
+    window.navigateToAIInterview = (jobCode: string, company: string) => {
+      router.push(`/ai-interview/evaluation?jobCode=${jobCode}&company=${company}`);
+    };
   
     return () => {
       window.drawRouteToJob = undefined;
       window.showRoadview = undefined;
+      window.navigateToAIInterview = undefined;
     };
-  }, [markerPosition, jobs, onJobSelect]);
+  }, [markerPosition, jobs, onJobSelect, router]);
 
   
   useEffect(() => {
@@ -513,6 +521,7 @@ declare global {
   interface Window {
     drawRouteToJob?: (destLat: number, destLng: number) => void;
     showRoadview?: (destLat: number, destLng: number) => void;
+    navigateToAIInterview?: (jobCode: string, company: string) => void;
   }
 }
 

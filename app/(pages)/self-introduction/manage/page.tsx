@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
-import { Button, Card, Col, Row, Typography, Input, Modal } from "antd";
+import { Card, Col, Row, Typography, Input, Modal, Button } from "antd";
 import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined,
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
-  FileTextOutlined, DesktopOutlined, SketchOutlined, ShoppingOutlined,
+  FileTextOutlined, SketchOutlined, ShoppingOutlined,
   CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
   CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
-  BankOutlined, SafetyOutlined
+  BankOutlined, SafetyOutlined, QuestionCircleOutlined
 } from '@ant-design/icons';
+import JoyRide from 'react-joyride';
 
 import style from "./Flip.module.css";
 
@@ -69,6 +70,14 @@ const jobStyles: { [key: string]: JobStyle } = {
 
 const { Text } = Typography;
 
+// JoyRide 스텝 타입 정의
+interface Step {
+  target: string;
+  content: string;
+  title?: string;
+  disableBeacon?: boolean;
+}
+
 const ListPage = ({ user }: ListPageProps) => {
   const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -77,6 +86,7 @@ const ListPage = ({ user }: ListPageProps) => {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [updatedAnswers, setUpdatedAnswers] = useState<{ [key: string]: string }>({}); // 사용자가 수정한 답변을 저장하는 상태
   const [selectedJobCode, setSelectedJobCode] = useState<string>(""); // 선택된 직무 코드
+  const [runTour, setRunTour] = useState(false);
 
   const [modal, contextHolder] = Modal.useModal();
   const [flippedCards, setFlippedCards] = useState<{ [key: string]: boolean }>({});
@@ -273,6 +283,38 @@ const ListPage = ({ user }: ListPageProps) => {
     }
   };
 
+  // Joyride 스텝 정의
+  const steps: Step[] = [
+    {
+      target: '.job-filter',
+      content: '직무별로 자기소개서를 필터링할 수 있습니다.',
+      title: '직무 필터',
+    },
+    {
+      target: '.intro-card',
+      content: '자기소개서 카드를 클릭하여 내용을 확인하고 수정할 수 있습니다.',
+      title: '자기소개서 카드',
+    },
+    {
+      target: '.more-options',
+      content: '더보기 버튼을 클릭하면 자기소개서 삭제 및 AI 첨삭 기능을 사용할 수 있습니다.',
+      title: '추가 기능',
+    },
+    {
+      target: '.add-new-card',
+      content: '새로운 자기소개서를 작성할 수 있습니다.',
+      title: '새 자기소개서 작성',
+    }
+  ];
+
+  // 투어가 끝나면 runTour를 false로 설정
+  const handleJoyrideCallback = (data: any) => {
+    const { status } = data;
+    if (status === 'finished' || status === 'skipped') {
+      setRunTour(false);
+    }
+  };
+
   if (loading) {
     return <div>로딩 중...</div>;
   }
@@ -345,7 +387,7 @@ const ListPage = ({ user }: ListPageProps) => {
             <Button
               type="primary"
               onClick={confirm}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-6 h-auto rounded-lg text-lg font-medium transition-all duration-300 border-none shadow-md hover:shadow-lg"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-2 h-auto rounded-lg text-lg font-medium transition-all duration-300 border-none shadow-md hover:shadow-lg"
             >
               수정하기
             </Button>
@@ -358,17 +400,45 @@ const ListPage = ({ user }: ListPageProps) => {
 
   return (
     <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="mx-auto">
-      <div className="relative mb-4 mt-8 w-full">
-        <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-2 px-4">
-          {/* "자기소개서 리스트" */}
-          <h1 className="text-2xl font-bold" style={{ flex: '0 0 auto' }}>
-            자기소개서 리스트
-          </h1>
-          {/* 직무 선택 드롭다운 */}
+      <JoyRide
+        steps={steps}
+        run={runTour}
+        continuous
+        showProgress
+        showSkipButton
+        scrollToFirstStep={true}
+        scrollOffset={0}
+        disableScrolling={true}
+        callback={handleJoyrideCallback}
+        styles={{
+          options: {
+            primaryColor: '#3B82F6',
+            backgroundColor: '#ffffff',
+            textColor: '#333',
+          },
+          buttonBack: {
+            display: 'none'
+          }
+        }}
+        locale={{
+          close: '닫기',
+          last: '완료',
+          next: '다음',
+          skip: '건너뛰기',
+        }}
+      />
+      
+      <div className="flex items-center justify-between bg-white py-2 px-4">
+        <h1 className="text-2xl font-bold">자기소개서 리스트</h1>
+        <div className="flex items-center gap-4">
+          <QuestionCircleOutlined 
+            className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl transition-colors"
+            onClick={() => setRunTour(true)}
+          />
           <select
             value={selectedJobCode}
             onChange={(e) => setSelectedJobCode(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md"
+            className="job-filter p-2 border border-gray-300 rounded-md"
             style={{ flex: '0 0 auto', minWidth: '200px' }}
           >
             <option value="">전체</option>
@@ -383,7 +453,7 @@ const ListPage = ({ user }: ListPageProps) => {
 
       <Row gutter={[32, 32]}>
         {filteredDocuments.map((document) => (
-        <Col key={document._id} flex="0 1 auto" className={style.imageWrapper}>
+        <Col key={document._id} className="intro-card">
           <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
             <div className={`${style.front}`}>
               <Card
@@ -407,7 +477,7 @@ const ListPage = ({ user }: ListPageProps) => {
                     </div>
                     <div style={{ marginLeft: 'auto' }}>
                       <button
-                        className="text-gray-800 bg-transparent border-none cursor-pointer"
+                        className="text-gray-800 bg-transparent border-none cursor-pointer more-options"
                         onClick={() => handleFlip(document._id)}
                       >
                         <EllipsisOutlined
@@ -472,9 +542,9 @@ const ListPage = ({ user }: ListPageProps) => {
       ))}
         <Col>
           <Card
+            className="add-new-card flex items-center justify-center cursor-pointer p-2"
             hoverable
             onClick={handleAddNewDocument}
-            className="flex items-center justify-center cursor-pointer p-2"
             style={{
               minHeight: 130,
               minWidth: 250  // 고정 너비

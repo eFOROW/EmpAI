@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button, Input, Typography, Card } from 'antd';
+import { Button, Input, Typography } from 'antd';
 import { LeftOutlined, 
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
-  FileTextOutlined, DesktopOutlined, SketchOutlined, ShoppingOutlined,
+  FileTextOutlined, SketchOutlined, ShoppingOutlined,
   CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
   CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
@@ -55,6 +55,43 @@ const jobStyles: { [key: string]: JobStyle } = {
   "금융·보험": { icon: <BankOutlined />, color: "#eb2f96", bgColor: "#fff0f6", borderColor: "#ffadd2" },
   "공공·복지": { icon: <SafetyOutlined />, color: "#52c41a", bgColor: "#f6ffed", borderColor: "#b7eb8f" }
 } as const;
+
+const response = {
+  "result": [
+      {
+          "relevance": 8,
+          "specificity": 5,
+          "persuasiveness": 6,
+          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
+          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
+          "Pass_answer": ""
+      },
+      {
+          "relevance": 8,
+          "specificity": 5,
+          "persuasiveness": 6,
+          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
+          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
+          "Pass_answer": ""
+      },
+      {
+          "relevance": 8,
+          "specificity": 5,
+          "persuasiveness": 6,
+          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
+          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
+          "Pass_answer": ""
+      },
+      {
+          "relevance": 8,
+          "specificity": 5,
+          "persuasiveness": 6,
+          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
+          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
+          "Pass_answer": ""
+      }
+  ]
+};
 
 export default function FeedbackPage() {
   const router = useRouter();
@@ -131,12 +168,13 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
-        {/* 왼쪽: 원본 자기소개서 */}
-        <div className="space-y-6">
-          {document.data.map((item, index) => (
-            <div key={index} className="space-y-2">
-              <Typography.Title level={4} className="mb-2 px-4">
+      <div className="space-y-6">
+        {/* 각 문항에 대해 왼쪽과 오른쪽을 수평으로 배치 */}
+        {document.data.map((item, index) => (
+          <div key={index} className="flex gap-8 mb-6 mr-10">
+            {/* 왼쪽 : 원본 자기소개서 */}
+            <div className="flex-1 flex flex-col">
+              <Typography.Title level={4} className="mb-2">
                 Q{index + 1}. {item.question}
               </Typography.Title>
               <Input.TextArea
@@ -144,24 +182,48 @@ export default function FeedbackPage() {
                 readOnly
                 autoSize={{ minRows: 8, maxRows: 8 }}
                 className="hover:border-blue-300"
-                style={{ 
+                style={{
                   resize: 'none',
-                  backgroundColor: '#fff'
+                  backgroundColor: '#fff',
+                  minHeight: '250px', // 고정된 최소 높이 설정
+                  maxHeight: '250px', // 고정된 최대 높이 설정
+                  height: '100%', // 부모 컨테이너에 맞춰서 높이를 100%로 설정
                 }}
               />
             </div>
-          ))}
-        </div>
 
-        {/* 오른쪽: 첨삭 결과 */}
-        <div className="space-y-6">
-          <Typography.Title level={3} className="mb-4">첨삭 결과</Typography.Title>
-          <div className="flex flex-col items-center justify-center h-[200px] bg-gray-50 rounded border border-gray-200">
-            <Typography.Text type="secondary" className="text-lg">
-              첨삭 결과 표시
-            </Typography.Text>
+            {/* 오른쪽 : 첨삭 결과 */}
+            <div className="flex-1 flex flex-col ml-10">
+              <Typography.Title level={4} className="mb-2">
+                첨삭 결과 #{index + 1}
+              </Typography.Title>
+              <div className="p-4 bg-white shadow-sm border border-gray-200 rounded-lg">
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li>
+                    <strong>관련성:</strong> {response.result[index]?.relevance}
+                  </li>
+                  <li>
+                    <strong>구체성:</strong> {response.result[index]?.specificity}
+                  </li>
+                  <li>
+                    <strong>설득력:</strong> {response.result[index]?.persuasiveness}
+                  </li>
+                  <li>
+                    <strong>피드백:</strong> {response.result[index]?.feedback}
+                  </li>
+                  <li>
+                    <strong>문장 구조 평가:</strong> {response.result[index]?.Pass_question}
+                  </li>
+                  {response.result[index]?.Pass_answer && (
+                    <li>
+                      <strong>추가 답변:</strong> {response.result[index]?.Pass_answer}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
