@@ -1,12 +1,27 @@
-// selectselfintro.tsx 수정
+'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation";
 import getCurrentUser from '@/lib/firebase/auth_state_listener';
+import { Button } from 'antd';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FolderIcon, ChevronLeftIcon, PlusCircleIcon, FileEditIcon } from 'lucide-react';
 
 interface InterviewData {
-  uid: string;
+  userUid: string;     
+  resumeUid: string;   
   job_code: string;
-  title: string;  // title 필드 추가
+  resume_title: string;
+  data: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+interface ApiResponse {
+  _id: string;
+  job_code: string;
+  title: string;
   data: {
     question: string;
     answer: string;
@@ -16,6 +31,8 @@ interface InterviewData {
 interface SelectSelfIntroProps {
   onSelect: (introData: InterviewData) => void;
   onBack: () => void;
+  job_Code?: string;    
+  company?: string;    
 }
 
 const jobOptions = [
@@ -23,37 +40,45 @@ const jobOptions = [
   "총무·법무·사무", "IT개발·데이터", "디자인", "영업·판매·무역", "고객상담·TM", "구매·자재·물류", 
   "상품기획·MD", "운전·운송·배송", "서비스", "생산", "건설·건축", "의료", "연구·R&D", "교육", 
   "미디어·문화·스포츠", "금융·보험", "공공·복지"
-];
+] as const;
 
-export function Select_Self_Intro({ onSelect, onBack }: SelectSelfIntroProps) {
-  const [selectedJob, setSelectedJob] = useState("전체");
-  const [allIntroductions, setAllIntroductions] = useState<InterviewData[]>([]); // 전체 데이터를 저장
-  const [filteredIntroductions, setFilteredIntroductions] = useState<InterviewData[]>([]); // 필터링된 데이터를 저장
-  const [loading, setLoading] = useState(true);
+export function Select_Self_Intro({ onSelect, onBack, job_Code, company }: SelectSelfIntroProps) {
+  const [selectedJob, setSelectedJob] = useState<string>(job_Code || "전체");
+  const [allIntroductions, setAllIntroductions] = useState<InterviewData[]>([]); 
+  const [filteredIntroductions, setFilteredIntroductions] = useState<InterviewData[]>([]); 
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedIntro, setSelectedIntro] = useState<InterviewData | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const initData = async () => {
       try {
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
+        const user = await getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
           const params = new URLSearchParams({
-            uid: currentUser.uid,
+            uid: user.uid,
           });
 
           const response = await fetch(`/api/self-introduction?${params}`);
           const data = await response.json();
 
-          // 데이터를 InterviewData 형식으로 변환
-          const filteredData = data.map((item: any) => ({
-            uid: item.uid,
+          const filteredData = data.map((item: ApiResponse): InterviewData => ({
+            userUid: user.uid,
+            resumeUid: item._id,
             job_code: item.job_code,
-            title: item.title,  // title 필드 추가
+            resume_title: item.title,
             data: item.data
           }));
 
-          setAllIntroductions(filteredData); // 전체 데이터를 저장
-          setFilteredIntroductions(filteredData); // 초기에는 전체 데이터를 표시
+          setAllIntroductions(filteredData);
+          setFilteredIntroductions(filteredData);
         }
       } catch (err) {
         console.error('Error:', err);
@@ -62,103 +87,199 @@ export function Select_Self_Intro({ onSelect, onBack }: SelectSelfIntroProps) {
       }
     };
 
-    initData();
-  }, []);
+    if (mounted) {
+      initData();
+    }
+  }, [mounted]);
 
   useEffect(() => {
-    if (selectedJob === "전체") {
-      setFilteredIntroductions(allIntroductions); // 직군 코드가 "전체"일 때는 모든 데이터 표시
+    if (selectedJob === "전체" && !job_Code) {
+      setFilteredIntroductions(allIntroductions);
     } else {
-      const filteredByJobCode = allIntroductions.filter((item) => item.job_code === selectedJob);
-      setFilteredIntroductions(filteredByJobCode); // 직군 코드에 맞는 데이터만 필터링
+      const filteredByJobCode = allIntroductions.filter((item: InterviewData) => 
+        item.job_code === (job_Code || selectedJob)
+      );
+      setFilteredIntroductions(filteredByJobCode);
     }
-  }, [selectedJob, allIntroductions]);
+  }, [selectedJob, allIntroductions, job_Code]);
 
   const handleIntroSelect = (intro: InterviewData) => {
-    setSelectedIntro(intro === selectedIntro ? null : intro); // 선택된 자기소개서가 다시 선택되면 해제
+    setSelectedIntro(intro === selectedIntro ? null : intro);
   };
 
   const handleSubmitInterview = () => {
     if (selectedIntro) {
-      onSelect(selectedIntro); // 면접 보기 버튼을 클릭하면 데이터를 전달
+      onSelect(selectedIntro);
     }
   };
 
-  if (loading) {
+  const handleNavigate = () => {
+    if (mounted) {
+      router.push('/self-introduction/manage');
+    }
+  };
+
+  if (loading || !mounted) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="w-16 h-16 relative">
+          <div className="absolute w-full h-full border-4 border-blue-200 rounded-full animate-pulse"></div>
+          <div className="absolute w-full h-full border-t-4 border-blue-500 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-2xl font-bold text-center mb-8">연습하실 역량을 선택해 주세요.</h1>
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
+      >
+        {job_Code && company ? (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl mb-8"
+          >
+            <p className="text-blue-700 text-lg font-medium text-center">
+              {company}의 {job_Code} 직무 면접을 위해 해당 직군의 자기소개서만 선택 가능합니다.
+            </p>
+          </motion.div>
+        ) : null}
 
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-2">
-          {jobOptions.map((job) => (
-            <button
-              key={job}
-              onClick={() => setSelectedJob(job)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                ${selectedJob === job 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-            >
-              {job}
-            </button>
-          ))}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            연습하실 면접의 자소서를 선택해 주세요
+          </h1>
+          <Button 
+            type="default"
+            shape="circle"
+            icon={<ChevronLeftIcon />}
+            onClick={onBack}
+            size="large"
+            className="hover:scale-105 transition-transform"
+          />
         </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="p-4">
-            {filteredIntroductions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                작성된 자기소개서가 없습니다.
-              </div>
-            ) : (
-              filteredIntroductions.map((intro, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleIntroSelect(intro)}
-                  className={`w-full text-left mb-4 transition-all duration-300
-                    ${selectedIntro === intro ? 'bg-blue-100 shadow-lg' : 'bg-white'}`}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3">
+            {jobOptions.map((job) => (
+              <motion.div
+                key={job}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  onClick={() => setSelectedJob(job)}
+                  disabled={Boolean(job_Code && job !== job_Code)}
+                  type={selectedJob === job ? 'primary' : 'default'}
+                  size="large"
+                  className={`rounded-full ${
+                    selectedJob === job 
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 border-none' 
+                      : 'hover:bg-gray-50'
+                  } ${job_Code && job !== job_Code ? 'opacity-50' : ''}`}
                 >
-                  <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4
-                    ${selectedIntro === intro ? 'border-blue-500' : 'hover:shadow-md'} transition-shadow`}>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-blue-100 rounded-full p-3">
-                        <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-900">{intro.title}</h2> {/* title 값 사용 */}
-                        <p className="text-sm text-gray-500">{intro.job_code}</p>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))
-            )}
+                  {job}
+                </Button>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </div>
 
-      <div className="mt-6 flex justify-center">
-        <button
-          onClick={handleSubmitInterview}
-          disabled={!selectedIntro}
-          className={`px-6 py-3 text-white font-semibold rounded-md transition-colors 
-            ${selectedIntro ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
-        >
-          면접 보기
-        </button>
-      </div>
+        <div className="bg-gray-50 rounded-3xl p-6 h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <AnimatePresence>
+            {filteredIntroductions.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex flex-col items-center justify-center h-full space-y-6 py-12"
+              >
+                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FolderIcon className="w-12 h-12 text-blue-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700">작성된 자기소개서가 없습니다</h3>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<PlusCircleIcon className="w-5 h-5" />}
+                  onClick={handleNavigate}
+                  className="rounded-full px-8 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border-none shadow-lg hover:shadow-xl"
+                >
+                  자기소개서 작성하러 가기
+                </Button>
+              </motion.div>
+            ) : (
+              <div className="grid gap-4">
+                {filteredIntroductions.map((intro, index) => (
+                  <motion.button
+                    key={index}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleIntroSelect(intro)}
+                    className="w-full text-left"
+                  >
+                    <div className={`bg-white rounded-2xl p-6 transition-all duration-300
+                      ${selectedIntro === intro 
+                        ? 'ring-2 ring-blue-500 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50' 
+                        : 'hover:shadow-md border border-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className={`rounded-full p-4 transition-colors duration-300
+                          ${selectedIntro === intro 
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-500' 
+                            : 'bg-gray-100'
+                          }`}
+                        >
+                          <FileEditIcon className={`w-6 h-6 ${
+                            selectedIntro === intro ? 'text-white' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900">{intro.resume_title}</h2>
+                          <p className="text-sm text-gray-500 mt-1">{intro.job_code}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-8 flex justify-end space-x-4">
+          <Button
+            type="default"
+            size="large"
+            onClick={onBack}
+            className="rounded-full px-8 hover:bg-gray-50"
+          >
+            이전으로
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleSubmitInterview}
+            disabled={!selectedIntro}
+            size="large"
+            className={`rounded-full px-8 ${
+              selectedIntro 
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border-none' 
+                : 'bg-gray-300'
+            }`}
+          >
+            면접 보기
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 }

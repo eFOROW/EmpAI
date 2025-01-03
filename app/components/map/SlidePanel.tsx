@@ -12,8 +12,10 @@ import {
   WalletOutlined,
   CalendarOutlined,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
+import { Select, Input, message } from 'antd';
 
 interface SlidePanelProps {
   children: React.ReactNode;
@@ -36,6 +38,20 @@ const careerOptions = [ "신입", "신입/경력", "경력", "경력무관" ];
 
 const eduOptions = [ "학력무관", "고등학교졸업이상", "대학교(2,3년)졸업이상", "대학교(4년)졸업이상", "석사졸업이상" ];
 
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // 지구의 반지름 (단위: km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // 거리 (km)
+};
+
 const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, markerPosition, onJobLocationsFound, onJobSelect, selectedJobId }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 열림/닫힘 상태 관리
   const [isInnerPanelOpen, setIsInnerPanelOpen] = useState(true); // 내부 패널 열림/닫힘 상태 추가
@@ -46,6 +62,8 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
   const [selectedEduCode, setSelectedEduCode] = useState<string>("고등학교졸업이상");
   const [jobList, setJobList] = useState<Array<{[key: string]: any}>>([]);
   const [selectedJobIndex, setSelectedJobIndex] = useState<number | null>(null);
+  const [searchType, setSearchType] = useState<string>('position');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRadius = parseFloat(e.target.value);
@@ -80,22 +98,6 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
         break;
     }
     
-
-    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-      const R = 6371; // 지구의 반지름 (단위: km)
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      const distance = R * c; // 거리 (km)
-      
-      return distance;
-    };
 
     const url = `/api/job?midCodeName=${encodeURIComponent(selectedJobCode)}&experienceLevelCode=${experienceLevelCode}&educationLevelName=${encodeURIComponent(selectedEduCode)}`;
 
@@ -139,6 +141,90 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
     }
   }, [selectedJobId, jobList]);
 
+  const handleSearchRequest = async () => {
+    if (searchKeyword.trim().length < 3) {
+      message.warning('검색어는 3자 이상 입력해주세요.');
+      return;
+    }
+
+    if (!searchKeyword.trim()) {
+      return;
+    }
+
+    enterLoading(0);
+
+    try {
+      const searchCode = searchType === 'company' ? '0' : '1';
+      const response = await fetch(`/api/job/search?code=${searchCode}&text=${encodeURIComponent(searchKeyword)}`);
+      
+      if (!response.ok) {
+        throw new Error('검색 요청 실패');
+      }
+
+      const data = await response.json();
+      
+      // 검색 결과를 바로 설정 (반경 필터링 제외)
+      setJobList(data);
+      onJobLocationsFound(data);
+      
+      // 검색 후 입력 필드 초기화
+      setSearchKeyword('');
+      setIsInnerPanelOpen(false);
+
+      setLoadings(prev => {
+        const newLoadings = [...prev];
+        newLoadings[0] = false;
+        return newLoadings;
+      });
+    } catch (error) {
+      console.error('검색 중 오류 발생:', error);
+      setLoadings(prev => {
+        const newLoadings = [...prev];
+        newLoadings[0] = false;
+        return newLoadings;
+      });
+    }
+  };
+
+  const handleFilterSearch = () => {
+    enterLoading(0);
+
+    let experienceLevelCode = 0;
+    switch (selectedCareerCode) {
+      case "신입": experienceLevelCode = 1; break;
+      case "경력": experienceLevelCode = 2; break;
+      case "신입/경력": experienceLevelCode = 3; break;
+      case "경력무관": experienceLevelCode = 0; break;
+      default: experienceLevelCode = 0; break;
+    }
+
+    const url = `/api/job?midCodeName=${encodeURIComponent(selectedJobCode)}&experienceLevelCode=${experienceLevelCode}&educationLevelName=${encodeURIComponent(selectedEduCode)}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const jobsWithinRadius = data.filter((job: any) => {
+          const distance = calculateDistance(
+            markerPosition.lat,
+            markerPosition.lng,
+            parseFloat(job.Latitude),
+            parseFloat(job.Longitude)
+          );
+          return distance <= radius;
+        });
+
+        setJobList(jobsWithinRadius);
+        onJobLocationsFound(jobsWithinRadius);
+        setIsInnerPanelOpen(false);
+
+        setLoadings(prev => {
+          const newLoadings = [...prev];
+          newLoadings[0] = false;
+          return newLoadings;
+        });
+      });
+  };
+
   return (
     <div className="relative z-50">
       <div
@@ -157,9 +243,52 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
           <div className={`transition-all duration-300 overflow-hidden ${
             isInnerPanelOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
           }`}>
-            {/* 검색 옵션 영역 */}
+            {/* 검색 옵역 */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">근무직군</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">공고 검색</h3>
+              <div className="flex items-center gap-2 border-2 border-blue-500 rounded-lg p-1">
+                <Select
+                  defaultValue="position"
+                  style={{ width: 100 }}
+                  onChange={setSearchType}
+                  options={[
+                    { value: 'company', label: '회사명' },
+                    { value: 'position', label: '공고명' },
+                  ]}
+                  bordered={false}
+                />
+                <Input
+                  placeholder={`${searchType === 'company' ? '회사명' : '공고명'}을 입력하세요`}
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      if (searchKeyword.trim().length < 3) {
+                        message.warning('검색어는 3자 이상 입력해주세요.');
+                        return;
+                      }
+                      handleSearchRequest();
+                    }
+                  }}
+                  style={{ 
+                    border: 'none',
+                    boxShadow: 'none',
+                    outline: 'none'
+                  }}
+                  className="focus:shadow-none hover:border-transparent"
+                />
+                <SearchOutlined 
+                  className="text-blue-500 text-xl cursor-pointer p-2 hover:bg-blue-50 rounded-full"
+                  onClick={handleSearchRequest}
+                />
+              </div>
+            </div>
+
+            {/* 기존 검색 옵션 영역 */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">맞춤 검색</h3>
+              
+              <h4 className="text-base font-medium text-gray-700 mb-3">근무직군</h4>
               <select
                 value={selectedJobCode}
                 onChange={(e) => setSelectedJobCode(e.target.value)}
@@ -170,7 +299,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                 ))}
               </select>
 
-              <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-4">학력/경력</h3>
+              <h4 className="text-base font-medium text-gray-700 mt-6 mb-3">학력/경력</h4>
               <div className="flex gap-4 mb-6">
                 <select
                   value={selectedCareerCode}
@@ -192,7 +321,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                 </select>
               </div>
 
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">거리 설정</h3>
+              <h4 className="text-base font-medium text-gray-700 mb-3">거리 설정</h4>
               <div className="flex items-center gap-4">
                 <input
                   type="range"
@@ -210,7 +339,10 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
             <Button
               type="primary"
               loading={loadings[0]}
-              onClick={() => {enterLoading(0); setIsInnerPanelOpen(!isInnerPanelOpen)}}
+              onClick={() => {
+                enterLoading(0);
+                handleFilterSearch();
+              }}
               className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all"
             >
               검색하기

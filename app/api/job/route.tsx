@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-const client = new MongoClient(process.env.MONGODB_URI as string); // 환경변수에서 MongoDB URI 가져오기
+const client = new MongoClient(process.env.MONGODB_URI as string);
 
 export async function GET(request: Request) {
     try {
