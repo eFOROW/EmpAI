@@ -1,5 +1,4 @@
 import { adminAuth } from "./firebase-admin";
-import { DecodedIdToken } from "firebase-admin/auth";
 import { headers } from "next/headers";
 
 export async function verifyAuth() {

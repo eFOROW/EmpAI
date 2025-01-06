@@ -31,16 +31,17 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 }) => {
   return (
     <motion.div
+      onClick={onClick}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ 
-        scale: 1.05, // 카드 확대
-        boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(75,0,130,0.2), 0px 0px 30px rgba(0,0,255,0.4)" // 호버 시 강한 그림자
+        scale: 1.05,
+        boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(75,0,130,0.2), 0px 0px 30px rgba(0,0,255,0.4)"
       }} 
       className="relative bg-white rounded-xl overflow-hidden cursor-pointer group transition-shadow duration-300"
       style={{
-        boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(75,0,130,0.1), 0px 0px 30px rgba(0,0,255,0.1)", // 평소에는 부드러운 그림자
+        boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(75,0,130,0.1), 0px 0px 30px rgba(0,0,255,0.1)",
       }}
     >
       <div className="relative p-6">
