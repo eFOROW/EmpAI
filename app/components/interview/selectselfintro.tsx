@@ -67,7 +67,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company }: Selec
           });
 
           const token = await user.getIdToken();
-          console.log(token);
           const API_URL = `/api/self-introduction?${params}`;
           const response = await fetch(API_URL, {
             headers: {
