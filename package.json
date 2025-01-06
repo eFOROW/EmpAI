@@ -15,6 +15,7 @@
     "empai": "file:",
     "EmpAI": "file:",
     "firebase": "^11.1.0",
+    "firebase-admin": "^13.0.2",
     "framer-motion": "^10.18.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.469.0",

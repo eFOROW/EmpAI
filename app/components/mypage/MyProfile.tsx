@@ -17,8 +17,12 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
         setLoading(true);
         setError("");
         try {
-          // Firebase uid를 사용하여 API에서 사용자 데이터 요청
-          const response = await fetch(`/api/db/Users?uid=${user.uid}`);
+          const token = await user.getIdToken();
+          const response = await fetch(`/api/db/Users?uid=${user.uid}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (!response.ok) {
             throw new Error("Failed to fetch user data");
           }
@@ -34,6 +38,26 @@ const MyProfile: React.FC<MyProfileProps> = ({ user }) => {
       fetchUserData();
     }
   }, [user]); // `user`가 변경될 때마다 API 호출
+
+  const updateUserInfo = async (data: any) => {
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated");
+      }
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/user?uid=${user.uid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      // ... 나머지 처리 코드
+    } catch (error) {
+      console.error('Error updating user info:', error);
+    }
+  };
 
   return (
     <div className="profile-container p-5 max-w-4xl mx-auto">

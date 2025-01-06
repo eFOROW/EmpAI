@@ -494,9 +494,11 @@ const Map: React.FC<MapProps> = ({
         width={1200}
         centered
         footer={null}
-        bodyStyle={{ 
-          padding: '1rem',
-          backgroundColor: 'white'
+        styles={{
+          body: { 
+            padding: '1rem',
+            backgroundColor: 'white'
+          }
         }}
         style={{
           top: 20

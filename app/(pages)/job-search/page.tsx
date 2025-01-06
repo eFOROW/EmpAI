@@ -61,7 +61,7 @@ const Page = () => {
 
       <div className="flex-grow">
         <Map
-          clientId="obpdge9tt1"
+          clientId={process.env.NEXT_PUBLIC_CLIENT_ID as string}
           lat={36.35060201641992}
           lng={127.3848240170031}
           zoom={15}
