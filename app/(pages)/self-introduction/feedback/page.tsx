@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button, Input, Typography } from 'antd';
 import { LeftOutlined, 
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
@@ -11,6 +11,8 @@ import { LeftOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
   BankOutlined, SafetyOutlined
 } from '@ant-design/icons';
+import getCurrentUser from "@/lib/firebase/auth_state_listener";
+import { User } from "firebase/auth";
 
 interface Document {
   _id: string;
@@ -97,8 +99,48 @@ export default function FeedbackPage() {
   const router = useRouter();
   const [id, setId] = useState<string | null>(null);
   const [document, setDocument] = useState<Document | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // 사용자 인증 상태 확인
+    getCurrentUser().then((currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) {
+        router.push('/mypage'); // 로그인되지 않은 경우 리다이렉트
+        return;
+      }
+    });
+  }, [router]);
+
+  const fetchData = useCallback(async (_id: string) => {
+    if (!user) return;
+
+    try {
+      const token = await user.getIdToken();
+      const API_URL = `/api/self-introduction?_id=${_id}`;
+      const response = await fetch(API_URL, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data: Document = await response.json();
+        setDocument(data);
+      } else {
+        console.error('Failed to fetch document:', response.statusText);
+        if (response.status === 401) {
+          router.push('/mypage'); // 인증 실패시 로그인 페이지로
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching document:', error);
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    if (!user) return;
+
     const urlParams = new URLSearchParams(window.location.search);
     const _id = urlParams.get('_id');
 
@@ -108,25 +150,16 @@ export default function FeedbackPage() {
     } else {
       router.push('/self-introduction');
     }
-  }, [router]);
+  }, [router, user, fetchData]);
 
-  const fetchData = async (_id: string) => {
-    try {
-      const API_URL = `/api/self-introduction?_id=${_id}`;
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data: Document = await response.json();
-        setDocument(data);
-      } else {
-        console.error('Failed to fetch document:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching document:', error);
-    }
-  };
-
-  if (!id || !document) {
-    return <div>Loading...</div>;
+  if (!user || !id || !document) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   return (

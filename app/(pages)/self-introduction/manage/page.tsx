@@ -109,13 +109,17 @@ const ListPage = ({ user }: ListPageProps) => {
 
   const fetchDocuments = async () => {
     try {
-      const API_URL = `/api/self-introduction?uid=${user.uid}`;
-      const response = await fetch(API_URL);
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/self-introduction?uid=${user.uid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch documents");
       }
-      const data: Document[] = await response.json();
-      const transformedData = data.map((doc) => ({
+      const data = await response.json();
+      const transformedData = data.map((doc: any) => ({
         ...doc,
         last_modified: new Date(doc.last_modified),
       }));
@@ -215,16 +219,18 @@ const ListPage = ({ user }: ListPageProps) => {
 
     const handleDelete = async (_id: string) => {
       try {
+        const token = await user.getIdToken();
         const response = await fetch('/api/self-introduction', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ _id }), // _id를 요청 본문에 담아 보냄
+          body: JSON.stringify({ _id }), 
         });
-    
+
         const data = await response.json();
-    
+
         if (response.ok) {
           fetchDocuments();
           setSelectedDocument(null);
@@ -240,46 +246,37 @@ const ListPage = ({ user }: ListPageProps) => {
     
 
   const handleSaveAnswers = async () => {
-    if (!selectedDocument) {
-      console.error("selectedDocument is null.");
-      return;
-    }
-  
-    // 기존 문서의 데이터를 업데이트
-    const updatedData = selectedDocument.data.map((item) => ({
-      question: item.question,
-      answer: updatedAnswers[item.question] || item.answer,
-    }));
-  
-    // _id 포함한 업데이트된 문서 생성
-    const updatedDocument: Document = {
-      _id: selectedDocument._id, // _id 추가
-      title: selectedDocument.title,
-      job_code: selectedDocument.job_code,
+    if (!selectedDocument) return;
+
+    const updatedDocument = {
+      ...selectedDocument,
+      data: selectedDocument.data.map((item) => ({
+        ...item,
+        answer: updatedAnswers[item.question] || item.answer,
+      })),
       last_modified: new Date(),
-      data: updatedData,
     };
-  
+
     try {
+      const token = await user.getIdToken();
       const response = await fetch("/api/self-introduction", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(updatedDocument),
       });
-  
+
       if (response.ok) {
-        // ...
+        fetchDocuments();
+        setSelectedDocument(null);
+        window.scrollTo(0, 0);
       } else {
-        console.error("Failed to update document:", await response.json());
+        throw new Error("Failed to update document");
       }
     } catch (error) {
       console.error("Error while updating document:", error);
-    } finally {
-      fetchDocuments();
-      setSelectedDocument(null);
-      window.scrollTo(0, 0);
     }
   };
 

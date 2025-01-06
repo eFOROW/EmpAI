@@ -72,59 +72,62 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
   };
 
   const enterLoading = (index: number) => {
-    // 로딩 상태 시작
+    // 로딩 상태만 설정하고 맞춤검색은 실행하지 않도록 수정
     setLoadings((prevLoadings) => {
       const newLoadings = [...prevLoadings];
       newLoadings[index] = true;
       return newLoadings;
     });
-  
+  };
+
+  // 맞춤검색을 위한 별도 함수 생성
+  const executeFilterSearch = (index: number) => {
+    enterLoading(index);
+    
     let experienceLevelCode = 0;
     switch (selectedCareerCode) {
-      case "신입":
-        experienceLevelCode = 1; // 신입
-        break;
-      case "경력":
-        experienceLevelCode = 2; // 경력
-        break;
-      case "신입/경력":
-        experienceLevelCode = 3; // 신입/경력
-        break;
-      case "경력무관":
-        experienceLevelCode = 0; // 경력무관
-        break;
-      default:
-        experienceLevelCode = 0; // 기본값 (경력무관)
-        break;
+      case "신입": experienceLevelCode = 1; break;
+      case "경력": experienceLevelCode = 2; break;
+      case "신입/경력": experienceLevelCode = 3; break;
+      case "경력무관": experienceLevelCode = 0; break;
+      default: experienceLevelCode = 0; break;
     }
-    
 
     const url = `/api/job?midCodeName=${encodeURIComponent(selectedJobCode)}&experienceLevelCode=${experienceLevelCode}&educationLevelName=${encodeURIComponent(selectedEduCode)}`;
 
-    // GET 요청 보내기
     fetch(url)
       .then(response => response.json())
       .then(data => {
-        const jobsWithinRadius = data.filter((job: any) => {
-          const distance = calculateDistance(
-            markerPosition.lat,
-            markerPosition.lng,
-            parseFloat(job.Latitude),
-            parseFloat(job.Longitude)
-          );
-          return distance <= radius;
-        });
+        const jobsWithinRadius = data
+          .filter((job: any) => {
+            const distance = calculateDistance(
+              markerPosition.lat,
+              markerPosition.lng,
+              parseFloat(job.Latitude),
+              parseFloat(job.Longitude)
+            );
+            return distance <= radius;
+          })
+          .map((job: any) => ({
+            ...job,
+            isSearchResult: false
+          }));
 
-        setJobList(jobsWithinRadius); 
-        console.log(jobList)
+        setJobList(jobsWithinRadius);
         onJobLocationsFound(jobsWithinRadius);
+        setIsInnerPanelOpen(false);
 
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings];
+        setLoadings(prev => {
+          const newLoadings = [...prev];
           newLoadings[index] = false;
           return newLoadings;
         });
-      })
+      });
+  };
+
+  // 맞춤검색 버튼 클릭 핸들러 수정
+  const handleFilterSearch = () => {
+    executeFilterSearch(0);
   };
 
   useEffect(() => {
@@ -163,13 +166,18 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
 
       const data = await response.json();
       
-      // 검색 결과를 바로 설정 (반경 필터링 제외)
-      setJobList(data);
-      onJobLocationsFound(data);
+      // 검색 모드 플래그 추가
+      const searchResults = data.map((job: any) => ({
+        ...job,
+        isSearchResult: true  // 검색 결과임을 표시
+      }));
+
+      setJobList(searchResults);
+      onJobLocationsFound(searchResults);
       
-      // 검색 후 입력 필드 초기화
       setSearchKeyword('');
       setIsInnerPanelOpen(false);
+      setSelectedJobIndex(null);
 
       setLoadings(prev => {
         const newLoadings = [...prev];
@@ -184,45 +192,6 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
         return newLoadings;
       });
     }
-  };
-
-  const handleFilterSearch = () => {
-    enterLoading(0);
-
-    let experienceLevelCode = 0;
-    switch (selectedCareerCode) {
-      case "신입": experienceLevelCode = 1; break;
-      case "경력": experienceLevelCode = 2; break;
-      case "신입/경력": experienceLevelCode = 3; break;
-      case "경력무관": experienceLevelCode = 0; break;
-      default: experienceLevelCode = 0; break;
-    }
-
-    const url = `/api/job?midCodeName=${encodeURIComponent(selectedJobCode)}&experienceLevelCode=${experienceLevelCode}&educationLevelName=${encodeURIComponent(selectedEduCode)}`;
-
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const jobsWithinRadius = data.filter((job: any) => {
-          const distance = calculateDistance(
-            markerPosition.lat,
-            markerPosition.lng,
-            parseFloat(job.Latitude),
-            parseFloat(job.Longitude)
-          );
-          return distance <= radius;
-        });
-
-        setJobList(jobsWithinRadius);
-        onJobLocationsFound(jobsWithinRadius);
-        setIsInnerPanelOpen(false);
-
-        setLoadings(prev => {
-          const newLoadings = [...prev];
-          newLoadings[0] = false;
-          return newLoadings;
-        });
-      });
   };
 
   return (
@@ -255,7 +224,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
                     { value: 'company', label: '회사명' },
                     { value: 'position', label: '공고명' },
                   ]}
-                  bordered={false}
+                  variant="borderless"
                 />
                 <Input
                   placeholder={`${searchType === 'company' ? '회사명' : '공고명'}을 입력하세요`}
@@ -339,10 +308,7 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
             <Button
               type="primary"
               loading={loadings[0]}
-              onClick={() => {
-                enterLoading(0);
-                handleFilterSearch();
-              }}
+              onClick={() => handleFilterSearch()}
               className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all"
             >
               검색하기

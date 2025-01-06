@@ -16,7 +16,12 @@ export default function Career({ user }: MyProfileProps) {
         if (!user?.uid) return;
         
         try {
-            const response = await fetch(`/api/career?uid=${user.uid}`);
+            const token = await user.getIdToken();
+            const response = await fetch(`/api/career?uid=${user.uid}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.status === 404) {
                 setExists(false);
                 return;
@@ -46,7 +51,7 @@ export default function Career({ user }: MyProfileProps) {
         } catch (error) {
             console.error('데이터 조회 중 오류 발생:', error);
         }
-    }, [user?.uid]);
+    }, [user]);
 
     useEffect(() => {
         fetchCareerData();
