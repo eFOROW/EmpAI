@@ -66,7 +66,14 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company }: Selec
             uid: user.uid,
           });
 
-          const response = await fetch(`/api/self-introduction?${params}`);
+          const token = await user.getIdToken();
+          console.log(token);
+          const API_URL = `/api/self-introduction?${params}`;
+          const response = await fetch(API_URL, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           const data = await response.json();
 
           const filteredData = data.map((item: ApiResponse): InterviewData => ({
