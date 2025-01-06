@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     return NextResponse.json(savedCareer, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { message: "력 정보 생성 실패", error: (error as Error).message },
+      { message: "경력 정보 생성 실패", error: (error as Error).message },
       { status: 500 }
     );
   }

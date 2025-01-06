@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
+import { Radar } from '@ant-design/plots';
 
 interface AnalysisCardProps {
   title: string;
@@ -137,26 +138,34 @@ const formatDate = (dateString: string) => {
   return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
 };
 
-const EmotionAnalysisChart = ({ emotions }: { emotions: VideoAnalysis["감정_%"] }) => {
-  const emotionLabels: { [key: string]: string } = {
-    Angry: '화남', 
-    Disgust: '혐오', 
-    Fear: '두려움', 
-    Happy: '행복', 
-    Sad: '슬픔', 
-    Surprise: '놀람', 
-    Neutral: '무감정'
-  };
+// 전역 상수 정의
+const emotionLabels: { [key: string]: string } = {
+  Angry: '화남', 
+  Disgust: '혐오', 
+  Fear: '두려움', 
+  Happy: '행복', 
+  Sad: '슬픔', 
+  Surprise: '놀람', 
+  Neutral: '무감정'
+};
 
-  const emotionColors: { [key: string]: string } = {
-    Angry: '#EF4444',
-    Disgust: '#6366F1',
-    Fear: '#F43F5E',
-    Happy: '#10B981',
-    Sad: '#3B82F6',
-    Surprise: '#F59E0B',
-    Neutral: '#8B5CF6'
-  };
+const emotionColors: { [key: string]: string } = {
+  Angry: '#FF4D4F',
+  Disgust: '#722ED1',
+  Fear: '#FFA39E',
+  Happy: '#52C41A',
+  Sad: '#1890FF',
+  Surprise: '#FAAD14',
+  Neutral: '#8C8C8C'
+};
+
+const EmotionAnalysisChart = ({ emotions }: { emotions: VideoAnalysis["감정_%"] }) => {
+  const chartData = Object.entries(emotions)
+    .map(([key, value]) => ({
+      type: emotionLabels[key],
+      value: typeof value === 'number' ? value : 0
+    }))
+    .filter(item => item.value > 0);
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg transform transition-all hover:scale-105">
@@ -169,24 +178,66 @@ const EmotionAnalysisChart = ({ emotions }: { emotions: VideoAnalysis["감정_%"
           <InfoCircleOutlined className="ml-2 text-gray-500" />
         </Tooltip>
       </div>
+      <div className="mb-6" style={{ width: '100%', height: '300px' }}>
+        <Radar
+          data={chartData}
+          xField="type"
+          yField="value"
+          meta={{
+            value: {
+              min: 0,
+              max: 100,
+            },
+          }}
+          tooltip={false}
+          interactions={[]}
+          xAxis={{
+            line: null,
+            tickLine: null,
+          }}
+          yAxis={{
+            label: false,
+            grid: {
+              alternateColor: 'rgba(0, 0, 0, 0.04)',
+            },
+          }}
+          point={{
+            size: 4,
+          }}
+          area={{
+            smooth: true,
+          }}
+          color="#3B82F6"
+          lineStyle={{
+            stroke: '#3B82F6',
+            lineWidth: 2,
+          }}
+          areaStyle={{
+            fill: '#3B82F6',
+            fillOpacity: 0.15,
+          }}
+        />
+      </div>
       <div className="space-y-4">
-        {Object.entries(emotions).map(([emotion, value]) => (
-          <div key={emotion} className="relative">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="font-medium text-gray-600">
-                {emotionLabels[emotion] || emotion}
-              </span>
-              <span className="text-blue-600 font-semibold">{value.toFixed(1)}%</span>
+        {Object.entries(emotions)
+          .filter(([_, value]) => value > 0)
+          .map(([emotion, value]: [string, number]) => (
+            <div key={emotion} className="relative">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="font-medium text-gray-600">
+                  {emotionLabels[emotion] || emotion}
+                </span>
+                <span className="text-blue-600 font-semibold">{value.toFixed(1)}%</span>
+              </div>
+              <Progress 
+                percent={value} 
+                showInfo={false}
+                strokeColor={emotionColors[emotion]}
+                strokeWidth={10}
+                className="custom-progress"
+              />
             </div>
-            <Progress 
-              percent={value} 
-              showInfo={false}
-              strokeColor={emotionColors[emotion]}
-              strokeWidth={10}
-              className="custom-progress"
-            />
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
@@ -210,17 +261,29 @@ const HeadPositionAnalysis = ({ headPositions }: { headPositions: VideoAnalysis[
           <InfoCircleOutlined className="ml-2 text-gray-500" />
         </Tooltip>
       </div>
-      <div className="flex justify-around">
-        {Object.entries(headPositions).map(([direction, value]) => (
-          <div key={direction} className="text-center">
+      <div className="flex flex-col items-center space-y-6">
+        <div className="w-32">
+          <Progress
+            type="circle"
+            percent={headPositions.center}
+            format={percent => (
+              <div className="text-sm">
+                <div className="font-medium text-gray-600">중앙</div>
+                <div className="text-blue-500 font-semibold">{percent}%</div>
+              </div>
+            )}
+            strokeColor="#3B82F6"
+            strokeWidth={10}
+          />
+        </div>
+        <div className="flex justify-between w-full px-8">
+          <div className="w-24">
             <Progress
               type="circle"
-              percent={value}
+              percent={headPositions.left}
               format={percent => (
-                <div className="text-sm">
-                  <div className="font-medium text-gray-600">
-                    {positionLabels[direction] || direction}
-                  </div>
+                <div className="text-xs">
+                  <div className="font-medium text-gray-600">왼쪽</div>
                   <div className="text-blue-500 font-semibold">{percent}%</div>
                 </div>
               )}
@@ -228,7 +291,21 @@ const HeadPositionAnalysis = ({ headPositions }: { headPositions: VideoAnalysis[
               strokeWidth={10}
             />
           </div>
-        ))}
+          <div className="w-24">
+            <Progress
+              type="circle"
+              percent={headPositions.right}
+              format={percent => (
+                <div className="text-xs">
+                  <div className="font-medium text-gray-600">오른쪽</div>
+                  <div className="text-blue-500 font-semibold">{percent}%</div>
+                </div>
+              )}
+              strokeColor="#3B82F6"
+              strokeWidth={10}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -486,30 +563,111 @@ export default function AnalysisResultsPage() {
                   children: (
                     <div className="p-4">
                       {videoAnalysis ? (
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="col-span-2 bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl shadow-md">
+                        <div className="space-y-8">
+                          <div className="bg-blue-50 p-6 rounded-2xl shadow-lg">
                             <div className="flex items-center mb-4">
-                              <div className="bg-blue-200 rounded-full p-3 mr-4">
-                                <FileTextOutlined className="text-blue-600 text-2xl" />
+                              <div className="bg-blue-100 rounded-full p-3 mr-4">
+                                <FileTextOutlined className="text-blue-500 text-2xl" />
                               </div>
-                              <h3 className="text-xl font-bold text-gray-800">면접 질문</h3>
+                              <h4 className="text-xl font-bold text-gray-800">면접 질문</h4>
+                              <Tooltip title="AI가 선택한 면접 질문">
+                                <InfoCircleOutlined className="ml-2 text-gray-500" />
+                              </Tooltip>
                             </div>
-                            <p className="text-gray-700 text-base">{videoAnalysis.question}</p>
+                            <p className="text-lg text-gray-700">
+                              {videoAnalysis.question}
+                            </p>
                           </div>
 
-                          <EmotionAnalysisChart emotions={videoAnalysis["감정_%"]} />
-                          
-                          <HeadPositionAnalysis headPositions={videoAnalysis["머리기울기_%"]} />
+                          <div className="bg-white p-6 rounded-2xl shadow-lg transform hover:scale-[1.02] transition-all duration-300">
+                            <div className="flex items-center mb-6">
+                              <div className="bg-blue-100 rounded-full p-3 mr-4">
+                                <BarChartOutlined className="text-blue-500 text-2xl" />
+                              </div>
+                              <h4 className="text-xl font-bold text-gray-800">감정 분석</h4>
+                            </div>
+                            <div className="grid grid-cols-2 gap-8">
+                              <div>
+                                <Radar
+                                  data={Object.entries(videoAnalysis["감정_%"] as VideoAnalysis["감정_%"])
+                                    .map(([key, value]) => ({
+                                      type: emotionLabels[key],
+                                      value: typeof value === 'number' ? value : 0
+                                    }))
+                                    .filter(item => item.value > 0)}
+                                  xField="type"
+                                  yField="value"
+                                  meta={{
+                                    value: {
+                                      min: 0,
+                                      max: 100,
+                                    },
+                                  }}
+                                  tooltip={false}
+                                  interactions={[]}
+                                  xAxis={{
+                                    line: null,
+                                    tickLine: null,
+                                  }}
+                                  yAxis={{
+                                    label: false,
+                                    grid: {
+                                      alternateColor: 'rgba(0, 0, 0, 0.04)',
+                                    },
+                                  }}
+                                  point={{
+                                    size: 4,
+                                  }}
+                                  area={{
+                                    smooth: true,
+                                  }}
+                                  color="#3B82F6"
+                                  lineStyle={{
+                                    stroke: '#3B82F6',
+                                    lineWidth: 2,
+                                  }}
+                                  areaStyle={{
+                                    fill: '#3B82F6',
+                                    fillOpacity: 0.15,
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-4">
+                                {Object.entries(videoAnalysis["감정_%"] as VideoAnalysis["감정_%"])
+                                  .map(([emotion, value]) => (
+                                    <div key={emotion} className="relative">
+                                      <div className="flex justify-between text-sm mb-2">
+                                        <span className="font-medium text-gray-600">
+                                          {emotionLabels[emotion] || emotion}
+                                        </span>
+                                        <span className="text-blue-600 font-semibold">
+                                          {value.toFixed(1)}%
+                                        </span>
+                                      </div>
+                                      <Progress 
+                                        percent={value} 
+                                        showInfo={false}
+                                        strokeColor={emotionColors[emotion]}
+                                        strokeWidth={10}
+                                        className="custom-progress"
+                                      />
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          </div>
 
-                          <VoiceAnalysis voiceData={{
-                            말하기속도: videoAnalysis.말하기속도,
-                            목소리변동성: videoAnalysis.목소리변동성,
-                            추임새갯수: videoAnalysis.추임새갯수,
-                            침묵갯수: videoAnalysis.침묵갯수,
-                            '음성높낮이_%': videoAnalysis['음성높낮이_%']
-                          }} />
-
-                          <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
+                          <div className="grid grid-cols-3 gap-6">
+                            <HeadPositionAnalysis headPositions={videoAnalysis["머리기울기_%"]} />
+                            <VoiceAnalysis voiceData={{
+                              말하기속도: videoAnalysis.말하기속도,
+                              목소리변동성: videoAnalysis.목소리변동성,
+                              추임새갯수: videoAnalysis.추임새갯수,
+                              침묵갯수: videoAnalysis.침묵갯수,
+                              '음성높낮이_%': videoAnalysis['음성높낮이_%']
+                            }} />
+                            <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
+                          </div>
                         </div>
                       ) : (
                         <div className="text-center py-16">
