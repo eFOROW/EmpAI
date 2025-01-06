@@ -334,7 +334,7 @@ const VoiceAnalysis = ({ voiceData }: {
       tooltip: '면접 중 사용한 추임새 횟수'
     },
     { 
-      label: '침묵 횟수', 
+      label: '침묵 횟수',
       value: `${voiceData.침묵갯수}회`,
       tooltip: '면접 중 발생한 침묵 횟수'
     },
