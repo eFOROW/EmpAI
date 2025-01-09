@@ -36,6 +36,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const AnalyticsDisplay = () => {
     const [analyticsData, setAnalyticsData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
         dayjs().subtract(7, 'day'),
         dayjs()
@@ -43,6 +44,7 @@ const AnalyticsDisplay = () => {
 
     useEffect(() => {
         const fetchAnalyticsData = async () => {
+            setLoading(true);
             try {
                 const [startDate, endDate] = dateRange;
                 const formatDate = (date: Dayjs) => date.format('YYYY-MM-DD');
@@ -54,6 +56,8 @@ const AnalyticsDisplay = () => {
                 setAnalyticsData(data);
             } catch (error) {
                 console.error('Analytics 데이터 가져오기 실패:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -66,8 +70,18 @@ const AnalyticsDisplay = () => {
         }
     };
 
-    if (!analyticsData) {
-        return <div>로딩 중...</div>;
+    if (loading) {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+                <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center">
+                    <p className="text-gray-700 font-semibold text-xl mb-4">분석정보를 불러오는 중...</p>
+                    <div className="w-16 h-16 relative mb-6">
+                        <div className="absolute w-full h-full border-4 border-blue-200 rounded-full animate-pulse"></div>
+                        <div className="absolute w-full h-full border-t-4 border-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const lineChartData = analyticsData.hourlyData.rows.map((row: any) => {
@@ -97,9 +111,9 @@ const AnalyticsDisplay = () => {
     }));
 
     return (
-        <div className="p-6">
+        <div className="p-8 min-h-screen bg-gray-50">
             <div className="mb-6 flex justify-between items-center">
-                <h2 className="text-2xl font-bold">애널리틱스 대시보드</h2>
+                <h2 className="text-2xl font-bold">Service Analytics</h2>
                 <Space>
                     <RangePicker
                         value={dateRange}
