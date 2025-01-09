@@ -296,20 +296,47 @@ const ManagePage: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-            const token = await user?.getIdToken(); // 현재 사용자의 토큰 가져오기
+            // 필수 입력값 검증
+            if (!title) {
+                messageApi.error('제목을 입력해주세요.');
+                return;
+            }
+
+            if (!selectedValue) {
+                messageApi.error('직무를 선택해주세요.');
+                return;
+            }
+
+            // answers 배열의 모든 답변이 입력되었는지 확인
+            const isAllAnswersFilled = answers.every(answer => answer.answer.trim() !== '');
+            if (!isAllAnswersFilled) {
+                messageApi.error('모든 공통역량 질문에 답변을 입력해주세요.');
+                return;
+            }
+
+            const token = await user?.getIdToken();
+            
+            // 기존 answers 배열 복사
+            let allAnswers = [...answers];
+
+            // 직무 관련 질문과 답변이 모두 있을 때만 추가
+            if (selectJobQ && jobAnswer.trim()) {
+                allAnswers.push({
+                    question: selectJobQ,
+                    answer: jobAnswer.trim()
+                });
+            }
+
             const response = await fetch('/api/self-introduction', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // 토큰을 Authorization 헤더에 추가
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     title,
                     job_code: selectedValue,
-                    data: answers.map((answer) => ({
-                        question: answer.question,
-                        answer: answer.answer
-                    })),
+                    data: allAnswers,
                     uid: user?.uid
                 })
             });
@@ -318,10 +345,11 @@ const ManagePage: React.FC = () => {
                 throw new Error('Failed to create document');
             }
 
+            messageApi.success('성공적으로 저장되었습니다.');
             router.push('/self-introduction/manage');
         } catch (error) {
             console.error('Error creating document:', error);
-            // 에러 처리 로직 추가
+            messageApi.error('저장 중 오류가 발생했습니다.');
         }
     };
 
