@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 const si = require('systeminformation');
 
 // MongoDB Atlas 연결 문자열
@@ -11,56 +14,71 @@ mongoose.connect(mongoURI);
 const systemStatusSchema = new mongoose.Schema({
   cpuUsage: Number,
   memoryUsage: Number,
-  inboundTraffic: Number, // Mbps
-  outboundTraffic: Number, // Mbps
+  inboundTraffic: Number,
+  outboundTraffic: Number,
   timestamp: { type: Date, default: Date.now },
 });
 
 const SystemStatus = mongoose.model('SystemStatus', systemStatusSchema);
 
-// 이전 트래픽 값을 저장할 변수
-let previousInboundTraffic = 0;
-let previousOutboundTraffic = 0;
-
-// 시스템 상태 체크 함수
 async function checkSystemStatus() {
   try {
-    const cpuData = await si.currentLoad();
-    const memData = await si.mem();
-    const netData = await si.networkStats();
+    const cpuDataArray = [];
+    const memDataArray = [];
+    const networkDataArray = [];
+    
+    // 5분(300초) 동안 CPU, 메모리, 네트워크 모두 1초마다 측정
+    for (let i = 0; i < 300; i++) {
+      const cpuData = await si.currentLoad();
+      const memData = await si.mem();
+      const networkStats = await si.networkStats();
+      
+      cpuDataArray.push(cpuData.currentLoad);
+      memDataArray.push((memData.total - memData.available) / memData.total * 100);
+      
+      // 모든 네트워크 인터페이스의 rx_bytes와 tx_bytes 합계 저장
+      const rxBytes = networkStats.reduce((total, stat) => total + stat.rx_bytes, 0);
+      const txBytes = networkStats.reduce((total, stat) => total + stat.tx_bytes, 0);
+      networkDataArray.push({ rxBytes, txBytes });
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    // 평균 계산
+    const avgCpuUsage = cpuDataArray.reduce((a, b) => a + b, 0) / cpuDataArray.length;
+    const avgMemoryUsage = memDataArray.reduce((a, b) => a + b, 0) / memDataArray.length;
+    
+    // 1초당 평균 네트워크 전송량 계산 (Mbps)
+    let totalInbound = 0;
+    let totalOutbound = 0;
+    
+    for (let i = 1; i < networkDataArray.length; i++) {
+      const rxDiff = networkDataArray[i].rxBytes - networkDataArray[i-1].rxBytes;
+      const txDiff = networkDataArray[i].txBytes - networkDataArray[i-1].txBytes;
+      totalInbound += rxDiff;
+      totalOutbound += txDiff;
+    }
+    
+    const inboundMbps = (totalInbound / (networkDataArray.length - 1)) * 8 / (1024 * 1024);
+    const outboundMbps = (totalOutbound / (networkDataArray.length - 1)) * 8 / (1024 * 1024);
 
-    const cpuUsage = cpuData.currentLoad; // CPU 사용량 (%)
-    const memoryUsage = (memData.total - memData.available) / memData.total * 100; // 메모리 사용 비율 (%)
-
-    // 모든 네트워크 인터페이스의 트래픽 합산
-    const inboundTraffic = netData.reduce((total, iface) => total + iface.rx_bytes, 0);
-    const outboundTraffic = netData.reduce((total, iface) => total + iface.tx_bytes, 0);
-
-    // 이전 트래픽과의 차이 계산
-    const inboundTrafficDelta = inboundTraffic - previousInboundTraffic; // 바이트
-    const outboundTrafficDelta = outboundTraffic - previousOutboundTraffic; // 바이트
-
-    // Mbps로 변환 (1 byte = 8 bits, 1 minute = 60 seconds)
-    const inboundTrafficMbps = (inboundTrafficDelta * 8) / 300 / 1000000; // 5분 = 300초
-    const outboundTrafficMbps = (outboundTrafficDelta * 8) / 300 / 1000000; // 5분 = 300초
-
-    // MongoDB에 상태 기록
     const systemStatus = new SystemStatus({
-      cpuUsage,
-      memoryUsage,
-      inboundTraffic: inboundTrafficMbps >= 0 ? inboundTrafficMbps : 0, // 음수 방지
-      outboundTraffic: outboundTrafficMbps >= 0 ? outboundTrafficMbps : 0, // 음수 방지
+      cpuUsage: avgCpuUsage,
+      memoryUsage: avgMemoryUsage,
+      inboundTraffic: inboundMbps,
+      outboundTraffic: outboundMbps
     });
+    
     await systemStatus.save();
+    console.log('Saved system status:', {
+      avgCpuUsage,
+      avgMemoryUsage,
+      inboundMbps,
+      outboundMbps
+    });
 
-    // 이전 트래픽 값 업데이트
-    previousInboundTraffic = inboundTraffic;
-    previousOutboundTraffic = outboundTraffic;
-
-    // MongoDB 연결 종료
     await mongoose.connection.close();
     process.exit(0);
-
   } catch (error) {
     console.error('Error checking system status:', error);
     await mongoose.connection.close();
@@ -68,5 +86,4 @@ async function checkSystemStatus() {
   }
 }
 
-// setInterval 제거하고 즉시 실행
 checkSystemStatus();

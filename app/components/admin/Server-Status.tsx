@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ServerInfo {
     name: string;
@@ -20,56 +20,53 @@ export default function ServerStatus() {
         }
     ]);
 
-    const checkServerStatus = useCallback(async () => {
-        const updatedServers = await Promise.all(servers.map(async (server) => {
-            try {
-                const isActive = Math.random() > 0.2;
-                return {
-                    ...server,
-                    status: isActive ? 'active' : 'inactive',
-                    lastChecked: new Date()
-                };
-            } catch (error) {
-                return { ...server, status: 'inactive', lastChecked: new Date() };
-            }
-        }));
-        setServers(updatedServers as ServerInfo[]);
-    }, [servers]);
+    const checkServerStatus = async () => {
+        try {
+            const response = await fetch('/api/admin/server-status');
+            const data = await response.json();
+            setServers(data.servers.map((server: any) => ({
+                ...server,
+                lastChecked: new Date(server.lastChecked)
+            })));
+        } catch (error) {
+            console.error('Failed to check server status:', error);
+        }
+    };
 
+    // 초기 로딩 시에만 상태 확인
     useEffect(() => {
         checkServerStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-2xl font-bold mb-8">Server Status</h1>
-                <div className="grid grid-cols-2">
-                {servers.map((server, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between h-40 w-80">
-                        <div>
-                            <h3 className="font-semibold text-lg mb-2">{server.name}</h3>
-                            <p className="text-sm text-gray-500">
-                                최근 확인: {server.lastChecked.toLocaleTimeString()}
-                            </p>
+                <div className="flex gap-2">
+                    {servers.map((server, index) => (
+                        <div key={index} className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between h-40 w-72">
+                            <div>
+                                <h3 className="font-semibold text-lg mb-2">{server.name}</h3>
+                                <p className="text-sm text-gray-500">
+                                    최근 확인: {server.lastChecked.toLocaleTimeString()}
+                                </p>
+                            </div>
+                            <div className="flex items-center mt-4">
+                                <div className={`w-4 h-4 rounded-full mr-3 ${
+                                    server.status === 'active' 
+                                        ? 'bg-green-500 animate-pulse' 
+                                        : 'bg-red-500'
+                                }`} />
+                                <span className={`font-medium ${
+                                    server.status === 'active' 
+                                        ? 'text-green-500' 
+                                        : 'text-red-500'
+                                }`}>
+                                    {server.status === 'active' ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex items-center mt-4">
-                            <div className={`w-4 h-4 rounded-full mr-3 ${
-                                server.status === 'active' 
-                                    ? 'bg-green-500 animate-pulse' 
-                                    : 'bg-red-500'
-                            }`} />
-                            <span className={`font-medium ${
-                                server.status === 'active' 
-                                    ? 'text-green-500' 
-                                    : 'text-red-500'
-                            }`}>
-                                {server.status === 'active' ? '활성화' : '비활성화'}
-                            </span>
-                        </div>
-                    </div>
-                ))}
+                    ))}
                 </div>
             </div>
         </div>

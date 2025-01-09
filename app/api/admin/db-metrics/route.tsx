@@ -34,17 +34,33 @@ export async function GET(request: Request) {
       })
     );
 
-    // 시계열 메트릭 데이터
+    // 시간 범위에 따른 데이터 포인트 수 계산
+    let dataPoints: number;
+    let intervalMinutes: number;
+    
+    switch(range) {
+      case '1h':
+        dataPoints = 12;    // 5분 간격으로 1시간
+        intervalMinutes = 5;
+        break;
+      case '1d':
+        dataPoints = 288;   // 5분 간격으로 24시간
+        intervalMinutes = 5;
+        break;
+      case '1w':
+        dataPoints = 168;   // 1시간 간격으로 1주일
+        intervalMinutes = 60;
+        break;
+      default:
+        dataPoints = 12;
+        intervalMinutes = 5;
+    }
+
     const now = new Date();
-    const metrics = Array.from({ length: 15 }, (_, i) => {
-      const timestamp = new Date(now.getTime() - (i * 5 * 60000));
+    const metrics = Array.from({ length: dataPoints }, (_, i) => {
+      const timestamp = new Date(now.getTime() - (i * intervalMinutes * 60000));
       return {
         connections: serverStatus.connections.current + Math.floor(Math.random() * 10),
-        network: {
-          bytesIn: serverStatus.network.bytesIn + Math.floor(Math.random() * 1000),
-          bytesOut: serverStatus.network.bytesOut + Math.floor(Math.random() * 1000),
-          numRequests: serverStatus.network.numRequests + Math.floor(Math.random() * 100)
-        },
         opcounters: {
           command: serverStatus.opcounters.command + Math.floor(Math.random() * 10),
           query: serverStatus.opcounters.query + Math.floor(Math.random() * 10),
@@ -53,7 +69,9 @@ export async function GET(request: Request) {
           getmore: serverStatus.opcounters.getmore + Math.floor(Math.random() * 5),
           insert: serverStatus.opcounters.insert + Math.floor(Math.random() * 3)
         },
-        timestamp: timestamp.toLocaleTimeString()
+        timestamp: range === '1w' 
+          ? timestamp.toLocaleString() 
+          : timestamp.toLocaleTimeString()
       };
     }).reverse();
 
