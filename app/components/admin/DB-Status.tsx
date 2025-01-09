@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { Card, Spin, Alert, Select, Table, Tooltip as AntTooltip } from 'antd';
+import { Card, Alert, Select, Table, Tooltip as AntTooltip } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DatabaseOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
@@ -110,7 +110,7 @@ export default function DBStatus() {
       dataIndex: 'size',
       key: 'size',
       sorter: (a: CollectionStats, b: CollectionStats) => a.size - b.size,
-      render: (size: number) => `${(size / 1024 / 1024).toFixed(2)} MB`,
+      render: (size: number) => `${(size / 1024 / 1024).toFixed(3)} MB`,
     },
     {
       title: '필드 수',
@@ -158,66 +158,14 @@ export default function DBStatus() {
             </ResponsiveContainer>
           </Card>
 
-          <Card title="Network Traffic" bordered={false}>
-            <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={metrics}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                        dataKey="timestamp"
-                        tick={{ fontSize: 12 }}
-                        interval="preserveStartEnd"
-                    />
-                    <YAxis />
-                    <Tooltip 
-                        formatter={(value: number, name: string) => {
-                            switch(name) {
-                                case 'network.bytesIn':
-                                    return [`${value}/s`, 'bytesIn'];
-                                case 'network.bytesOut':
-                                    return [`${value}/s`, 'bytesOut'];
-                                case 'network.numRequests':
-                                    return [`${value}/s`, 'numRequests'];
-                                default:
-                                    return [value, name];
-                            }
-                        }}
-                    />
-                    <Line 
-                        type="monotone" 
-                        dataKey="network.bytesIn" 
-                        name="bytesIn" 
-                        stroke="#82ca9d"
-                        dot={false}
-                        strokeWidth={2}
-                    />
-                    <Line 
-                        type="monotone" 
-                        dataKey="network.bytesOut" 
-                        name="bytesOut" 
-                        stroke="#ffc658"
-                        dot={false}
-                        strokeWidth={2}
-                    />
-                    <Line 
-                        type="monotone" 
-                        dataKey="network.numRequests" 
-                        name="numRequests" 
-                        stroke="#8884d8"
-                        dot={false}
-                        strokeWidth={2}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
-          </Card>
-
           <Card 
             title={
-                <div className="flex items-center gap-2">
-                    <span>Operation Counters</span>
-                    <AntTooltip title="MongoDB의 각 작업(command, query, update, delete, getmore, insert)이 처리 가능한 평균시간">
-                        <InfoCircleOutlined className="text-gray-400 cursor-help" />
-                    </AntTooltip>
-                </div>
+              <div className="flex items-center gap-2">
+                <span>Operation Counters</span>
+                <AntTooltip title="MongoDB의 각 작업(command, query, update, delete, getmore, insert)이 처리 가능한 평균시간">
+                  <InfoCircleOutlined className="text-gray-400 cursor-help" />
+                </AntTooltip>
+              </div>
             } 
             bordered={false}
           >
@@ -300,7 +248,7 @@ export default function DBStatus() {
             <span>총계</span>
             <span>
               문서 수: {collections.reduce((total, col) => total + col.count, 0).toLocaleString()} | 
-              크기: {((collections.reduce((total, col) => total + col.size, 0)) / 1024 / 1024).toFixed(2)} MB | 
+              크기: {((collections.reduce((total, col) => total + col.size, 0)) / 1024 / 1024).toFixed(3)} MB | 
               필드 수: {collections.reduce((total, col) => total + col.fieldCount, 0)}
             </span>
           </div>

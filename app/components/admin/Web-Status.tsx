@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react';
-import { Card, Spin, Alert, Select, Button } from 'antd';
+import { Card, Spin, Alert, Select, Button, Menu } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ReloadOutlined } from '@ant-design/icons';
 
@@ -12,6 +12,8 @@ interface Status {
   inboundTraffic: number;
   outboundTraffic: number;
   timestamp: string;
+  maxInboundTraffic: number;
+  maxOutboundTraffic: number;
 }
 
 export default function WebStatus() {
@@ -91,15 +93,23 @@ export default function WebStatus() {
 
   const chartData = systemStatus.map(status => {
     const date = new Date(status.timestamp);
-    const minutes = Math.floor(date.getMinutes() / 5) * 5;
-    date.setMinutes(minutes);
+    
+    const formatTraffic = (trafficValue: number | undefined | null) => {
+      if (trafficValue === undefined || trafficValue === null) {
+        return 0;
+      }
+      return +(trafficValue.toFixed(2));
+    };
 
     return {
-      timestamp: date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      cpuUsage: status.cpuUsage,
-      memoryUsage: status.memoryUsage,
-      inboundTraffic: +(((status.inboundTraffic) / 1024 ).toFixed(2)),
-      outboundTraffic: +(((status.outboundTraffic) / 1024 ).toFixed(2))
+      timestamp: date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      cpuUsage: status.cpuUsage || 0,
+      memoryUsage: status.memoryUsage || 0,
+      inboundTraffic: formatTraffic(status.inboundTraffic * 40 ),
+      outboundTraffic: formatTraffic(status.outboundTraffic * 50 )
     };
   });
 

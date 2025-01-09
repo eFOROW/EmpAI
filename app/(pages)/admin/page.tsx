@@ -27,6 +27,7 @@ const ALLOWED_ADMIN_UIDS = ['qGmWLRZX8xdYlAbXNiTitsdq6mY2', 'D5z4xFJiekWCR6HjDNC
 export default function AdminPage() {
   const [selectedTab, setSelectedTab] = useState<MenuTab>('server');
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -34,8 +35,24 @@ export default function AdminPage() {
     getCurrentUser().then((currentUser) => {
       setUser(currentUser);
       setIsAuthChecked(true);
+      setIsLoading(false);
     });
   }, []);
+
+  if (isLoading) {
+    return (
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider width={250} className="bg-white">
+          <div className="block relative z-10 m-4">
+            <div className="font-extrabold text-3xl text-blue-600">EmpAI</div>
+          </div>
+        </Sider>
+        <Layout>
+          <Content className="m-0 min-h-[280px] bg-white" />
+        </Layout>
+      </Layout>
+    );
+  }
 
   const renderContent = () => {
     switch (selectedTab) {
@@ -87,7 +104,7 @@ export default function AdminPage() {
             <Menu
               mode="inline"
               selectedKeys={[selectedTab]}
-              className="h-full border-0"
+              className="h-full border-0 mt-10"
               onClick={({ key }) => setSelectedTab(key as MenuTab)}
             >
               <Menu.Item key="server" icon={<CloudServerOutlined />} style={{ height: '50px', lineHeight: '60px' }}>
