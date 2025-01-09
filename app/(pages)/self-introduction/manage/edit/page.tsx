@@ -295,60 +295,33 @@ const ManagePage: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        if (!title.trim()) {
-            messageApi.open({
-                type: 'warning',
-                content: '자기소개서 제목을 작성해주세요',
-            });
-            return
-        }
-        for (const item of answers) {
-            if (!item.answer.trim()) {
-                messageApi.open({
-                    type: 'warning',
-                    content: '역량질문에 대한 답변을 입력해 주세요!',
-                });
-                return
-            }
-        }
-        if (!jobAnswer.trim()) {
-            messageApi.open({
-                type: 'warning',
-                content: '직무질문에 대한 답변을 입력해 주세요!"',
-            });
-            return;
-        }
-
-
-        const formattedData = {
-            uid: user?.uid,
-            title: title,  // 제목
-            job_code: selectedValue,  // 직무 코드
-            last_modified: new Date().toISOString(),  // 현재 날짜로 설정
-            data: [
-                ...answers.map((item) => ({
-                    question: item.question,
-                    answer: item.answer,
-                })),
-                {
-                    question: selectJobQ,
-                    answer: jobAnswer
-                },
-            ],
-        };
-  
         try {
+            const token = await user?.getIdToken(); // 현재 사용자의 토큰 가져오기
             const response = await fetch('/api/self-introduction', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formattedData),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 토큰을 Authorization 헤더에 추가
+                },
+                body: JSON.stringify({
+                    title,
+                    job_code: selectedValue,
+                    data: answers.map((answer) => ({
+                        question: answer.question,
+                        answer: answer.answer
+                    })),
+                    uid: user?.uid
+                })
             });
-        
-            const result = await response.json();
-            console.log('서버 응답:', result);
-            router.push('/self-introduction/manage')
+
+            if (!response.ok) {
+                throw new Error('Failed to create document');
+            }
+
+            router.push('/self-introduction/manage');
         } catch (error) {
-            console.error('API 요청 오류:', error);
+            console.error('Error creating document:', error);
+            // 에러 처리 로직 추가
         }
     };
 

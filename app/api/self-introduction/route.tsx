@@ -135,12 +135,12 @@ export async function GET(request: Request) {
       document = await SelfIntroduction.find({ uid: decodedToken.uid });
     }
 
-    if (!document || (Array.isArray(document) && document.length === 0)) {
-      return NextResponse.json(
-        { message: "Document not found" },
-        { status: 404 }
-      );
-    }
+    // if (!document || (Array.isArray(document) && document.length === 0)) {
+    //   return NextResponse.json(
+    //     { message: "Document not found" },
+    //     { status: 404 }
+    //   );
+    // }
 
     return NextResponse.json(document, { status: 200 });
   } catch (error) {
