@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
-import { Card, Col, Row, Typography, Input, Modal, Button } from "antd";
+import { Card, Col, Row, Typography, Input, Modal, Button, message } from "antd";
 import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined,
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
   FileTextOutlined, SketchOutlined, ShoppingOutlined,
@@ -219,28 +219,29 @@ const ListPage = ({ user }: ListPageProps) => {
 
     const handleDelete = async (_id: string) => {
       try {
-        const token = await user.getIdToken();
+        const token = await user?.getIdToken();
         const response = await fetch('/api/self-introduction', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ _id }), 
+          body: JSON.stringify({
+            _id: _id,
+            uid: user?.uid  // uid를 명시적으로 포함
+          })
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          fetchDocuments();
-          setSelectedDocument(null);
-          window.scrollTo(0, 0);
-        } else {
-          alert(`Error: ${data.message}`);
+        if (!response.ok) {
+          throw new Error('Failed to delete document');
         }
+
+        // 삭제 성공 후 목록 새로고침
+        fetchDocuments();
+        message.success('성공적으로 삭제되었습니다.');
       } catch (error) {
         console.error('Error deleting document:', error);
-        alert('Failed to delete document');
+        message.error('삭제 중 오류가 발생했습니다.');
       }
     };
     
