@@ -6,11 +6,15 @@ import { User } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Video, AlertTriangle, Settings, CheckCircle2, XCircle } from 'lucide-react';
 
+interface AnalysisResponse {
+    status: string;
+  }
+
 interface DeviceCheckProps {
     user: User;
     stream: MediaStream | null;
     setStream: (stream: MediaStream | null) => void;
-    onComplete: () => void;
+    onComplete: (response: AnalysisResponse) => void;
 }
 
 const AudioVisualizer = ({ stream }: { stream: MediaStream | null }) => {
@@ -124,6 +128,7 @@ export function DeviceCheck({ user, stream, setStream, onComplete }: DeviceCheck
         video: false
     });
 
+
     const handleOpenModal = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         setShowModal(true);
@@ -137,13 +142,29 @@ export function DeviceCheck({ user, stream, setStream, onComplete }: DeviceCheck
         setShowDeviceErrorModal(false);
     };
 
-    const handleComplete = () => {
+    const handleStartInterview = async () => {
         if (!deviceStatus.audio || !deviceStatus.video) {
-            setShowDeviceErrorModal(true);
-            return;
+          setShowDeviceErrorModal(true);
+          return;
         }
-        onComplete();
-    };
+      
+        try {
+          const response = await fetch('/api/interview/analysis_request', {
+            method: 'GET'
+          });
+      
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+      
+          const data: AnalysisResponse = await response.json();
+          onComplete({ status: data.status });
+      
+        } catch (error) {
+          console.error('Failed to start interview:', error);
+          onComplete({ status: 'error' });
+        }
+      };
 
     const checkDeviceStatus = (stream: MediaStream | null) => {
         if (stream) {
@@ -350,7 +371,7 @@ export function DeviceCheck({ user, stream, setStream, onComplete }: DeviceCheck
                 <div className="flex justify-end">
                     <Button 
                         type="primary" 
-                        onClick={onComplete}
+                        onClick={handleStartInterview}
                         disabled={!deviceStatus.audio || !deviceStatus.video}
                         className={`px-8 h-12 text-base rounded-xl ${
                             (!deviceStatus.audio || !deviceStatus.video)
