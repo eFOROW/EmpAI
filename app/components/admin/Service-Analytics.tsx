@@ -67,9 +67,7 @@ const AnalyticsDisplay = () => {
                 }
                 
                 const data = await response.json();
-                console.log('Fetched Analytics Data:', data); // 데이터 로깅
                 
-                // 데이터 유효성 검증
                 if (!data || typeof data !== 'object') {
                     throw new Error('잘못된 데이터 형식입니다.');
                 }
@@ -262,17 +260,20 @@ const AnalyticsDisplay = () => {
                                 onChange={handleDateRangeChange}
                                 disabledDate={(current) => current && current > dayjs().endOf('day')}
                                 className="h-[50px]"
-                                ranges={{
-                                    '오늘': [dayjs(), dayjs()],
-                                    '어제': [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')],
-                                    '지난 7일': [dayjs().subtract(7, 'day'), dayjs()],
-                                    '지난 30일': [dayjs().subtract(30, 'day'), dayjs()],
-                                    '이번 달': [dayjs().startOf('month'), dayjs()],
-                                    '지난 달': [
-                                        dayjs().subtract(1, 'month').startOf('month'),
-                                        dayjs().subtract(1, 'month').endOf('month')
-                                    ],
-                                }}
+                                presets={[
+                                    { label: '오늘', value: [dayjs(), dayjs()] },
+                                    { label: '어제', value: [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')] },
+                                    { label: '지난 7일', value: [dayjs().subtract(7, 'day'), dayjs()] },
+                                    { label: '지난 30일', value: [dayjs().subtract(30, 'day'), dayjs()] },
+                                    { label: '이번 달', value: [dayjs().startOf('month'), dayjs()] },
+                                    { 
+                                        label: '지난 달', 
+                                        value: [
+                                            dayjs().subtract(1, 'month').startOf('month'),
+                                            dayjs().subtract(1, 'month').endOf('month')
+                                        ]
+                                    }
+                                ]}
                                 defaultValue={[dayjs().subtract(1, 'month'), dayjs()]}
                                 style={{ height: '50px' }}
                             />
