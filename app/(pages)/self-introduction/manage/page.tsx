@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { useRouter } from "next/navigation";
-import { Card, Col, Row, Typography, Input, Modal, Button, message } from "antd";
+import { Card, Col, Row, Typography, Input, Modal, Button } from "antd";
 import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined,
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
   FileTextOutlined, SketchOutlined, ShoppingOutlined,
@@ -217,31 +217,50 @@ const ListPage = ({ user }: ListPageProps) => {
       });
     };
 
+    const handleFeedbackClick = async (_id: string) => {
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/self-introduction-feedback', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          router.push(`/self-introduction/feedback?_id=${_id}`);
+        } else {
+          alert('AI 서버가 응답하지 않습니다. 잠시 후 다시 시도해주세요.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('서버 연결에 실패했습니다.');
+      }
+    };
+    
     const handleDelete = async (_id: string) => {
       try {
-        const token = await user?.getIdToken();
+        const token = await user.getIdToken();
         const response = await fetch('/api/self-introduction', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            _id: _id,
-            uid: user?.uid  // uid를 명시적으로 포함
-          })
+          body: JSON.stringify({ _id }), 
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to delete document');
-        }
+        const data = await response.json();
 
-        // 삭제 성공 후 목록 새로고침
-        fetchDocuments();
-        message.success('성공적으로 삭제되었습니다.');
+        if (response.ok) {
+          fetchDocuments();
+          setSelectedDocument(null);
+          window.scrollTo(0, 0);
+        } else {
+          alert(`Error: ${data.message}`);
+        }
       } catch (error) {
         console.error('Error deleting document:', error);
-        message.error('삭제 중 오류가 발생했습니다.');
+        alert('Failed to delete document');
       }
     };
     
@@ -529,7 +548,7 @@ const ListPage = ({ user }: ListPageProps) => {
                   color="primary" 
                   variant="solid" 
                   className="px-4 py-2"
-                  onClick={() => router.push(`/self-introduction/feedback?_id=${document._id}`)}
+                  onClick={() => handleFeedbackClick(document._id)}
                 >
                   첨삭받기
                 </Button>

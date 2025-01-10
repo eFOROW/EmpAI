@@ -1,8 +1,9 @@
-'use client';
-
+'use client'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Typography } from 'antd';
+import { Button, Input, Typography, Tabs, Card } from 'antd';
+import getCurrentUser from "@/lib/firebase/auth_state_listener";
+import { User } from "firebase/auth";
 import { LeftOutlined, 
   CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
   FileTextOutlined, SketchOutlined, ShoppingOutlined,
@@ -11,8 +12,8 @@ import { LeftOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
   BankOutlined, SafetyOutlined
 } from '@ant-design/icons';
-import getCurrentUser from "@/lib/firebase/auth_state_listener";
-import { User } from "firebase/auth";
+
+const { TabPane } = Tabs;
 
 interface Document {
   _id: string;
@@ -31,6 +32,19 @@ interface JobStyle {
   color: string;
   bgColor: string;
   borderColor: string;
+}
+
+interface AIResponse {
+  results: {
+    relevance: number;
+    specificity: number;
+    persuasiveness: number;
+    feedback: string;
+    similar_h2_tag: string;
+    similar_question: string;
+    similar_answer: string;
+    similarity: number;
+  }[];
 }
 
 // jobStyles 객체 정의
@@ -58,59 +72,94 @@ const jobStyles: { [key: string]: JobStyle } = {
   "공공·복지": { icon: <SafetyOutlined />, color: "#52c41a", bgColor: "#f6ffed", borderColor: "#b7eb8f" }
 } as const;
 
-const response = {
-  "result": [
-      {
-          "relevance": 8,
-          "specificity": 5,
-          "persuasiveness": 6,
-          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
-          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
-          "Pass_answer": ""
-      },
-      {
-          "relevance": 8,
-          "specificity": 5,
-          "persuasiveness": 6,
-          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
-          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
-          "Pass_answer": ""
-      },
-      {
-          "relevance": 8,
-          "specificity": 5,
-          "persuasiveness": 6,
-          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
-          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
-          "Pass_answer": ""
-      },
-      {
-          "relevance": 8,
-          "specificity": 5,
-          "persuasiveness": 6,
-          "feedback": "자기소개는 질문의 핵심을 잘 이해하고 IT와 마케팅 분야 경험과 직무 내용을 설명하는데 효율적입니다. 하지만 구체적인 사례나 실제 경험보다는 일반적인 표현이 많아 특정 기회에 대한 강력한 영향을 줄 수 있는 방안을 제시하지 못합니다.",
-          "Pass_question": "문장 구조와 문법적 정확성은 매우 우수하며 맞춤법 오류 없음.",
-          "Pass_answer": ""
-      }
-  ]
-};
-
 export default function FeedbackPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('0');
   const [id, setId] = useState<string | null>(null);
   const [document, setDocument] = useState<Document | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [feedbackData, setFeedbackData] = useState<AIResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const requestAIFeedback = async () => {
+    if (!document?._id || !user) return;
+    
+    setIsLoading(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/self-introduction/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ _id: document._id })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFeedbackData(data);
+      } else {
+        alert('AI 분석 요청에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('서버 연결에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // 사용자 인증 상태 확인
     getCurrentUser().then((currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
-        router.push('/mypage'); // 로그인되지 않은 경우 리다이렉트
+        router.push('/mypage');
         return;
       }
     });
   }, [router]);
+
+  const handleUpdateDocument = async () => {
+    if (!document?._id || !user) return;
+    
+    if (!document.data[parseInt(activeTab)].answer.trim()) {
+      alert('답변을 입력해주세요.');
+      return;
+    }
+    
+    try {
+      const token = await user.getIdToken();
+      const updateData = {
+        _id: document._id,
+        title: document.title,
+        job_code: document.job_code,
+        last_modified: new Date(),
+        data: document.data,
+        uid: user.uid
+      };
+  
+      const response = await fetch("/api/self-introduction", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+  
+      if (response.ok) {
+        alert('성공적으로 수정되었습니다.');
+      } else {
+        const errorData = await response.json();
+        console.error('Error:', errorData);
+        alert('수정 요청에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('서버 연결에 실패했습니다.');
+    }
+  };
 
   const fetchData = useCallback(async (_id: string) => {
     if (!user) return;
@@ -130,7 +179,7 @@ export default function FeedbackPage() {
       } else {
         console.error('Failed to fetch document:', response.statusText);
         if (response.status === 401) {
-          router.push('/mypage'); // 인증 실패시 로그인 페이지로
+          router.push('/mypage');
         }
       }
     } catch (error) {
@@ -162,8 +211,10 @@ export default function FeedbackPage() {
     );
   }
 
+
   return (
-    <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="p-6 mx-auto mt-8">
+    <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6">
+      {/* Header */}
       <div className="mb-8">
         <div className="flex items-start">
           <Button
@@ -201,62 +252,159 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* 각 문항에 대해 왼쪽과 오른쪽을 수평으로 배치 */}
-        {document.data.map((item, index) => (
-          <div key={index} className="flex gap-8 mb-6 mr-10">
-            {/* 왼쪽 : 원본 자기소개서 */}
-            <div className="flex-1 flex flex-col">
-              <Typography.Title level={4} className="mb-2">
-                Q{index + 1}. {item.question}
-              </Typography.Title>
-              <Input.TextArea
-                value={item.answer}
-                readOnly
-                autoSize={{ minRows: 8, maxRows: 8 }}
-                className="hover:border-blue-300"
-                style={{
-                  resize: 'none',
-                  backgroundColor: '#fff',
-                  minHeight: '250px', // 고정된 최소 높이 설정
-                  maxHeight: '250px', // 고정된 최대 높이 설정
-                  height: '100%', // 부모 컨테이너에 맞춰서 높이를 100%로 설정
-                }}
-              />
-            </div>
+      {/* AI Feedback Button */}
+      <div className="text-center mb-6">
+        <Button
+          type="primary"
+          onClick={requestAIFeedback}
+          loading={isLoading}
+          size="large"
+        >
+          {isLoading ? "분석중..." : "AI 분석 시작"}
+        </Button>
+      </div>
 
-            {/* 오른쪽 : 첨삭 결과 */}
-            <div className="flex-1 flex flex-col ml-10">
-              <Typography.Title level={4} className="mb-2">
-                첨삭 결과 #{index + 1}
-              </Typography.Title>
-              <div className="p-4 bg-white shadow-sm border border-gray-200 rounded-lg">
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li>
-                    <strong>관련성:</strong> {response.result[index]?.relevance}
-                  </li>
-                  <li>
-                    <strong>구체성:</strong> {response.result[index]?.specificity}
-                  </li>
-                  <li>
-                    <strong>설득력:</strong> {response.result[index]?.persuasiveness}
-                  </li>
-                  <li>
-                    <strong>피드백:</strong> {response.result[index]?.feedback}
-                  </li>
-                  <li>
-                    <strong>문장 구조 평가:</strong> {response.result[index]?.Pass_question}
-                  </li>
-                  {response.result[index]?.Pass_answer && (
-                    <li>
-                      <strong>추가 답변:</strong> {response.result[index]?.Pass_answer}
-                    </li>
-                  )}
-                </ul>
+      {/* Main Content */}
+      <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          type="card"
+          className="mb-6"
+      >
+          {document.data.map((_, index) => (
+              <TabPane 
+                  tab={`Q${index + 1}`} 
+                  key={index.toString()} 
+                  style={{ border: '1px solid #ccc', borderRadius: '4px' }} 
+              />
+          ))}
+      </Tabs>
+
+      <div 
+        className="flex transition-all duration-300 ease-in-out"
+        style={{ gap: '24px' }}
+      >
+        {/* Left: Question and Answer */}
+        <div 
+          className="transition-all duration-300 ease-in-out"
+          style={{ 
+            width: feedbackData ? '40%' : '100%', 
+            minWidth: '35%', 
+            flexShrink: 0,
+            position: 'sticky', // 고정 위치 설정
+            top: '50px', // 뷰포트 상단에서 50px 떨어진 위치에 고정
+            alignSelf: 'start', // 높이 설정이 있을 경우 정렬 보정
+          }}
+        >
+          <Card 
+            title={
+              <div style={{
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+              }}>
+                {document.data[parseInt(activeTab)].question}
               </div>
-            </div>
+            } 
+            className="h-full"
+          >
+            <Input.TextArea
+              value={document.data[parseInt(activeTab)].answer}
+              onChange={(e) => {
+                const newData = [...document.data];
+                newData[parseInt(activeTab)].answer = e.target.value;
+                setDocument({
+                  ...document,
+                  data: newData
+                });
+              }}
+              autoSize={{ minRows: 12, maxRows: 12 }}
+              className="mb-4"
+            />
+            <Button 
+              type="primary"
+              onClick={handleUpdateDocument}  
+            >
+              수정하기
+            </Button>
+          </Card>
+        </div>
+        
+        {/* Right: Feedback */}
+        {feedbackData && (
+          <div 
+            className="transition-all duration-300 ease-in-out"
+            style={{ 
+              width: '60%', //너비 수정
+              opacity: feedbackData ? 1 : 0,
+              transform: feedbackData ? 'translateX(0)' : 'translateX(20px)'
+            }}
+          >
+            <Card title="첨삭 결과" className="h-full">
+              <div>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <Card size="small">
+                    <div className="text-center">
+                      <div className="text-gray-500 mb-1">관련성</div>
+                      <div className="text-xl font-bold">
+                        {feedbackData.results[parseInt(activeTab)].relevance}/10점
+                      </div>
+                    </div>
+                  </Card>
+                  <Card size="small">
+                    <div className="text-center">
+                      <div className="text-gray-500 mb-1">구체성</div>
+                      <div className="text-xl font-bold">
+                        {feedbackData.results[parseInt(activeTab)].specificity}/10점
+                      </div>
+                    </div>
+                  </Card>
+                  <Card size="small">
+                    <div className="text-center">
+                      <div className="text-gray-500 mb-1">설득력</div>
+                      <div className="text-xl font-bold">
+                        {feedbackData.results[parseInt(activeTab)].persuasiveness}/10점
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Typography.Title level={5}>상세 피드백</Typography.Title>
+                    <Typography.Paragraph>
+                      {feedbackData.results[parseInt(activeTab)].feedback}
+                    </Typography.Paragraph>
+                  </div>
+
+                  {/* 유사도 분석 결과 */}
+                  {feedbackData.results[parseInt(activeTab)].similarity > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <Typography.Title level={5}>유사도 분석 결과</Typography.Title>
+                      <ul className="space-y-2">
+                        <li>
+                          <Typography.Text strong>합격한 회사: </Typography.Text>
+                          {feedbackData.results[parseInt(activeTab)].similar_h2_tag}
+                        </li>
+                        <li>
+                          <Typography.Text strong>유사한 문항: </Typography.Text>
+                          {feedbackData.results[parseInt(activeTab)].similar_question}
+                        </li>
+                        <li>
+                          <Typography.Text strong>유사한 답변: </Typography.Text>
+                          {feedbackData.results[parseInt(activeTab)].similar_answer}
+                        </li>
+                        <li>
+                          <Typography.Text strong>유사도: </Typography.Text>
+                          {feedbackData.results[parseInt(activeTab)].similarity.toFixed(2)}%
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
