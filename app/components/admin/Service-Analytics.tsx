@@ -18,6 +18,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 import { Space } from 'antd';
+import { LineChartOutlined } from '@ant-design/icons';
 
 // DatePicker를 클라이언트 사이드에서만 렌더링하도록 dynamic import
 const DatePicker = dynamic(
@@ -221,13 +222,10 @@ const AnalyticsDisplay = () => {
 
     if (loading) {
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-                <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center">
-                    <p className="text-gray-700 font-semibold text-xl mb-4">분석정보를 불러오는 중...</p>
-                    <div className="w-16 h-16 relative mb-6">
-                        <div className="absolute w-full h-full border-4 border-blue-200 rounded-full animate-pulse"></div>
-                        <div className="absolute w-full h-full border-t-4 border-blue-500 rounded-full animate-spin"></div>
-                    </div>
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="flex flex-col items-center">
+                    <LineChartOutlined className="text-5xl text-blue-500 animate-bounce mb-4" />
+                    <h2 className="text-xl font-semibold text-gray-700">서비스 분석 데이터 로딩 중...</h2>
                 </div>
             </div>
         );
