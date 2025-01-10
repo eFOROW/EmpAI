@@ -220,7 +220,7 @@ const ListPage = ({ user }: ListPageProps) => {
     const handleFeedbackClick = async (_id: string) => {
       try {
         const token = await user.getIdToken();
-        const response = await fetch('/api/self-introduction-feedback', {
+        const response = await fetch('/api/self-introduction/feedback', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
