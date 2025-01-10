@@ -42,6 +42,7 @@ export default function DBStatus() {
   const [timeRange, setTimeRange] = useState('1d');
 
   const fetchDBMetrics = async (range: string) => {
+    setLoading(true);
     try {
       const response = await fetch(`/api/admin/db-metrics?range=${range}`);
       if (!response.ok) {

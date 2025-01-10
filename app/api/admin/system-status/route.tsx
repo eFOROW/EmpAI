@@ -10,10 +10,17 @@ export async function GET(request: Request) {
     const now = new Date();
     let startDate;
 
-    if (range === '1w') {
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 1주일 전
-    } else {
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 1일 전
+    switch (range) {
+        case '1h':
+            startDate = new Date(now.getTime() - 60 * 60 * 1000); // 1시간 전
+            break;
+        case '1w':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 1주일 전
+            break;
+        case '1d':
+        default:
+            startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 1일 전
+            break;
     }
 
     try {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Card, Spin, Alert, Select, Button, Menu } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, GlobalOutlined } from '@ant-design/icons';
 
 interface Status {
   _id: string;
@@ -30,8 +30,14 @@ export default function WebStatus() {
   const errorLogRef = useRef<HTMLDivElement>(null);
 
   const fetchSystemStatus = async (range: string) => {
+    setLoading(true);
     try {
-      const response = await fetch(`/api/admin/system-status?range=${range}`);
+      const response = await fetch(`/api/admin/system-status?range=${range}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       if (!response.ok) {
         throw new Error('상태 응답이 좋지 않습니다.');
       }
@@ -155,16 +161,31 @@ export default function WebStatus() {
     </ResponsiveContainer>
   );
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center">
+          <GlobalOutlined className="text-5xl text-blue-500 animate-bounce mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700">웹 서버 상태 분석 중...</h2>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold mb-8">Web Server Status</h1>
         <div className="flex items-center mb-4">
           <Select
-            defaultValue="1d"
+            value={timeRange}
             style={{ width: 120 }}
-            onChange={setTimeRange}
+            onChange={(value) => {
+              setTimeRange(value);
+              fetchSystemStatus(value);
+            }}
           >
+            <Select.Option value="1h">최근 1시간</Select.Option>
             <Select.Option value="1d">최근 1일</Select.Option>
             <Select.Option value="1w">최근 1주일</Select.Option>
           </Select>
@@ -177,7 +198,6 @@ export default function WebStatus() {
             다시 가져오기
           </Button>
         </div>
-        {loading && <Spin tip="로딩 중..." />}
         {error && <Alert message={error} type="error" />}
         
         <div className="flex space-x-4 mb-4">
