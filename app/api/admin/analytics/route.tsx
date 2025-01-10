@@ -14,7 +14,7 @@ export async function GET(request: Request) {
             }
         });
 
-        const propertyId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID?.replace('G-', '');
+        const propertyId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
 
         const defaultResponse = {
             rows: [],

@@ -67,6 +67,33 @@ export default function AdminPage() {
     }
   };
 
+  const menuItems = [
+    {
+      key: 'server',
+      icon: <CloudServerOutlined />,
+      label: 'Server Status',
+      style: { height: '50px', lineHeight: '60px' }
+    },
+    {
+      key: 'web',
+      icon: <DesktopOutlined />,
+      label: 'Web Server Status',
+      style: { height: '50px', lineHeight: '60px' }
+    },
+    {
+      key: 'analytics',
+      icon: <AreaChartOutlined />,
+      label: 'Service Analytics',
+      style: { height: '50px', lineHeight: '60px' }
+    },
+    {
+      key: 'db',
+      icon: <DatabaseOutlined />,
+      label: 'DataBase Status',
+      style: { height: '50px', lineHeight: '60px' }
+    }
+  ];
+
   return (
     <>
       {isAuthChecked && (!user || !ALLOWED_ADMIN_UIDS.includes(user.uid)) ? (
@@ -106,20 +133,8 @@ export default function AdminPage() {
               selectedKeys={[selectedTab]}
               className="h-full border-0 mt-10"
               onClick={({ key }) => setSelectedTab(key as MenuTab)}
-            >
-              <Menu.Item key="server" icon={<CloudServerOutlined />} style={{ height: '50px', lineHeight: '60px' }}>
-                Server Status
-              </Menu.Item>
-              <Menu.Item key="web" icon={<DesktopOutlined />} style={{ height: '50px', lineHeight: '60px' }}>
-                Web Server Status
-              </Menu.Item>
-              <Menu.Item key="analytics" icon={<AreaChartOutlined />} style={{ height: '50px', lineHeight: '60px' }}>
-                Service Analytics
-              </Menu.Item>
-              <Menu.Item key="db" icon={<DatabaseOutlined />} style={{ height: '50px', lineHeight: '60px' }}>
-                DataBase Status
-              </Menu.Item>
-            </Menu>
+              items={menuItems}
+            />
           </Sider>
           <Layout>
             <Content
