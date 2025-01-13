@@ -102,14 +102,23 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
 
     const handleHighSchoolStatusChange = (value: any) => {
         setIsHighSchoolDisabled(value === '해당없음');
+        if (value === '해당없음') {
+            form.setFieldValue('highSchoolField', undefined);
+        }
     };
 
     const handleUniversityStatusChange = (value: any) => {
         setIsUniversityDisabled(value === '해당없음');
+        if (value === '해당없음') {
+            form.setFieldValue('universityMajor', undefined);
+        }
     };
 
     const handleGraduateSchoolStatusChange = (value: any) => {
         setIsGraduateSchoolDisabled(value === '해당없음');
+        if (value === '해당없음') {
+            form.setFieldValue('graduateSchoolMajor', undefined);
+        }
     };
 
     return (
@@ -143,6 +152,8 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                             onChange={handleHighSchoolStatusChange}
                             size="large"
                         >
+                            <Option value="해당없음">해당없음</Option>
+                            <Option value="재학중">재학중</Option>
                             <Option value="중퇴">중퇴</Option>
                             <Option value="졸업">졸업</Option>
                         </Select>
@@ -177,6 +188,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                             size="large"
                         >
                             <Option value="해당없음">해당없음</Option>
+                            <Option value="재학중">재학중</Option>
                             <Option value="중퇴">중퇴</Option>
                             <Option value="2,3년 수료/졸업">2,3년 수료/졸업</Option>
                             <Option value="4년 졸업">4년 졸업</Option>
@@ -217,6 +229,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                             size="large"
                         >
                             <Option value="해당없음">해당없음</Option>
+                            <Option value="재학중">재학중</Option>
                             <Option value="수료">수료</Option>
                             <Option value="졸업">졸업</Option>
                         </Select>

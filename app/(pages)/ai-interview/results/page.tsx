@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Modal,
   Card,
   Spin,
   Progress,
-  Tabs,
   Alert,
   Button,
   Tooltip,
@@ -24,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { User } from "firebase/auth";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { Radar } from "@ant-design/plots";
+import ResultModal from "@/app/components/interview/result";
 
 interface AnalysisCardProps {
   title: string;
@@ -495,6 +494,7 @@ const EyeTrackingAnalysis = ({
     </div>
   );
 };
+
 export default function AnalysisResultsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -637,237 +637,11 @@ export default function AnalysisResultsPage() {
           </div>
         )}
 
-        <Modal
-          title={
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold">{selectedAnalysis?.title}</h3>
-              <p className="text-sm text-gray-500">
-                {selectedAnalysis ? formatDate(selectedAnalysis.time) : ""}
-              </p>
-            </div>
-          }
-          open={modalVisible}
-          onCancel={() => setModalVisible(false)}
-          width={1400}
-          footer={null}
-          className="analysis-modal"
-        >
-          {selectedAnalysis && (
-            <Tabs
-              defaultActiveKey="1"
-              type="card"
-              items={[1, 2, 3, 4].map((num) => {
-                const videoAnalysis =
-                  selectedAnalysis[selectedAnalysis.uid]?.[num.toString()];
-                return {
-                  key: `tab-${num}`,
-                  label: (
-                    <span className="px-4">
-                      면접 {num}
-                      {videoAnalysis && (
-                        <span className="ml-2 text-green-500">●</span>
-                      )}
-                    </span>
-                  ),
-                  children: (
-                    <div className="p-4">
-                      {videoAnalysis ? (
-                        <div className="space-y-8">
-                          <div className="bg-blue-50 p-6 rounded-2xl shadow-lg">
-                            <div className="flex items-center mb-4">
-                              <div className="bg-blue-100 rounded-full p-3 mr-4">
-                                <FileTextOutlined className="text-blue-500 text-2xl" />
-                              </div>
-                              <h4 className="text-xl font-bold text-gray-800">
-                                면접 질문
-                              </h4>
-                              <Tooltip title="AI가 선택한 면접 질문">
-                                <InfoCircleOutlined className="ml-2 text-gray-500" />
-                              </Tooltip>
-                            </div>
-                            <p className="text-lg text-gray-700">
-                              {videoAnalysis.question}
-                            </p>
-                          </div>
-
-                          <div className="bg-white p-6 rounded-2xl shadow-lg transform hover:scale-[1.02] transition-all duration-300">
-                            <div className="flex items-center mb-6">
-                              <div className="bg-blue-100 rounded-full p-3 mr-4">
-                                <BarChartOutlined className="text-blue-500 text-2xl" />
-                              </div>
-                              <h4 className="text-xl font-bold text-gray-800">
-                                감정 분석
-                              </h4>
-                            </div>
-                            <div className="grid grid-cols-2 gap-8">
-                              <div>
-                                {videoAnalysis["감정_%"] ? (
-                                  <Radar
-                                    data={[
-                                      {
-                                        type: "화남",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Angry ?? 0,
-                                      },
-                                      {
-                                        type: "혐오",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Disgust ??
-                                          0,
-                                      },
-                                      {
-                                        type: "두려움",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Fear ?? 0,
-                                      },
-                                      {
-                                        type: "행복",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Happy ?? 0,
-                                      },
-                                      {
-                                        type: "슬픔",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Sad ?? 0,
-                                      },
-                                      {
-                                        type: "놀람",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Surprise ??
-                                          0,
-                                      },
-                                      {
-                                        type: "무감정",
-                                        value:
-                                          videoAnalysis?.["감정_%"]?.Neutral ??
-                                          0,
-                                      },
-                                    ].filter((item) => item.value > 0)} // 0 값 제거
-                                    xField="type"
-                                    yField="value"
-                                    meta={{
-                                      value: {
-                                        min: 0,
-                                        max: 100,
-                                      },
-                                    }}
-                                    tooltip={false}
-                                    interactions={[]}
-                                    xAxis={{
-                                      line: null,
-                                      tickLine: null,
-                                    }}
-                                    yAxis={{
-                                      label: false,
-                                      grid: {
-                                        alternateColor: "rgba(0, 0, 0, 0.04)",
-                                      },
-                                    }}
-                                    point={{
-                                      size: 4,
-                                    }}
-                                    area={{
-                                      smooth: false, // 다각형 유지
-                                    }}
-                                    color="#3B82F6"
-                                    lineStyle={{
-                                      stroke: "#3B82F6",
-                                      lineWidth: 2,
-                                    }}
-                                    areaStyle={{
-                                      fill: "#3B82F6",
-                                      fillOpacity: 0.15,
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="flex items-center justify-center h-full">
-                                    <p className="text-gray-500">
-                                      감정 분석 결과가 없습니다
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="space-y-4">
-                                {videoAnalysis["감정_%"] ? (
-                                  [
-                                    "Angry",
-                                    "Disgust",
-                                    "Fear",
-                                    "Happy",
-                                    "Sad",
-                                    "Surprise",
-                                    "Neutral",
-                                  ].map((emotion, index) => (
-                                    <div
-                                      key={`emotion-${emotion}-${index}`}
-                                      className="relative"
-                                    >
-                                      <div className="flex justify-between text-sm mb-2">
-                                        <span className="font-medium text-gray-600">
-                                          {emotionLabels[emotion] || emotion}
-                                        </span>
-                                        <span className="text-blue-600 font-semibold">
-                                          {(
-                                            videoAnalysis["감정_%"][
-                                              emotion
-                                            ] as number
-                                          ).toFixed(1)}
-                                          %
-                                        </span>
-                                      </div>
-                                      <Progress
-                                        percent={
-                                          videoAnalysis["감정_%"][
-                                            emotion
-                                          ] as number
-                                        }
-                                        showInfo={false}
-                                        strokeColor={emotionColors[emotion]}
-                                        strokeWidth={10}
-                                        className="custom-progress"
-                                      />
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center py-4 text-gray-500">
-                                    감정 분석 결과가 없습니다
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-6">
-                            <HeadPositionAnalysis
-                              headPositions={videoAnalysis["머리기울기_%"]}
-                            />
-                            <VoiceAnalysis
-                              voiceData={{
-                                말하기속도: videoAnalysis.말하기속도,
-                                목소리변동성: videoAnalysis.목소리변동성,
-                                추임새갯수: videoAnalysis.추임새갯수,
-                                침묵갯수: videoAnalysis.침묵갯수,
-                                "음성높낮이_%": videoAnalysis["음성높낮이_%"],
-                              }}
-                            />
-                            <EyeTrackingAnalysis
-                              eyeTrackingData={videoAnalysis["아이트래킹_%"]}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center py-16">
-                          <Spin size="large" />
-                          <p className="mt-4 text-gray-500">분석 중입니다...</p>
-                        </div>
-                      )}
-                    </div>
-                  ),
-                };
-              })}
-            />
-          )}
-        </Modal>
+        <ResultModal 
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          analysis={selectedAnalysis}
+        />
       </div>
     </div>
   );
