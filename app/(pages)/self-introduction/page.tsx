@@ -1,106 +1,189 @@
-import React from "react";
+"use client";
 
-const Home: React.FC = () => {
+import { useEffect, useState } from "react";
+import { User } from "firebase/auth";
+import getCurrentUser from "@/lib/firebase/auth_state_listener";
+import { motion } from "framer-motion";
+import { ConfigProvider } from "antd";
+import { useRouter } from "next/navigation";
+import { EditOutlined, FolderOpenOutlined } from "@ant-design/icons";
+
+interface ServiceCardProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  delay: number;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({
+  title,
+  description,
+  icon,
+  onClick,
+  delay,
+}) => {
   return (
-    <div className="flex h-screen w-full m-0 p-0 bg-white">
-      {/* 왼쪽 섹션 */}
-      <div className="flex-1 flex justify-center items-center relative p-6">
-        {/* 왼쪽 사각형 */}
-        <div
-          className="w-4/5 h-3/4 rounded-2xl flex justify-center 
-          items-center text-xl text-[#333] 
-          relative shadow-md hover:shadow-lg transition-shadow duration-300
-          bg-gradient-to-b from-pink-50/50 to-white"
-        >
-          {/* 동그란 원 - 자기소개서 관리 */}
-          <div
-            className="absolute -top-[85px] left-1/2 transform -translate-x-1/2
-            w-[200px] h-[200px] rounded-full text-[30px] leading-[1.4]
-            flex justify-center items-center text-center font-semibold bg-pink-100
-            shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300"
-          >
-            <span>
-              자기소개서<br />
-              관리
-            </span>
-          </div>
-          {/* 왼쪽 섹션 내용 */}
-          <div className="text-center space-y-8 px-10 py-8 animate-fadeIn">
-            {/* 섹션 제목 */}
-            <p className="text-xl text-gray-800 font-bold">
-                사용자가 자기소개서를 체계적으로 관리할 수 있는 관리 기능을 제공
-            </p>
-            {/* 작성 지원 설명 */}
-            <div className="text-left text-lg text-gray-700 leading-8">
-                <p className="font-semibold text-gray-800">자소서 작성</p>
-                <ul className="list-disc pl-6 space-y-2">
-                <li>30개의 기본 역량 질문 중 <strong>3개</strong>를 선택할 수 있습니다.</li>
-                <li>사용자가 선택한 직무 관련 질문 5~7개 중에서 <strong>1개</strong>를 추가로 선택하여 자기소개서를 작성할 수 있습니다.</li>
-                </ul>
-            </div>
-            
-            {/* 저장 및 목록 관리 설명 */}
-            <div className="text-left text-lg text-gray-700 leading-8">
-                <p className="font-semibold text-gray-800">저장 및 수정</p>
-                <ul className="list-disc pl-6 space-y-2">
-                <li>작성한 자기소개서를 저장하면 <strong>자기소개서 목록</strong>에 자동 추가됩니다.</li>
-                <li>목록에서 저장된 자기소개서를 클릭하면 다시 확인할 수 있습니다.</li>
-                <li>수정이 필요한 자기소개서를 선택하여 바로 수정할 수 있습니다.</li>
-                </ul>
-            </div>
-         </div>
-        </div>
-      </div>
+    <motion.div
+      onClick={onClick}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
+      whileHover={{
+        scale: 1.05,
+        boxShadow:
+          "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(0,0,255,0.2), 0px 0px 30px rgba(0,0,255,0.4), 0px 0px 30px rgba(128,128,128,0.1)",
+        }}
+        className="relative bg-white rounded-xl overflow-hidden cursor-pointer group transition-shadow duration-300"
+        style={{
+          boxShadow:
+            "0px 8px 16px rgba(0, 0, 0, 0.1), 0px 8px 16px rgba(0, 0, 0, 0.1), 0px 0px 30px rgba(0,0,255,0.1), 0px 0px 30px rgba(0,0,255,0.1), 0px 0px 30px rgba(128,128,128,0.05)",
+        }}
 
-      {/* 오른쪽 섹션 */}
-      <div className="flex-1 flex justify-center items-center relative p-6">
-        {/* 오른쪽 사각형 */}
-        <div
-          className="w-4/5 h-3/4 rounded-2xl flex justify-center 
-          items-center text-xl text-[#333] 
-          relative shadow-md hover:shadow-lg transition-shadow duration-300
-          bg-gradient-to-b from-blue-50/50 to-white"
+    >
+      <div className="relative p-6">
+        {/* 아이콘 */}
+        <motion.div
+          className="h-12 w-12 text-3xl text-blue-300"
+          transition={{ duration: 0.5 }}
         >
-          {/* 동그란 원 - 자기소개서 첨삭 */}
-          <div
-            className="absolute -top-[85px] left-1/2 transform -translate-x-1/2
-            w-[200px] h-[200px] rounded-full text-[30px] leading-[1.4] 
-            flex justify-center items-center text-center font-semibold bg-blue-100
-            shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300"
-          >
-            <span>
-              자기소개서<br />
-              첨삭
-            </span>
-          </div>
-          {/* 오른쪽 섹션 내용 */}
-          <div className="text-center space-y-8 px-10 py-8 animate-fadeIn">
-            {/* 섹션 제목 */}
-            <p className="text-xl text-gray-800 font-bold">
-                자기소개서를 검토하고 개선할 수 있는 첨삭 기능을 제공
-            </p>
+          {icon}
+        </motion.div>
 
-            {/* 첨삭 과정 설명 */}
-            <div className="text-left text-lg text-gray-700 leading-8">
-            <p className="font-semibold text-gray-800">첨삭 기능 사용 방법</p>
-            <ul className="list-disc pl-6 space-y-2">
-                <li>자기소개서 목록에서 첨삭이 필요한 자기소개서를 선택합니다.</li>
-                <li>선택한 자기소개서를 기반으로 첨삭 화면으로 이동합니다.</li>
-            </ul>
-            </div>
-            {/* 첨삭 기능의 특징 */}
-            <div className="text-left text-lg text-gray-700 leading-8">
-                <p className="font-semibold text-gray-800">첨삭 기능 특징</p>
-                <ul className="list-disc pl-6 space-y-2">
-                <li>문맥, 어휘, 구조 등을 분석하여 적절한 <strong>수정 가이드</strong>를 제공합니다.</li>
-                <li>첨삭된 결과를 확인하여 <strong>개선된 자기소개서를 확인</strong>할 수 있습니다.</li>
-                </ul>
-            </div>
-          </div>
-        </div>
+        {/* 제목 및 설명 */}
+        <h3 className="text-lg font-semibold mt-4">{title}</h3>
+        <p className="text-gray-600 text-sm mt-2">{description}</p>
+
+        {/* 살펴보기 버튼 */}
+        <motion.div
+          className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        >
+          <button
+            className="flex items-center gap-2 text-sm text-gray-900 group-hover:text-blue-500"
+            onClick={onClick}
+          >
+            살펴보기
+          </button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-export default Home;
+export default function Page() {
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      setUser(user);
+    });
+  }, []);
+
+  const services = [
+    {
+      title: "자기소개서 등록",
+      description:
+        "원하는 자기소개서 질문을 선택해 답변을 작성하고 저장할 수 있는 페이지입니다. 효율적인 자기소개서 작성을 돕기 위한 직관적인 인터페이스를 제공합니다.",
+      icon: <EditOutlined className="text-3xl text-blue-500" />,
+      path: "/self-introduction/manage/edit",
+    },
+    {
+      title: "자기소개서 관리",
+      description:
+        "저장된 자기소개서를 확인하고 AI 첨삭 및 유사 질문의 합격 자기소개서를 참고하여 수정할 수 있는 페이지입니다. 자기소개서의 완성도를 높이기 위한 다양한 도구를 제공합니다.",
+      icon: <FolderOpenOutlined className="text-3xl text-blue-500" />,
+      path: "/self-introduction/manage",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/50 to-blue-50/80">
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#4F46E5",
+          },
+        }}
+      >
+        {/* 히어로 섹션 개선 */}
+        <div className="relative pt-20 pb-16 text-center">
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 backdrop-blur-[100px]" />
+          </div>
+          <div className="relative z-10 max-w-4xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                AI 기반 자기소개서 플랫폼
+              </h1>
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
+                취업의 첫 걸음을 내딛는 이들을 위한{" "}
+                <span className="text-indigo-600 font-semibold">
+                  자기소개서 피드백 솔루션
+                </span>
+                을 제공합니다.
+              </p>
+              <p className="mt-4 text-gray-600">
+                AI가 분석해주는 자기소개서, 경쟁력을 높이는 비법을 만나보세요!
+              </p>
+            </motion.div>
+            
+            {/* 통계 섹션 추가 */}
+            <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
+              {[
+                { number: "92%", label: "사용자 만족도" },
+                { number: "15,000+", label: "합격 자소서" },
+                { number: "25/1", label: "AI 지원" },
+              ].map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="text-2xl md:text-3xl font-bold text-indigo-600">{stat.number}</div>
+                  <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 서비스 카드 섹션 */}
+        <div className="bg-gray-50 py-16">
+          <div className="max-w-7xl mx-auto px-4 pb-32">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-4xl font-bold text-gray-900">주요 서비스</h2>
+              <p className="mt-4 text-lg text-gray-600">
+              자기소개서 작성의 모든 단계를 AI와 함께 준비하세요
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
+              {services.map((service, index) => (
+                <ServiceCard
+                  key={index}
+                  title={service.title}
+                  description={service.description}
+                  icon={service.icon}
+                  delay={index * 0.1}
+                  onClick={() => router.push(service.path)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </ConfigProvider>
+    </div>
+  );
+}

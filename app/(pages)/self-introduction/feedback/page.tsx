@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Typography, Tabs, Card } from 'antd';
+import { Button, Input, Typography, Tabs, Card, Progress  } from 'antd';
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { User } from "firebase/auth";
 import { LeftOutlined, 
@@ -10,7 +10,7 @@ import { LeftOutlined,
   CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
   CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
-  BankOutlined, SafetyOutlined
+  BankOutlined, SafetyOutlined, QuestionCircleOutlined, CheckCircleOutlined  
 } from '@ant-design/icons';
 
 const { TabPane } = Tabs;
@@ -161,6 +161,14 @@ export default function FeedbackPage() {
     }
   };
 
+  const getColorByScore = (score: number) => {
+    if (score <= 3) return '#ff4d4f';      // 빨간색 (1-3점)
+    if (score <= 7) return '#ffa940';      // 주황색 (4-7점)
+    return '#1890ff';                      // 파란색 (8-10점)
+  };
+  
+  
+
   const fetchData = useCallback(async (_id: string) => {
     if (!user) return;
 
@@ -260,24 +268,41 @@ export default function FeedbackPage() {
           loading={isLoading}
           size="large"
         >
-          {isLoading ? "분석중..." : "AI 분석 시작"}
+          {isLoading ? "분석중..." : "AI 분석 요청"}
         </Button>
       </div>
 
       {/* Main Content */}
       <Tabs 
-          activeKey={activeTab} 
-          onChange={setActiveTab}
-          type="card"
-          className="mb-6"
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        type="card"
+        className="mb-6"
+        style={{
+          padding: '10px 10px 0',
+          borderRadius: '8px'
+        }}
+        tabBarStyle={{
+          margin: 0,
+          background: 'transparent'
+        }}
       >
-          {document.data.map((_, index) => (
-              <TabPane 
-                  tab={`Q${index + 1}`} 
-                  key={index.toString()} 
-                  style={{ border: '1px solid #ccc', borderRadius: '4px' }} 
-              />
-          ))}
+        {document.data.map((item, index) => (
+          <TabPane 
+            tab={
+              <div style={{ 
+                padding: '4px 16px',
+                fontWeight: activeTab === index.toString() ? '600' : '400',
+                fontSize: '16px',
+                transition: 'all 0.3s',
+                borderBottom: activeTab === index.toString() ? '2px solid #1890ff' : 'none'
+              }}>
+                Q{index + 1}
+              </div>
+            }
+            key={index.toString()}
+          />
+        ))}
       </Tabs>
 
       <div 
@@ -288,7 +313,7 @@ export default function FeedbackPage() {
         <div 
           className="transition-all duration-300 ease-in-out"
           style={{ 
-            width: feedbackData ? '40%' : '100%', 
+            width: feedbackData ? '45%' : '100%', 
             minWidth: '35%', 
             flexShrink: 0,
             position: 'sticky', // 고정 위치 설정
@@ -301,11 +326,18 @@ export default function FeedbackPage() {
               <div style={{
                 whiteSpace: 'normal',
                 wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '18px',
+                fontWeight: 600
               }}>
+                <QuestionCircleOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
                 {document.data[parseInt(activeTab)].question}
               </div>
             } 
             className="h-full"
+            headStyle={{ backgroundColor: '#eff6ff' }}  
           >
             <Input.TextArea
               value={document.data[parseInt(activeTab)].answer}
@@ -318,7 +350,7 @@ export default function FeedbackPage() {
                 });
               }}
               autoSize={{ minRows: 12, maxRows: 12 }}
-              className="mb-4"
+              className="mb-4 text-base"
             />
             <Button 
               type="primary"
@@ -339,67 +371,118 @@ export default function FeedbackPage() {
               transform: feedbackData ? 'translateX(0)' : 'translateX(20px)'
             }}
           >
-            <Card title="첨삭 결과" className="h-full">
-              <div>
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <Card size="small">
-                    <div className="text-center">
-                      <div className="text-gray-500 mb-1">관련성</div>
-                      <div className="text-xl font-bold">
-                        {feedbackData.results[parseInt(activeTab)].relevance}/10점
-                      </div>
-                    </div>
-                  </Card>
-                  <Card size="small">
-                    <div className="text-center">
-                      <div className="text-gray-500 mb-1">구체성</div>
-                      <div className="text-xl font-bold">
-                        {feedbackData.results[parseInt(activeTab)].specificity}/10점
-                      </div>
-                    </div>
-                  </Card>
-                  <Card size="small">
-                    <div className="text-center">
-                      <div className="text-gray-500 mb-1">설득력</div>
-                      <div className="text-xl font-bold">
-                        {feedbackData.results[parseInt(activeTab)].persuasiveness}/10점
-                      </div>
-                    </div>
-                  </Card>
+            <Card 
+              title={
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '18px',
+                  fontWeight: 600
+                }}>
+                  <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '18px' }} />
+                  <span>첨삭 결과</span>
                 </div>
+              } 
+              className="h-full"
+              headStyle={{ backgroundColor: '#eff6ff' }}
+            >
+              <div>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card size="small">
+                  <div className="text-center">
+                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>관련성</div>
+                    <Progress 
+                      percent={feedbackData.results[parseInt(activeTab)].relevance * 10} 
+                      showInfo={false}
+                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].relevance)}
+                      trailColor="#f5f5f5"
+                      strokeWidth={10}
+                    />
+                    <div className="text-lg font-bold mt-1">
+                      {feedbackData.results[parseInt(activeTab)].relevance}/10점
+                    </div>
+                  </div>
+                </Card>
+                <Card size="small">
+                  <div className="text-center">
+                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>구체성</div>
+                    <Progress 
+                      percent={feedbackData.results[parseInt(activeTab)].specificity * 10} 
+                      showInfo={false}
+                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].specificity)}
+                      trailColor="#f5f5f5"
+                      strokeWidth={10}
+                    />
+                    <div className="text-lg font-bold mt-1">
+                      {feedbackData.results[parseInt(activeTab)].specificity}/10점
+                    </div>
+                  </div>
+                </Card>
+                <Card size="small">
+                  <div className="text-center">
+                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>설득력</div>
+                    <Progress 
+                      percent={feedbackData.results[parseInt(activeTab)].persuasiveness * 10} 
+                      showInfo={false}
+                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].persuasiveness)}
+                      trailColor="#f5f5f5"
+                      strokeWidth={10}
+                    />
+                    <div className="text-lg font-bold mt-1">
+                      {feedbackData.results[parseInt(activeTab)].persuasiveness}/10점
+                    </div>
+                  </div>
+                </Card>
+              </div>
 
                 <div className="space-y-4">
                   <div>
-                    <Typography.Title level={5}>상세 피드백</Typography.Title>
-                    <Typography.Paragraph>
+                    <Typography.Title level={4}>상세 피드백</Typography.Title>
+                    <Typography.Paragraph className="text-base">
                       {feedbackData.results[parseInt(activeTab)].feedback}
                     </Typography.Paragraph>
                   </div>
 
                   {/* 유사도 분석 결과 */}
                   {feedbackData.results[parseInt(activeTab)].similarity > 0 && (
-                    <div className="mt-4 pt-4 border-t">
-                      <Typography.Title level={5}>유사도 분석 결과</Typography.Title>
-                      <ul className="space-y-2">
-                        <li>
-                          <Typography.Text strong>합격한 회사: </Typography.Text>
-                          {feedbackData.results[parseInt(activeTab)].similar_h2_tag}
-                        </li>
-                        <li>
-                          <Typography.Text strong>유사한 문항: </Typography.Text>
-                          {feedbackData.results[parseInt(activeTab)].similar_question}
-                        </li>
-                        <li>
-                          <Typography.Text strong>유사한 답변: </Typography.Text>
-                          {feedbackData.results[parseInt(activeTab)].similar_answer}
-                        </li>
-                        <li>
-                          <Typography.Text strong>유사도: </Typography.Text>
-                          {feedbackData.results[parseInt(activeTab)].similarity.toFixed(2)}%
-                        </li>
-                      </ul>
+                  <div className="mt-4 pt-4 border-t">
+                    <Typography.Title level={4}>유사도 분석 결과</Typography.Title>
+                    <div className="space-y-4">  {/* 각 항목 사이 간격 추가 */}
+                      <Card size="small">
+                        <div>
+                          <div className="text-gray-600 font-semibold mb-1">합격한 회사</div>
+                          <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_h2_tag}</div>
+                        </div>
+                      </Card>
+
+                      <Card size="small">
+                        <div>
+                          <div className="text-gray-600 font-semibold mb-1">유사한 문항</div>
+                          <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_question}</div>
+                        </div>
+                      </Card>
+
+                      <Card size="small">
+                        <div>
+                          <div className="text-gray-600 font-semibold mb-1">유사한 답변</div>
+                          <div className="text-lg" style={{ whiteSpace: 'pre-wrap' }}>
+                            {feedbackData.results[parseInt(activeTab)].similar_answer}
+                          </div>
+                        </div>
+                      </Card>
+
+                      <Card size="small" className="bg-blue-50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 font-semibold">유사도</span>
+                          <span className="text-xl font-bold text-blue-600">
+                            {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
+                          </span>
+                        </div>
+                      </Card>
                     </div>
-                  )}
+                  </div>
+                )}
                 </div>
               </div>
             </Card>
