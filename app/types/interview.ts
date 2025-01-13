@@ -29,6 +29,23 @@ export interface VideoAnalysis {
   침묵갯수: number | null;
   목소리변동성: string | null;
   ["음성높낮이_%"]: number | null;
+  답변강점?: string;
+  답변개선사항?: string;
+  답변종합평가?: string;
+  Score: {
+    말하기속도: number;
+    "추임새/침묵": number;
+    목소리변동성: number;
+    표정분성: number;
+    머리기울기: number;
+    시선분석: number;
+    답변평가: number;
+  };
+  Evaluation: {
+    답변강점: string;
+    답변개선사항: string;
+    답변종합평가: string;
+  };
 }
 
 export interface Analysis {
