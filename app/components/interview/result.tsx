@@ -148,7 +148,7 @@ const VoiceAnalysis = ({
       label: "말하기 속도",
       value:
         voiceData.말하기속도 !== null
-          ? `${voiceData.말하기속도.toFixed(1)}`
+          ? `${voiceData.말하기속도.toFixed(0)+" WPM"}`
           : "분석 결과 없음",
       tooltip: "발화 속도에 대한 분석",
     },
@@ -402,7 +402,7 @@ const generateAttitudeEvaluation = (scores: {
   말하기속도: number;
   "추임새/침묵": number;
   목소리변동성: number;
-  표정분성: number;
+  표정분석: number;
   머리기울기: number;
   시선분석: number;
 }) => {
@@ -424,7 +424,7 @@ const generateAttitudeEvaluation = (scores: {
       ? "추임새와 침묵을 적절히 사용하여 자연스러운 대화 흐름을 유지하고 있습니다. 이는 면접관과의 원활한 소통에 크게 기여하며, 긴장을 완화시키는 데 도움이 됩니다. 이러한 적절한 사용은 당신의 대화 능력을 잘 보여줍니다."
       : scores["추임새/침묵"] >= 5
       ? "추임새나 침묵이 약간 많습니다. 줄이려는 노력이 필요합니다. 너무 많은 추임새는 대화의 흐름을 방해할 수 있으니, 보다 신중하게 선택하여 사용하는 것이 좋습니다."
-      : "추임새나 침묵이 너무 많아 대화의 흐름을 방해합니다. 이를 줄이는 연습이 필요합니다. 자연스러운 대화를 위해 적절한 타이밍에만 추임새를 사용하고, 불필요한 침묵을 피하는 것이 좋습니다."
+      : "추임새나 침묵이 너무 많아 대화의 흐름을 방해합니다. 이를 줄이는 연습이 필요합니다. 자연스러운 대화를 위해 불필요한 추임새와 침묵을 피하는 것이 좋습니다."
     )
   );
 
@@ -433,16 +433,16 @@ const generateAttitudeEvaluation = (scores: {
     "【목소리 변화】\n" + (scores.목소리변동성 >= 8
       ? "적절한 목소리 변동성으로 생동감 있게 말하고 있습니다. 이는 면접관에게 긍정적인 인상을 주며, 듣는 이의 관심을 끌기에 충분합니다. 목소리의 높낮이를 효과적으로 활용하고 있어 매우 좋습니다."
       : scores.목소리변동성 >= 5
-      ? "목소리 변동성이 약간 부족하거나 과도합니다. 더 자연스러운 억양을 연습하세요. 목소리의 높낮이를 적절하게 조절하여 대화의 리듬을 맞추는 것이 중요합니다."
-      : "목소리 변동성이 매우 부족하거나 지나치게 과도합니다. 청취자의 집중을 방해할 수 있으니 개선이 필요합니다. 목소리의 자연스러운 흐름을 유지하여 보다 신뢰감 있는 대화를 이끌어 나가세요."
+      ? "목소리 변동성이 약간 과도합니다. 더 자연스러운 억양을 연습하세요. 목소리의 높낮이를 적절하게 조절하여 대화의 리듬을 맞추는 것이 중요합니다."
+      : "목소리 변동성이 지나치게 과도합니다. 청취자의 집중을 방해할 수 있으니 개선이 필요합니다. 목소리의 자연스러운 흐름을 유지하여 보다 신뢰감 있는 대화를 이끌어 나가세요."
     )
   );
 
   // 표정 분석 평가
   evaluations.push(
-    "【표정 분석】\n" + (scores.표정분성 >= 8
+    "【표정 분석】\n" + (scores.표정분석 >= 8
       ? "적절한 표정으로 자신감과 긍정적인 태도를 잘 표현하고 있습니다. 이는 면접관에게 긍정적인 인상을 주고, 신뢰성을 높이는 데 도움이 됩니다. 표정을 통해 전달되는 감정이 효과적으로 표현되고 있습니다."
-      : scores.표정분성 >= 5
+      : scores.표정분석 >= 5
       ? "표정이 다소 단조롭거나 과도합니다. 더 자연스러운 표정 관리가 필요합니다. 적절한 표정을 통해 자신의 감정과 태도를 조절하며, 면접관과의 비언어적 소통을 향상시켜 보세요."
       : "부정적이거나 부적절한 표정이 많습니다. 표정 관리에 주의를 기울이세요. 부정적인 표정은 면접관에게 좋지 않은 인상을 줄 수 있으니, 긍정적이고 자연스러운 표정을 유지하는 것이 중요합니다."
     )
@@ -506,20 +506,51 @@ const OverallEvaluation = ({
 
 const ScoreAnalysis = ({
   scores,
+  analysis
 }: {
   scores: {
     말하기속도: number;
     "추임새/침묵": number;
     목소리변동성: number;
-    표정분성: number;
+    표정분석: number;
     머리기울기: number;
     시선분석: number;
     답변평가: number;
   };
+  analysis: any;
 }) => {
+  const calculateAverageScores = () => {
+    const allScores = Object.values(analysis).map(interview => 
+      interview && typeof interview === 'object' ? 
+        Object.values(interview).map(round => round?.Score) : 
+        []
+    ).flat().filter(score => {
+      return score && Object.values(score).every(val => val !== null);
+    });
+
+    const recentScores = allScores.slice(-10);
+
+    if (recentScores.length === 0) return null;
+
+    return {
+      말하기속도: average(recentScores.map(s => s.말하기속도)),
+      "추임새/침묵": average(recentScores.map(s => s["추임새/침묵"])),
+      목소리변동성: average(recentScores.map(s => s.목소리변동성)),
+      표정분석: average(recentScores.map(s => s.표정분석)),
+      머리기울기: average(recentScores.map(s => s.머리기울기)),
+      시선분석: average(recentScores.map(s => s.시선분석)),
+      답변평가: average(recentScores.map(s => s.답변평가))
+    };
+  };
+
+  const average = (arr: number[]) => 
+    arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+  const averageScores = calculateAverageScores();
+
   const scoreItems = [
     { label: "답변 평가", value: scores.답변평가, maxScore: 50 },
-    { label: "표정 분석", value: scores.표정분성, maxScore: 10 },
+    { label: "표정 분석", value: scores.표정분석, maxScore: 10 },
     { label: "말하기 속도", value: scores.말하기속도, maxScore: 10 },
     { label: "추임새/침묵", value: scores["추임새/침묵"], maxScore: 10 },
     { label: "목소리 변동성", value: scores.목소리변동성, maxScore: 10 },
@@ -531,24 +562,34 @@ const ScoreAnalysis = ({
   const maxPossibleScore = 100;
   const percentage = Math.round((totalScore / maxPossibleScore) * 100);
 
-  // 총점에 따른 원형 차트 색상
   const getCircleColor = (score: number) => {
     if (score >= 90) return {
-      '0%': '#52C41A',
-      '100%': '#95DE64'
-    };      // 초록색 그라데이션
+      '0%': '#52C41A',    // 밝은 초록
+      '50%': '#73D13D',   // 중간 초록 (더 밝게)
+      '100%': '#95DE64'   // 연한 초록 (더 밝게)
+    };
     if (score >= 80) return {
-      '0%': '#FAAD14',
-      '100%': '#FFD666'
-    };      // 노란색 그라데이션
-    if (score >= 50) return {
-      '0%': '#FA8C16',
-      '100%': '#FFC069'
-    };      // 주황색 그라데이션
+      '0%': '#1890FF',    // 은 파랑
+      '50%': '#40A9FF',   // 중간 파랑 (더 밝게)
+      '100%': '#69C0FF'   // 연한 파랑 (더 밝게)
+    };
+    if (score >= 70) return {
+      '0%': '#FAAD14',    // 밝은 노랑
+      '50%': '#FFC53D',   // 중간 노랑 (더 밝게)
+      '100%': '#FFD666'   // 연한 노랑 (더 밝게)
+    };
     return {
-      '0%': '#FF4D4F',
-      '100%': '#FF7875'
-    };      // 빨간색 그라데이션
+      '0%': '#FF4D4F',    // 밝은 빨강
+      '50%': '#FF7875',   // 중간 빨강 (더 밝게)
+      '100%': '#FFA39E'   // 연한 빨강 (더 밝게)
+    };
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 90) return { text: '탁월', color: '#52C41A' };
+    if (score >= 80) return { text: '우수', color: '#1890FF' };
+    if (score >= 70) return { text: '양호', color: '#FAAD14' };
+    return { text: '개선 필요', color: '#FF4D4F' };
   };
 
   return (
@@ -564,28 +605,48 @@ const ScoreAnalysis = ({
       </div>
 
       <div className="flex relative">
-        {/* 좌측 원형 차트 */}
-        <div className="w-1/3 flex flex-col items-center justify-center">
+        <div className="w-1/3 flex flex-col items-center justify-center relative">
           <Progress
             type="circle"
             percent={percentage}
-            size={200}
+            size={250}
             strokeColor={getCircleColor(percentage)}
-            strokeWidth={10}
-            format={(percent) => (
+            strokeWidth={12}
+            format={() => (
               <div className="text-center">
-                <div className="text-2xl font-bold">{percent}점</div>
-                <div className="text-sm text-gray-500">총점</div>
+                <div className="text-5xl font-bold" style={{ color: getScoreLabel(percentage).color }}>
+                  {percentage}
+                </div>
+                <div className="text-lg font-semibold mt-1" style={{ color: getScoreLabel(percentage).color }}>
+                  {getScoreLabel(percentage).text}
+                </div>
               </div>
             )}
           />
+          <div 
+            className="absolute w-[220px] h-[220px] rounded-full"
+            style={{
+              background: `conic-gradient(from 0deg, ${getScoreLabel(percentage).color}22 0%, transparent ${percentage}%, transparent 100%)`,
+              filter: 'blur(8px)',
+              zIndex: -1
+            }}
+          />
         </div>
 
-        {/* 구분선 */}
         <div className="w-px bg-gray-300 mx-8" />
 
-        {/* 우측 수평 막대그래프 */}
         <div className="flex-1 space-y-4">
+          <div className="flex justify-end gap-4 mb-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)'}}></div>
+              <span className="text-gray-600">현재 면접 영상</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)'}}></div>
+              <span className="text-gray-600">최근 10회 평균</span>
+            </div>
+          </div>
+          
           {scoreItems.map(({ label, value, maxScore }) => (
             <div key={label} className="relative">
               <div className="flex justify-between text-sm mb-1">
@@ -594,15 +655,26 @@ const ScoreAnalysis = ({
                   {value}/{maxScore}점
                 </span>
               </div>
-              <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
+              <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out"
+                  className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
                   style={{
                     width: `${(value / maxScore) * 100}%`,
                     background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)',
                   }}
                 />
               </div>
+              {averageScores && (
+                <div className="relative h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${(averageScores[label.replace(/ /g, '') as keyof typeof averageScores] / maxScore) * 100}%`,
+                      background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)',
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -615,9 +687,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
   return (
     <Modal
       title={
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center pr-10">
           <h3 className="text-2xl font-bold">{analysis?.title}</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 ml-4">
             {analysis ? formatDate(analysis.time) : ""}
           </p>
         </div>
@@ -657,7 +729,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                             <h4 className="text-xl font-bold text-gray-800">
                               면접 질문
                             </h4>
-                            <Tooltip title="AI가 선택한 면접 질문">
+                            <Tooltip title="AI의 면접 질문">
                               <InfoCircleOutlined className="ml-2 text-gray-500" />
                             </Tooltip>
                           </div>
@@ -669,7 +741,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                             <div className="bg-white p-6 rounded-xl">
                               <div className="flex items-center mb-4">
                                 <h5 className="text-lg font-semibold text-gray-800">내 답변</h5>
-                                <Tooltip title="실제 면접에서 한 답변">
+                                <Tooltip title="잡음에 따라 인식률이 상이할 수 있음">
                                   <InfoCircleOutlined className="ml-2 text-gray-500" />
                                 </Tooltip>
                               </div>
@@ -703,6 +775,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                       <div className="grid grid-cols-4 gap-6">
                         <EmotionAnalysis emotionData={videoAnalysis["감정_%"]} />
                         <HeadPositionAnalysis headPositions={videoAnalysis["머리기울기_%"]} />
+                        <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
                         <VoiceAnalysis
                           voiceData={{
                             말하기속도: videoAnalysis.말하기속도,
@@ -711,7 +784,6 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                             침묵갯수: videoAnalysis.침묵갯수,
                           }}
                         />
-                        <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
                       </div>
 
                       <OverallEvaluation
@@ -723,7 +795,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                         }}
                       />
                       
-                      <ScoreAnalysis scores={videoAnalysis.Score} />
+                      <ScoreAnalysis scores={videoAnalysis.Score} analysis={analysis} />
                     </div>
                   ) : (
                     <div className="text-center py-16">
