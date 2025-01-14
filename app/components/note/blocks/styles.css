@@ -1,0 +1,27 @@
+.callout-block[data-callout-type="info"] {
+  background-color: #F5F5F5;
+}
+
+.callout-block[data-callout-type="warning"] {
+  background-color: #FFF3DC;
+}
+
+.callout-block[data-callout-type="idea"] {
+  background-color: #F0F7FF;
+}
+
+[data-color-scheme="dark"] .callout-block[data-callout-type="info"] {
+  background-color: #2D3748;
+}
+
+[data-color-scheme="dark"] .callout-block[data-callout-type="warning"] {
+  background-color: #4A3725;
+}
+
+[data-color-scheme="dark"] .callout-block[data-callout-type="idea"] {
+  background-color: #2D4A77;
+}
+
+.callout-content {
+  flex-grow: 1;
+} 

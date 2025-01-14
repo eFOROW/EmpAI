@@ -3,11 +3,17 @@
 import { useEffect, useState } from "react";
 import { Button, Modal } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import dynamic from 'next/dynamic';
 
 import { User, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { MyProfile, LoginForm, Career } from "@/app/components/mypage";
+
+const BlockNoteEditor = dynamic(() => 
+  import('@/app/components/note/Editor').then((mod) => mod.default), 
+  { ssr: false }
+);
 
 export default function Page() {
     const [control_id, setID] = useState(0);
@@ -81,6 +87,16 @@ export default function Page() {
                                 >
                                     이력정보 등록
                                 </Button>
+                                <Button
+                                    type="text"
+                                    className={`w-full flex items-center px-4 py-3 rounded-lg transition-all
+                                        ${control_id === 3
+                                        ? 'bg-white shadow-md text-blue-700 font-semibold' 
+                                        : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
+                                    onClick={() => setID(3)}
+                                >
+                                    내 취업노트
+                                </Button>
                             </div>
 
                             <div className="mt-8">
@@ -103,6 +119,7 @@ export default function Page() {
                             <>
                                 {control_id === 0 && <MyProfile user={user} />}
                                 {control_id === 2 && <Career user={user} />}
+                                {control_id === 3 && <BlockNoteEditor />}
                             </>
                         ) : ( // user가 없을 때
                             <LoginForm />
