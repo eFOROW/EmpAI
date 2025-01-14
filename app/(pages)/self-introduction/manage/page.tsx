@@ -246,8 +246,9 @@ const ListPage = ({ user }: ListPageProps) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ _id }), 
+          body: JSON.stringify({ _id, uid: user.uid }), 
         });
+        console.log(response);
 
         const data = await response.json();
 

@@ -1,27 +1,83 @@
-.callout-block[data-callout-type="info"] {
-  background-color: #F5F5F5;
+.callout {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-grow: 1;
+    border-radius: 8px;
+    min-height: 48px;
+    padding: 12px;
+    margin: 4px 0;
 }
 
-.callout-block[data-callout-type="warning"] {
-  background-color: #FFF3DC;
+.callout[data-callout-type="info"] {
+    background-color: #e6ebff;
 }
 
-.callout-block[data-callout-type="idea"] {
-  background-color: #F0F7FF;
+.callout[data-callout-type="warning"] {
+    background-color: #fff6e6;
 }
 
-[data-color-scheme="dark"] .callout-block[data-callout-type="info"] {
-  background-color: #2D3748;
+.callout[data-callout-type="tip"] {
+    background-color: #e6ffe6;
 }
 
-[data-color-scheme="dark"] .callout-block[data-callout-type="warning"] {
-  background-color: #4A3725;
+.callout[data-callout-type="important"] {
+    background-color: #ffe6e6;
 }
 
-[data-color-scheme="dark"] .callout-block[data-callout-type="idea"] {
-  background-color: #2D4A77;
+[data-color-scheme="dark"] .callout[data-callout-type="info"] {
+    background-color: #203380;
 }
 
-.callout-content {
-  flex-grow: 1;
+[data-color-scheme="dark"] .callout[data-callout-type="warning"] {
+    background-color: #805d20;
+}
+
+[data-color-scheme="dark"] .callout[data-callout-type="tip"] {
+    background-color: #208020;
+}
+
+[data-color-scheme="dark"] .callout[data-callout-type="important"] {
+    background-color: #802020;
+}
+
+.callout-icon-wrapper {
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 12px;
+    height: 24px;
+    width: 24px;
+    user-select: none;
+    cursor: pointer;
+}
+
+.callout-icon[data-callout-icon-type="info"] {
+    color: #507aff;
+}
+
+.callout-icon[data-callout-icon-type="warning"] {
+    color: #e69819;
+}
+
+.callout-icon[data-callout-icon-type="tip"] {
+    color: #0bc10b;
+}
+
+.callout-icon[data-callout-icon-type="important"] {
+    color: #d80d0d;
+}
+
+.inline-content {
+    flex-grow: 1;
+}
+
+.blocks-content {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.blocks-content > div {
+    width: 100%;
 } 

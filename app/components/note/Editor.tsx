@@ -10,24 +10,75 @@ import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { EditOutlined } from '@ant-design/icons';
 import { Divider } from "./blocks/Divider";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { RiDivideLine } from 'react-icons/ri';
+import { RiDivideLine, RiInformationLine } from 'react-icons/ri';
+import { Bookmark } from "./blocks/Bookmark";
+import { Callout } from "./blocks/Callout";
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     divider: Divider,
+    bookmark: Bookmark
   },
 });
 
-const insertDivider = (editor: typeof schema.BlockNoteEditor) => ({
+const insertDivider = (editor: any) => ({
     title: "구분선",
     onItemClick: () => {
-      insertOrUpdateBlock(editor, {
-        type: "divider",
-      });
+      const pos = editor.getTextCursorPosition();
+      editor.insertBlocks([{ type: "divider" }], pos.block, 'after');
+      editor.insertBlocks([{ type: "paragraph" }], pos.block.id, 'after');
     },
     group: "기타",
     icon: <RiDivideLine />,
+});
+
+const insertBookmark = (editor: any) => ({
+  title: "북마크 추가",
+  onItemClick: async () => {
+    const url = window.prompt("URL을 입력하세요");
+    const pos = editor.getTextCursorPosition();
+    
+    if (url && /^https?:\/\/[^\s]+$/.test(url)) {
+      try {
+        const response = await fetch(`/api/note/metadata?url=${encodeURIComponent(url)}`);
+        const metadata = await response.json();
+        
+        if (response.ok) {
+          editor.insertBlocks([
+            {
+              type: "bookmark",
+              props: {
+                url: url,
+                title: metadata.title,
+                description: metadata.description,
+                image: metadata.image
+              }
+            }
+          ], pos.block, 'after');
+          editor.insertBlocks([{ type: "paragraph" }], pos.block.id, 'after');
+        } else {
+          throw new Error(metadata.error);
+        }
+      } catch (error) {
+        console.error('북마크 생성 실패:', error);
+        editor.insertBlocks([
+          {
+            type: "bookmark",
+            props: {
+              url: url,
+              title: url,
+              description: "",
+              image: ""
+            }
+          }
+        ], pos.block, 'after');
+        editor.insertBlocks([{ type: "paragraph" }], pos.block.id, 'after');
+      }
+    }
+  },
+  group: "기타",
+  icon: <span>🔖</span>,
 });
 
 export default function Editor() {
@@ -42,17 +93,12 @@ export default function Editor() {
   }, []);
 
   const editor = useCreateBlockNote({
-    schema,
+    schema: schema as any,
     dictionary: locales.ko,
     placeholders: {
         ...locales.ko.placeholders,
         default: "'/'를 입력해 명령어 사용"
-    },
-    initialContent: [
-      {
-        type: "divider",
-      },
-    ],
+    }
   });
   useEffect(() => {
     const loadContent = async () => {
@@ -148,7 +194,7 @@ export default function Editor() {
     <div className="flex flex-col">
       <div className="p-4 bg-blue-50 mb-4 rounded-lg">
         <h1 className="text-xl text-blue-700 font-semibold">
-          나만의 취업노트를 꾸며보세요! ✨
+          나만의 취업노트를 꾸며며며보세요! ✨
         </h1>
         <p className="text-blue-600 mt-1">
           면접 준비, 자기소개서, 포트폴리오 등 취업 준비에 필요한 모든 것을 기록해보세요.
@@ -159,7 +205,7 @@ export default function Editor() {
         triggerCharacter={"/"}
         getItems={async (query) =>
           filterSuggestionItems(
-            [...getDefaultReactSlashMenuItems(editor), insertDivider(editor)],
+            [...getDefaultReactSlashMenuItems(editor), insertDivider(editor), insertBookmark(editor)],
             query
           )
         }
