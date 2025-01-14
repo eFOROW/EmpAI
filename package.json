@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@ant-design/charts": "^2.2.6",
+    "@blocknote/core": "^0.22.0",
+    "@blocknote/mantine": "^0.22.0",
+    "@blocknote/react": "^0.22.0",
     "@google-analytics/data": "^4.12.0",
     "@types/js-cookie": "^3.0.6",
     "@types/navermaps": "^3.7.8",
@@ -35,6 +38,7 @@
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
