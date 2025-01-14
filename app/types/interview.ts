@@ -36,7 +36,7 @@ export interface VideoAnalysis {
     말하기속도: number;
     "추임새/침묵": number;
     목소리변동성: number;
-    표정분성: number;
+    표정분석: number;
     머리기울기: number;
     시선분석: number;
     답변평가: number;

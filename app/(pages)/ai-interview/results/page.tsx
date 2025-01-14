@@ -528,7 +528,10 @@ export default function AnalysisResultsPage() {
           }
           
           const data = await response.json();
-          setAnalysisResults(data);
+          const sortedData = data.sort((a: Analysis, b: Analysis) => 
+            new Date(b.time).getTime() - new Date(a.time).getTime()
+          );
+          setAnalysisResults(sortedData);
         }
       } catch (err) {
         setError("분석 결과를 불러오는데 실패했습니다.");
