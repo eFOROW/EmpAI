@@ -44,6 +44,12 @@ const insertBookmark = (editor: any) => ({
         const metadata = await response.json();
         
         if (response.ok) {
+          let imageUrl = metadata.image;
+          if (imageUrl && !imageUrl.startsWith('http')) {
+            const urlObj = new URL(url);
+            imageUrl = new URL(imageUrl, urlObj.origin).toString();
+          }
+          
           editor.insertBlocks([
             {
               type: "bookmark",
@@ -51,7 +57,7 @@ const insertBookmark = (editor: any) => ({
                 url: url,
                 title: metadata.title,
                 description: metadata.description,
-                image: metadata.image
+                image: imageUrl
               }
             }
           ], pos.block, 'after');
