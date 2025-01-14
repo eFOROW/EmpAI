@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { locales, filterSuggestionItems, insertOrUpdateBlock } from "@blocknote/core";
+import { locales, filterSuggestionItems } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { SuggestionMenuController, getDefaultReactSlashMenuItems, useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -10,9 +10,8 @@ import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { EditOutlined } from '@ant-design/icons';
 import { Divider } from "./blocks/Divider";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { RiDivideLine, RiInformationLine } from 'react-icons/ri';
+import { RiDivideLine } from 'react-icons/ri';
 import { Bookmark } from "./blocks/Bookmark";
-import { Callout } from "./blocks/Callout";
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -194,7 +193,7 @@ export default function Editor() {
     <div className="flex flex-col">
       <div className="p-4 bg-blue-50 mb-4 rounded-lg">
         <h1 className="text-xl text-blue-700 font-semibold">
-          나만의 취업노트를 꾸며며며보세요! ✨
+          나만의 취업노트를 꾸며보세요! ✨
         </h1>
         <p className="text-blue-600 mt-1">
           면접 준비, 자기소개서, 포트폴리오 등 취업 준비에 필요한 모든 것을 기록해보세요.
