@@ -89,6 +89,7 @@ const insertBookmark = (editor: any) => ({
 export default function Editor() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
   
   useEffect(() => {
     getCurrentUser().then(user => {
@@ -120,8 +121,10 @@ export default function Editor() {
         if (data.content) {
           editor.replaceBlocks(editor.topLevelBlocks, data.content);
         }
+        setIsContentLoaded(true);
       } catch (error) {
         console.error('로드 실패:', error);
+        setIsContentLoaded(true);
       }
     };
 
@@ -129,7 +132,7 @@ export default function Editor() {
   }, [user, editor]);
 
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user?.uid || !isContentLoaded) return;
 
     const saveContent = async () => {
       const blocks = editor.topLevelBlocks;
@@ -171,7 +174,7 @@ export default function Editor() {
       clearTimeout(timeoutId);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [user, editor]);
+  }, [user, editor, isContentLoaded]);
 
   if (loading) {
     return (
@@ -205,7 +208,11 @@ export default function Editor() {
           면접 준비, 자기소개서, 포트폴리오 등 취업 준비에 필요한 모든 것을 기록해보세요.
         </p>
       </div>
-      <BlockNoteView editor={editor} slashMenu={false}>
+      <BlockNoteView
+        editor={editor} 
+        slashMenu={false}
+        spellCheck={false}
+      >
       <SuggestionMenuController
         triggerCharacter={"/"}
         getItems={async (query) =>
