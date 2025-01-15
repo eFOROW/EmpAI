@@ -3,11 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { TypingText } from "../../components/Home";
 import { fadeIn, staggerContainer } from "../../utils/motion";
+import { TypingText } from "../../components/Home";
 
 const About = () => (
-  <section className="paddings relative z-10">
+  <section className="paddings relative z-10" id="about">
     <div className="gradient-02 z-0" />
     <motion.div
       variants={staggerContainer(0.25, 0.25)}
