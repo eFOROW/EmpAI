@@ -25,7 +25,7 @@ export async function GET() {
 
     // AI 면접 서버 상태 확인
     try {
-        const interviewResponse = await fetch('https://safe-harmless-shark.ngrok-free.app/health', {
+        const interviewResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/health', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

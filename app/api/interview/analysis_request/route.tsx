@@ -103,7 +103,7 @@ export async function POST(request: Request) {
    });
 
    // 분석 서버로 전송
-   const analyzeResponse = await fetch('https://safe-harmless-shark.ngrok-free.app/analyze', {
+   const analyzeResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/analyze', {
      method: 'POST',
      body: analyzeFormData
    });

@@ -22,7 +22,7 @@ const Explore = () => {
         <TitleText
           title={
             <>
-              다양한 AI서비스 제공 <br className="md:block hidden" />
+              취업 맞춤서비스<br className="md:block hidden" />
             </>
           }
           textStyles="text-center"

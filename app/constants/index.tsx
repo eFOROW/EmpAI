@@ -16,13 +16,13 @@ export const exploreWorlds = [
   },
   {
     id: "world-4",
-    imgUrl: "/planet-04.png",
-    title: "-----",
+    imgUrl: "/explore-airesult.png",
+    title: "AI모의면접ㆍ피드백",
   },
   {
     id: "world-5",
-    imgUrl: "/planet-05.png",
-    title: "AI모의면접ㆍ피드백",
+    imgUrl: "/explore-note.png",
+    title: "나만의 취업노트",
   },
 ];
 

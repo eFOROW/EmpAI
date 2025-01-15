@@ -154,8 +154,64 @@ html {
   }
   .heroHeading3 {
     @apply font-bold lg:text-[72px] md:text-[50px] sm:text-[40px] text-[30px] lg:leading-[80px] md:leading-[60px] sm:leading-[48px] leading-[42px] text-primary-black;
+    background-clip: text;
+    -webkit-background-clip: text;
   }
   .heroDText {
     @apply md:w-[120px] sm:w-[40px] w-[30px] md:h-[60px] sm:h-[30px] h-[20px] md:border-[9px] border-[5px] rounded-r-[25px] border-primary-black sm:mx-2 mx-[6px];
+  }
+  
+  @keyframes shine {
+    from {
+      transform: translateX(-100%) translateY(-100%) rotate(90deg);
+    }
+    to {
+      transform: translateX(100%) translateY(100%) rotate(150deg);
+    }
+  }
+  
+  .animate-shine {
+    animation: shine 4s infinite;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 10%,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.3) 30%,
+      rgba(255, 255, 255, 0.2) 40%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 60%
+    );
+    width: 100%;
+    height: 70%;
+  }
+
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+
+  .bg-pos-0 {
+    background-position: 0% 0%;
+  }
+
+  .hover\:bg-pos-100:hover {
+    background-position: 100% 100%;
+  }
+
+  @keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-gradient {
+    animation: gradientMove 3s ease infinite;
+    background-size: 200% 200%;
   }
 }
