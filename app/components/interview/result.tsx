@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import { Modal, Progress, Tabs, Tooltip, Spin } from "antd";
 import {
   BarChartOutlined,
@@ -13,6 +11,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import type { VideoAnalysis, ResultModalProps } from "@/app/types/interview";
+import  VideoPlayer from '@/app/components/interview/videoplayer';
+import React, { useState, useEffect, useMemo } from "react";
+
 
 const emotionLabels: { [key: string]: string } = {
   Angry: "화남",
@@ -682,10 +683,135 @@ const ScoreAnalysis = ({
     </div>
   );
 };
+interface VideoPlayerProps {
+  uid: string;
+  filename: string;
+  onLoad?: () => void;  // onLoad를 선택적 prop으로 추가
+}
+
 
 const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis }) => {
+  const [activeTab, setActiveTab] = useState('tab-1');
+  const [modalKey, setModalKey] = useState(0);
+
+  useEffect(() => {
+    if (visible) {
+      setModalKey(prev => prev + 1);
+      setActiveTab('tab-1');
+    }
+  }, [visible]);
+
+  const tabItems = useMemo(() => {
+    if (!analysis || !analysis.uid) return [];
+
+    return [1, 2, 3, 4].map((num) => {
+      const tabKey = `tab-${num}`;
+      const videoAnalysis = analysis[analysis.uid][num.toString()];
+      return {
+        key: tabKey,
+        label: (
+          <span className="px-4">
+            면접 {num}
+            {videoAnalysis && (
+              <span className="ml-2 text-green-500">●</span>
+            )}
+          </span>
+        ),
+        children: (
+          <div className="p-4">
+            {videoAnalysis ? (
+              <div className="space-y-8">
+                <div className="flex gap-6">
+                  <div className="flex-[5.5] bg-blue-50 p-6 rounded-2xl shadow-lg">
+                    <div className="flex items-center mb-4">
+                      <div className="bg-blue-100 rounded-full p-3 mr-4">
+                        <FileTextOutlined className="text-blue-500 text-2xl" />
+                      </div>
+                      <h4 className="text-xl font-bold text-gray-800">
+                        면접 질문
+                      </h4>
+                      <Tooltip title="AI의 면접 질문">
+                        <InfoCircleOutlined className="ml-2 text-gray-500" />
+                      </Tooltip>
+                    </div>
+                    <p className="text-base text-gray-700 mb-6">
+                      {videoAnalysis.question}
+                    </p>
+                    
+                    <div className="border-t border-blue-200 mt-6 pt-6">
+                      <div className="bg-white p-6 rounded-xl">
+                        <div className="flex items-center mb-4">
+                          <h5 className="text-lg font-semibold text-gray-800">내 답변</h5>
+                          <Tooltip title="잡음에 따라 인식률이 상이할 수 있음">
+                            <InfoCircleOutlined className="ml-2 text-gray-500" />
+                          </Tooltip>
+                        </div>
+                        <p className="text-gray-700 text-base">
+                          {videoAnalysis.답변 || "답변 데이터가 없습니다."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-[4.5] bg-white p-6 rounded-2xl shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-gray-100">
+                    <div className="flex items-center mb-3">
+                      <div className="bg-red-100 rounded-full p-2 mr-4">
+                        <PlayCircleOutlined className="text-red-500 text-2xl" />
+                      </div>
+                      <h4 className="text-xl font-bold text-gray-800">면접 영상</h4>
+                    </div>
+                    <div className="relative pt-[2%]">
+                      {activeTab === tabKey && (
+                        <VideoPlayer
+                          key={`video-${analysis.uid}-${num}-${modalKey}`}
+                          uid={analysis.uid}
+                          filename={videoAnalysis.video_filename}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-6">
+                  <EmotionAnalysis emotionData={videoAnalysis["감정_%"]} />
+                  <HeadPositionAnalysis headPositions={videoAnalysis["머리기울기_%"]} />
+                  <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
+                  <VoiceAnalysis
+                    voiceData={{
+                      말하기속도: videoAnalysis.말하기속도,
+                      목소리변동성: videoAnalysis.목소리변동성,
+                      추임새갯수: videoAnalysis.추임새갯수,
+                      침묵갯수: videoAnalysis.침묵갯수,
+                    }}
+                  />
+                </div>
+
+                <OverallEvaluation
+                  attitudeEvaluation={generateAttitudeEvaluation(videoAnalysis.Score)}
+                  answerEvaluation={{
+                    strengths: videoAnalysis.Evaluation?.답변강점 || "답변 강점 데이터가 없습니다.",
+                    improvements: videoAnalysis.Evaluation?.답변개선사항 || "개선사항 데이터가 없습니다.",
+                    overall: videoAnalysis.Evaluation?.답변종합평가 || "종합 평가 데이터가 없습니다."
+                  }}
+                />
+                
+                <ScoreAnalysis scores={videoAnalysis.Score} analysis={analysis} />
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <Spin size="large" />
+                <p className="mt-4 text-gray-500">분석 중입니다...</p>
+              </div>
+            )}
+          </div>
+        ),
+      };
+    });
+  }, [analysis, modalKey, activeTab]);
+
   return (
     <Modal
+      key={modalKey}
       title={
         <div className="flex justify-between items-center pr-10">
           <h3 className="text-2xl font-bold">{analysis?.title}</h3>
@@ -700,113 +826,13 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
       footer={null}
       className="analysis-modal"
     >
-      {analysis && (
+      {analysis && analysis.uid && (
         <Tabs
           defaultActiveKey="1"
           type="card"
-          items={[1, 2, 3, 4].map((num) => {
-            const videoAnalysis = analysis[analysis.uid]?.[num.toString()];
-            return {
-              key: `tab-${num}`,
-              label: (
-                <span className="px-4">
-                  면접 {num}
-                  {videoAnalysis && (
-                    <span className="ml-2 text-green-500">●</span>
-                  )}
-                </span>
-              ),
-              children: (
-                <div className="p-4">
-                  {videoAnalysis ? (
-                    <div className="space-y-8">
-                      <div className="flex gap-6">
-                        <div className="flex-[5.5] bg-blue-50 p-6 rounded-2xl shadow-lg">
-                          <div className="flex items-center mb-4">
-                            <div className="bg-blue-100 rounded-full p-3 mr-4">
-                              <FileTextOutlined className="text-blue-500 text-2xl" />
-                            </div>
-                            <h4 className="text-xl font-bold text-gray-800">
-                              면접 질문
-                            </h4>
-                            <Tooltip title="AI의 면접 질문">
-                              <InfoCircleOutlined className="ml-2 text-gray-500" />
-                            </Tooltip>
-                          </div>
-                          <p className="text-base text-gray-700 mb-6">
-                            {videoAnalysis.question}
-                          </p>
-                          
-                          <div className="border-t border-blue-200 mt-6 pt-6">
-                            <div className="bg-white p-6 rounded-xl">
-                              <div className="flex items-center mb-4">
-                                <h5 className="text-lg font-semibold text-gray-800">내 답변</h5>
-                                <Tooltip title="잡음에 따라 인식률이 상이할 수 있음">
-                                  <InfoCircleOutlined className="ml-2 text-gray-500" />
-                                </Tooltip>
-                              </div>
-                              <p className="text-gray-700 text-base">
-                                {videoAnalysis.답변 || "답변 데이터가 없습니다."}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex-[4.5] bg-white p-6 rounded-2xl shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-gray-100">
-                          <div className="flex items-center mb-3">
-                            <div className="bg-red-100 rounded-full p-2 mr-4">
-                              <PlayCircleOutlined className="text-red-500 text-2xl" />
-                            </div>
-                            <h4 className="text-xl font-bold text-gray-800">면접 영상</h4>
-                          </div>
-                          <div className="relative pt-[56.25%]">
-                            <iframe
-                              className="absolute top-0 left-0 w-full h-full rounded-xl"
-                              src="https://www.youtube.com/embed/u_ziPVJyO1o"
-                              title="면접 영상"
-                              frameBorder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-6">
-                        <EmotionAnalysis emotionData={videoAnalysis["감정_%"]} />
-                        <HeadPositionAnalysis headPositions={videoAnalysis["머리기울기_%"]} />
-                        <EyeTrackingAnalysis eyeTrackingData={videoAnalysis["아이트래킹_%"]} />
-                        <VoiceAnalysis
-                          voiceData={{
-                            말하기속도: videoAnalysis.말하기속도,
-                            목소리변동성: videoAnalysis.목소리변동성,
-                            추임새갯수: videoAnalysis.추임새갯수,
-                            침묵갯수: videoAnalysis.침묵갯수,
-                          }}
-                        />
-                      </div>
-
-                      <OverallEvaluation
-                        attitudeEvaluation={generateAttitudeEvaluation(videoAnalysis.Score)}
-                        answerEvaluation={{
-                          strengths: videoAnalysis.Evaluation?.답변강점 || "답변 강점 데이터가 없습니다.",
-                          improvements: videoAnalysis.Evaluation?.답변개선사항 || "개선사항 데이터가 없습니다.",
-                          overall: videoAnalysis.Evaluation?.답변종합평가 || "종합 평가 데이터가 없습니다."
-                        }}
-                      />
-                      
-                      <ScoreAnalysis scores={videoAnalysis.Score} analysis={analysis} />
-                    </div>
-                  ) : (
-                    <div className="text-center py-16">
-                      <Spin size="large" />
-                      <p className="mt-4 text-gray-500">분석 중입니다...</p>
-                    </div>
-                  )}
-                </div>
-              ),
-            };
-          })}
+          activeKey={activeTab}
+          onChange={(key) => setActiveTab(key)}
+          items={tabItems}
         />
       )}
     </Modal>

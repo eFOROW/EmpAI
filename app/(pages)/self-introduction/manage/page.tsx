@@ -343,73 +343,81 @@ const ListPage = ({ user }: ListPageProps) => {
 
   if (selectedDocument) {
     return (
-      <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="p-6 mx-auto mt-8">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-start mb-8">
-            <Button
-              onClick={() => setSelectedDocument(null)}
-              icon={<LeftOutlined />}
-              className="mr-4 hover:bg-gray-100 rounded-full h-10 w-10 flex items-center justify-center border-none absolute"
-            />
-            <div className="w-full flex justify-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-                  {selectedDocument.title}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <Text
-                    className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
-                    style={{
-                      color: jobStyles[selectedDocument.job_code]?.color ?? "#666",
-                      backgroundColor: jobStyles[selectedDocument.job_code]?.bgColor ?? "#f5f5f5",
-                      border: `1px solid ${jobStyles[selectedDocument.job_code]?.borderColor ?? "#d9d9d9"}`,
-                      width: 'fit-content',
-                      display: 'inline-flex'
-                    }}
-                  >
-                    {jobStyles[selectedDocument.job_code]?.icon ?? null}
-                    {selectedDocument.job_code}
-                  </Text>
-                  <span className="text-sm text-gray-500">
-                    최근 수정: {selectedDocument.last_modified.toLocaleDateString()}{" "}
-                    {selectedDocument.last_modified.toLocaleTimeString()}
-                  </span>
+      <div className="flex flex-col items-center min-h-screen bg-white">
+        <div style={{ width: '100%', minWidth: '900px', maxWidth: '1050px' }} className="p-6 mx-auto mt-8">
+          <div className="p-6 mx-auto mt-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.15)] rounded-xl">
+            <div className="flex items-start mb-8">
+              <Button
+                onClick={() => setSelectedDocument(null)}
+                icon={<LeftOutlined />}
+                className="mr-4 hover:bg-gray-100 rounded-full h-10 w-10 flex items-center justify-center border-none absolute"
+              />
+              <div className="w-full flex justify-center">
+                <div className="border-b pb-6 mb-8 mt-4">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                    {selectedDocument.title}
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <Text
+                      className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                      style={{
+                        color: jobStyles[selectedDocument.job_code]?.color ?? "#666",
+                        backgroundColor: jobStyles[selectedDocument.job_code]?.bgColor ?? "#f5f5f5",
+                        border: `1px solid ${jobStyles[selectedDocument.job_code]?.borderColor ?? "#d9d9d9"}`,
+                        width: 'fit-content',
+                        display: 'inline-flex'
+                      }}
+                    >
+                      {jobStyles[selectedDocument.job_code]?.icon ?? null}
+                      {selectedDocument.job_code}
+                    </Text>
+                    <span className="text-sm text-gray-500">
+                      최근 수정: {selectedDocument.last_modified.toLocaleDateString()}{" "}
+                      {selectedDocument.last_modified.toLocaleTimeString()}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 질문/답변 영역 */}
-          <div className="space-y-8">
-            {selectedDocument.data.map((item, index) => (
-              <div 
-                key={index} 
-                className="bg-gray-50 rounded-lg p-6 transition-all duration-200 hover:shadow-md"
+            <div className="space-y-12">
+              {selectedDocument.data.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="border-l-4 border-[#4A90E2] pl-6 mb-12"
+                >
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="text-[#4A90E2] mr-3 text-xl">Q{index + 1}.</span>
+                    {item.question}
+                  </h3>
+                  <Input.TextArea
+                    value={updatedAnswers[item.question] || ""}
+                    onChange={(e) => handleAnswerChange(item.question, e.target.value)}
+                    autoSize={{ minRows: 3, maxRows: 20 }}
+                    className="border border-gray-200 rounded-lg focus:border-[#7C8DA6] hover:border-[#7C8DA6]/50 transition-all duration-200"
+                    style={{ 
+                      resize: 'none',
+                      padding: '16px',
+                      fontSize: '16px',
+                      lineHeight: '1.8',
+                      backgroundColor: '#ffffff',
+                      color: '#374151'
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <Button
+                type="primary"
+                onClick={confirm}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-2 h-auto rounded-lg text-lg font-medium transition-all duration-300 border-none shadow-md hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Q{index + 1}. {item.question}
-                </h3>
-                <Input.TextArea
-                  value={updatedAnswers[item.question] || ""}
-                  onChange={(e) => handleAnswerChange(item.question, e.target.value)}
-                  rows={8}
-                  className="border-2 focus:border-blue-400 hover:border-blue-300 transition-colors duration-200"
-                  style={{ resize: 'none' }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* 수정 버튼 */}
-          <div className="mt-8 flex justify-center">
-            <Button
-              type="primary"
-              onClick={confirm}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-2 h-auto rounded-lg text-lg font-medium transition-all duration-300 border-none shadow-md hover:shadow-lg"
-            >
-              수정하기
-            </Button>
-            {contextHolder}
+                수정하기
+              </Button>
+              {contextHolder}
+            </div>
           </div>
         </div>
       </div>
