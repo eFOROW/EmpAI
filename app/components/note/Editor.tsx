@@ -40,7 +40,8 @@ const insertBookmark = (editor: any) => ({
     
     if (url && /^https?:\/\/[^\s]+$/.test(url)) {
       try {
-        const response = await fetch(`/api/note/metadata?url=${encodeURIComponent(url)}`);
+        const encodedUrl = btoa(url);
+        const response = await fetch(`/api/note/metadata?encodedUrl=${encodedUrl}`);
         const metadata = await response.json();
         
         if (response.ok) {
