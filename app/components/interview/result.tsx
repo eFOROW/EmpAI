@@ -10,7 +10,7 @@ import {
   PlayCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import type { VideoAnalysis, ResultModalProps } from "@/app/types/interview";
+import type { Analysis, VideoAnalysis } from "@/app/types/interview";
 import  VideoPlayer from '@/app/components/interview/videoplayer';
 import React, { useState, useEffect, useMemo } from "react";
 
@@ -505,9 +505,24 @@ const OverallEvaluation = ({
   </div>
 );
 
+interface ResultModalProps {
+  visible: boolean;
+  onClose: () => void;
+  analysis: Analysis | null;
+  averageScores: {
+    말하기속도: number;
+    "추임새/침묵": number;
+    목소리변동성: number;
+    표정분석: number;
+    머리기울기: number;
+    시선분석: number;
+    답변평가: number;
+  } | null;
+}
+
 const ScoreAnalysis = ({
   scores,
-  analysis
+  averageScores
 }: {
   scores: {
     말하기속도: number;
@@ -518,50 +533,9 @@ const ScoreAnalysis = ({
     시선분석: number;
     답변평가: number;
   };
-  analysis: any;
+  averageScores: ResultModalProps['averageScores'];
 }) => {
-  const calculateAverageScores = () => {
-    const allScores = Object.values(analysis).map(interview => 
-      interview && typeof interview === 'object' ? 
-        Object.values(interview).map(round => round?.Score) : 
-        []
-    ).flat().filter(score => {
-      return score && Object.values(score).every(val => val !== null);
-    });
-
-    const recentScores = allScores.slice(-10);
-
-    if (recentScores.length === 0) return null;
-
-    return {
-      말하기속도: average(recentScores.map(s => s.말하기속도)),
-      "추임새/침묵": average(recentScores.map(s => s["추임새/침묵"])),
-      목소리변동성: average(recentScores.map(s => s.목소리변동성)),
-      표정분석: average(recentScores.map(s => s.표정분석)),
-      머리기울기: average(recentScores.map(s => s.머리기울기)),
-      시선분석: average(recentScores.map(s => s.시선분석)),
-      답변평가: average(recentScores.map(s => s.답변평가))
-    };
-  };
-
-  const average = (arr: number[]) => 
-    arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-
-  const averageScores = calculateAverageScores();
-
-  const scoreItems = [
-    { label: "답변 평가", value: scores.답변평가, maxScore: 50 },
-    { label: "표정 분석", value: scores.표정분석, maxScore: 10 },
-    { label: "말하기 속도", value: scores.말하기속도, maxScore: 10 },
-    { label: "추임새/침묵", value: scores["추임새/침묵"], maxScore: 10 },
-    { label: "목소리 변동성", value: scores.목소리변동성, maxScore: 10 },
-    { label: "머리 기울기", value: scores.머리기울기, maxScore: 5 },
-    { label: "시선 분석", value: scores.시선분석, maxScore: 5 },
-  ];
-
-  const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-  const maxPossibleScore = 100;
-  const percentage = Math.round((totalScore / maxPossibleScore) * 100);
+  if (!scores || !averageScores) return null;
 
   const getCircleColor = (score: number) => {
     if (score >= 90) return {
@@ -570,7 +544,7 @@ const ScoreAnalysis = ({
       '100%': '#95DE64'   // 연한 초록 (더 밝게)
     };
     if (score >= 80) return {
-      '0%': '#1890FF',    // 은 파랑
+      '0%': '#1890FF',    // 밝은 파랑
       '50%': '#40A9FF',   // 중간 파랑 (더 밝게)
       '100%': '#69C0FF'   // 연한 파랑 (더 밝게)
     };
@@ -593,96 +567,110 @@ const ScoreAnalysis = ({
     return { text: '개선 필요', color: '#FF4D4F' };
   };
 
+  const totalScore = Object.values(scores).reduce((acc, curr) => acc + curr, 0);
+  const scorePercentage = (totalScore / 100) * 100;
+  const scoreLabel = getScoreLabel(scorePercentage);
+  const circleColor = getCircleColor(scorePercentage);
+
+  const scoreItems = [
+    { label: "답변 평가", value: scores.답변평가, average: averageScores.답변평가, total: 50 },
+    { label: "표정 분석", value: scores.표정분석, average: averageScores.표정분석, total: 10 },
+    { label: "말하기 속도", value: scores.말하기속도, average: averageScores.말하기속도, total: 10 },
+    { label: "추임새/침묵", value: scores["추임새/침묵"], average: averageScores["추임새/침묵"], total: 10 },
+    { label: "목소리 변동성", value: scores.목소리변동성, average: averageScores.목소리변동성, total: 10 },
+    { label: "머리 기울기", value: scores.머리기울기, average: averageScores.머리기울기, total: 5 },
+    { label: "시선 분석", value: scores.시선분석, average: averageScores.시선분석, total: 5 }
+  ];
+
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-gray-100">
-      <div className="flex items-center mb-6">
-        <div className="bg-yellow-100 rounded-full p-3 mr-4">
-          <BarChartOutlined className="text-yellow-500 text-2xl" />
-        </div>
-        <h4 className="text-xl font-bold text-gray-800">종합 분석 점수</h4>
-        <Tooltip title="각 항목별 분석 점수">
-          <InfoCircleOutlined className="ml-2 text-gray-500" />
-        </Tooltip>
-      </div>
-
-      <div className="flex relative">
-        <div className="w-1/3 flex flex-col items-center justify-center relative">
-          <Progress
-            type="circle"
-            percent={percentage}
-            size={250}
-            strokeColor={getCircleColor(percentage)}
-            strokeWidth={12}
-            format={() => (
-              <div className="text-center">
-                <div className="text-5xl font-bold" style={{ color: getScoreLabel(percentage).color }}>
-                  {percentage}
-                </div>
-                <div className="text-lg font-semibold mt-1" style={{ color: getScoreLabel(percentage).color }}>
-                  {getScoreLabel(percentage).text}
-                </div>
-              </div>
-            )}
-          />
-          <div 
-            className="absolute w-[220px] h-[220px] rounded-full"
-            style={{
-              background: `conic-gradient(from 0deg, ${getScoreLabel(percentage).color}22 0%, transparent ${percentage}%, transparent 100%)`,
-              filter: 'blur(8px)',
-              zIndex: -1
-            }}
-          />
-        </div>
-
-        <div className="w-px bg-gray-300 mx-8" />
-
-        <div className="flex-1 space-y-4">
-          <div className="flex justify-end gap-4 mb-2 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)'}}></div>
-              <span className="text-gray-600">현재 면접 영상</span>
+    <div className="space-y-6">
+      <div className="flex gap-6">
+        <div className="flex-1 bg-white p-6 rounded-2xl shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.1)] border border-gray-100">
+          <div className="flex items-center mb-6">
+            <div className="bg-yellow-100 rounded-full p-3 mr-4">
+              <BarChartOutlined className="text-yellow-500 text-2xl" />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)'}}></div>
-              <span className="text-gray-600">최근 10회 평균</span>
-            </div>
+            <h4 className="text-xl font-bold text-gray-800">종합 분석 점수</h4>
+            <Tooltip title="면접 전체 평가 점수">
+              <InfoCircleOutlined className="ml-2 text-gray-500" />
+            </Tooltip>
           </div>
           
-          {scoreItems.map(({ label, value, maxScore }) => (
-            <div key={label} className="relative">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold text-gray-800 w-24">{label}</span>
-                <span className="font-normal text-gray-800">
-                  {value}/{maxScore}점
-                </span>
-              </div>
-              <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    width: `${(value / maxScore) * 100}%`,
-                    background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)',
-                  }}
-                />
-              </div>
-              {averageScores && (
-                <div className="relative h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
-                    style={{
-                      width: `${(averageScores[label.replace(/ /g, '') as keyof typeof averageScores] / maxScore) * 100}%`,
-                      background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)',
-                    }}
-                  />
-                </div>
-              )}
+          <div className="flex items-center">
+            <div className="flex-none w-72 flex items-center justify-center">
+              <Progress
+                type="circle"
+                percent={scorePercentage}
+                format={() => (
+                  <div className="text-center">
+                    <div className="text-5xl font-bold" style={{ color: Object.values(circleColor)[0] }}>
+                      {scorePercentage.toFixed(0)}
+                    </div>
+                    <div className="text-base mt-1" style={{ color: scoreLabel.color }}>
+                      {scoreLabel.text}
+                    </div>
+                  </div>
+                )}
+                strokeColor={circleColor}
+                size={240}
+                strokeWidth={12}
+              />
             </div>
-          ))}
+            
+            <div className="w-px h-[400px] bg-gray-200 mx-12" />
+            
+            <div className="flex-1">
+              <div className="flex justify-end gap-6 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#40A9FF]"></div>
+                  <span className="text-sm text-gray-600">현재 면접 영상</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#FFA500]"></div>
+                  <span className="text-sm text-gray-600">내 평균</span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {scoreItems.map(({ label, value, average, total }) => (
+                  <div key={label} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-semibold w-24">{label}</span>
+                      <span className="text-gray-900 font-medium">
+                        {value}/{total}점
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
+                          style={{
+                            width: `${(value / total) * 100}%`,
+                            background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)',
+                          }}
+                        />
+                      </div>
+                      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
+                          style={{
+                            width: `${(average / total) * 100}%`,
+                            background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
 interface VideoPlayerProps {
   uid: string;
   filename: string;
@@ -690,7 +678,7 @@ interface VideoPlayerProps {
 }
 
 
-const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis }) => {
+const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis, averageScores }) => {
   const [activeTab, setActiveTab] = useState('tab-1');
   const [modalKey, setModalKey] = useState(0);
 
@@ -795,7 +783,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
                   }}
                 />
                 
-                <ScoreAnalysis scores={videoAnalysis.Score} analysis={analysis} />
+                <ScoreAnalysis scores={videoAnalysis.Score} averageScores={averageScores} />
               </div>
             ) : (
               <div className="text-center py-16">
@@ -807,6 +795,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis })
         ),
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysis, modalKey, activeTab]);
 
   return (

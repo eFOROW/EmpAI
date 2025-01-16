@@ -387,7 +387,7 @@ interface VideoPlayerProps {
                 step="0.1"
                 value={isMuted ? 0 : volume}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
-                className="w-24 h-1 -rotate-90 origin-left translate-x-4 translate-y-8 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                 className="w-20 h-1 -rotate-90 origin-left translate-x-2 translate-y-[65px] bg-white/30 rounded-lg appearance-none cursor-pointer"
               />
             </div>
           </div>
