@@ -87,7 +87,11 @@ const insertBookmark = (editor: any) => ({
   icon: <span>🔖</span>,
 });
 
-export default function Editor() {
+interface EditorProps {
+  noteId: string;
+}
+
+export default function Editor({ noteId }: EditorProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
@@ -109,73 +113,78 @@ export default function Editor() {
   });
   useEffect(() => {
     const loadContent = async () => {
-      if (!user?.uid) return;
-      
-      try {
-        const token = await user.getIdToken();
-        const response = await fetch(`/api/note?uid=${user.uid}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await response.json();
-        if (data.content) {
-          editor.replaceBlocks(editor.topLevelBlocks, data.content);
+        if (!user?.uid || !noteId) return;
+        setIsContentLoaded(false); // 로딩 시작
+        
+        try {
+            const token = await user.getIdToken();
+            const response = await fetch(`/api/note?noteId=${noteId}&uid=${user.uid}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if (data.content) {
+                editor.replaceBlocks(editor.topLevelBlocks, data.content);
+            }
+        } catch (error) {
+            console.error('로드 실패:', error);
+        } finally {
+            setIsContentLoaded(true); // 로딩 완료
         }
-        setIsContentLoaded(true);
-      } catch (error) {
-        console.error('로드 실패:', error);
-        setIsContentLoaded(true);
-      }
     };
 
     loadContent();
-  }, [user, editor]);
+  }, [user, editor, noteId]);
 
   useEffect(() => {
-    if (!user?.uid || !isContentLoaded) return;
+    if (!user?.uid || !isContentLoaded || !noteId) return;
 
     const saveContent = async () => {
-      const blocks = editor.topLevelBlocks;
-      try {
-        const token = await user.getIdToken();
-        await fetch('/api/note', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            uid: user.uid,
-            content: blocks
-          })
-        });
-      } catch (error) {
-        console.error('저장 실패:', error);
-      }
+        const blocks = editor.topLevelBlocks;
+        try {
+            const token = await user.getIdToken();
+            await fetch('/api/note', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    noteId: noteId,
+                    content: blocks
+                })
+            });
+        } catch (error) {
+            console.error('저장 실패:', error);
+        }
     };
 
     let timeoutId: NodeJS.Timeout;
 
     const debouncedSave = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(saveContent, 1000);
-    };
-
-    const handleBeforeUnload = () => {
-      clearTimeout(timeoutId);
-      saveContent();
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(saveContent, 1000);
     };
 
     const unsubscribe = editor.onChange(debouncedSave);
-    window.addEventListener('beforeunload', handleBeforeUnload);
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-      clearTimeout(timeoutId);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        clearTimeout(timeoutId);
+        saveContent();
     };
-  }, [user, editor, isContentLoaded]);
+
+    const cleanup = () => {
+        clearTimeout(timeoutId);
+        saveContent();
+        unsubscribe?.();
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return cleanup;
+  }, [user, editor, isContentLoaded, noteId]);
 
   if (loading) {
     return (

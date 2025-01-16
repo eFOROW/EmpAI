@@ -12,7 +12,7 @@ const interviewQuestions = [
     id: "1",
     category: "자기소개",
     level: "기본",
-    question: "1분 자기소개 부탁드립니다.",
+    question: "자기소개 부탁드립니다.",
     tips: [
       "간단한 인사로 시작하여 이름, 지원 직무 언급",
       "핵심 역량과 경험을 2-3가지로 압축하여 전달",

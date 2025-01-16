@@ -4,11 +4,13 @@ import * as cheerio from "cheerio";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const url = searchParams.get("url");
+    const encodedUrl = searchParams.get("encodedUrl");
 
-    if (!url) {
+    if (!encodedUrl) {
       return NextResponse.json({ error: "URL이 필요합니다" }, { status: 400 });
     }
+
+    const url = atob(encodedUrl);
 
     try {
       new URL(url);
