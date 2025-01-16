@@ -71,8 +71,11 @@ export async function GET(request: Request) {
             const note = await Note.findById(noteId);
             return NextResponse.json({ content: note?.content || [] });
         } else {
-            // 사용자의 모든 노트 목록 조회
-            const notes = await Note.find({ uid: decodedToken.uid }, 'title updatedAt _id');
+            // 사용자의 모든 노트 목록 조회 (최신 수정순)
+            const notes = await Note.find(
+                { uid: decodedToken.uid }, 
+                'title updatedAt _id'
+            ).sort({ updatedAt: -1 }); // -1은 내림차순(최신순)
             return NextResponse.json({ notes });
         }
     } catch (error) {

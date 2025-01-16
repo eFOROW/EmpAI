@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Modal } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Modal, Input } from 'antd';
+import { ExclamationCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import dynamic from 'next/dynamic';
 
 import { User, signOut } from "firebase/auth";
@@ -108,6 +108,20 @@ export default function Page() {
         }
     };
 
+    const handleDeleteNote = (noteId: string) => {
+        Modal.confirm({
+            title: '노트 삭제',
+            content: '정말로 이 노트를 삭제하시겠습니까?',
+            centered: true,
+            okText: '삭제',
+            cancelText: '취소',
+            okButtonProps: {
+                danger: true
+            },
+            onOk: () => deleteNote(noteId)
+        });
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex flex-grow">
@@ -171,9 +185,17 @@ export default function Page() {
                                 {control_id === 0 && <MyProfile user={user} />}
                                 {control_id === 2 && <Career user={user} />}
                                 {control_id === 3 && (
-                                    <div className="container mx-auto px-4">
-                                        <div className="flex space-x-4">
-                                            <div className="w-64 bg-white p-4 rounded-lg shadow">
+                                    <div className="mx-0">
+                                        <div className="p-4 bg-blue-50 mb-4 rounded-lg">
+                                            <h1 className="text-xl text-blue-700 font-semibold">
+                                                나만의 취업노트를 꾸며보세요! ✨
+                                            </h1>
+                                            <p className="text-blue-600 mt-1">
+                                                면접 준비, 자기소개서, 포트폴리오 등 취업 준비에 필요한 모든 것을 기록해보세요.
+                                            </p>
+                                        </div>
+                                        <div className="flex space-x-4 pl-4">
+                                            <div className="w-64 bg-white p-4 rounded-lg shadow h-fit">
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h3 className="font-semibold">내 노트 목록</h3>
                                                     <Button
@@ -199,13 +221,56 @@ export default function Page() {
                                                             >
                                                                 {note.title}
                                                             </span>
-                                                            <Button
-                                                                icon={<DeleteOutlined />}
-                                                                onClick={() => deleteNote(note._id)}
-                                                                type="text"
-                                                                danger
-                                                                size="small"
-                                                            />
+                                                            <div className="flex gap-1">
+                                                                <Button
+                                                                    icon={<EditOutlined />}
+                                                                    onClick={() => {
+                                                                        Modal.confirm({
+                                                                            title: '노트 제목 수정',
+                                                                            centered: true,
+                                                                            content: (
+                                                                                <Input
+                                                                                    defaultValue={note.title}
+                                                                                    onChange={(e) => {
+                                                                                        (e.target as any).value = e.target.value;
+                                                                                    }}
+                                                                                />
+                                                                            ),
+                                                                            async onOk(close) {
+                                                                                const input = document.querySelector('.ant-modal-content input') as HTMLInputElement;
+                                                                                const newTitle = input.value;
+                                                                                if (newTitle && newTitle !== note.title) {
+                                                                                    const token = await user?.getIdToken();
+                                                                                    await fetch('/api/note', {
+                                                                                        method: 'POST',
+                                                                                        headers: {
+                                                                                            'Content-Type': 'application/json',
+                                                                                            'Authorization': `Bearer ${token}`
+                                                                                        },
+                                                                                        body: JSON.stringify({
+                                                                                            uid: user?.uid,
+                                                                                            noteId: note._id,
+                                                                                            title: newTitle
+                                                                                        })
+                                                                                    });
+                                                                                    loadNotes();
+                                                                                }
+                                                                            },
+                                                                            okText: '수정',
+                                                                            cancelText: '취소'
+                                                                        });
+                                                                    }}
+                                                                    type="text"
+                                                                    size="small"
+                                                                />
+                                                                <Button
+                                                                    icon={<DeleteOutlined />}
+                                                                    onClick={() => handleDeleteNote(note._id)}
+                                                                    type="text"
+                                                                    danger
+                                                                    size="small"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
