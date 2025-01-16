@@ -89,9 +89,11 @@ const insertBookmark = (editor: any) => ({
 
 interface EditorProps {
   noteId: string;
+  onSaveStart?: () => void;
+  onSaveEnd?: () => void;
 }
 
-export default function Editor({ noteId }: EditorProps) {
+export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
@@ -141,10 +143,10 @@ export default function Editor({ noteId }: EditorProps) {
     if (!user?.uid || !isContentLoaded || !noteId) return;
 
     const saveContent = async () => {
-        if (!isContentLoaded) return;
-
-        const blocks = editor.topLevelBlocks;
+        if (!user) return;
+        onSaveStart?.();
         try {
+            const blocks = editor.topLevelBlocks;
             const token = await user.getIdToken();
             await fetch('/api/note', {
                 method: 'POST',
@@ -160,6 +162,8 @@ export default function Editor({ noteId }: EditorProps) {
             });
         } catch (error) {
             console.error('저장 실패:', error);
+        } finally {
+            onSaveEnd?.();
         }
     };
 
@@ -189,7 +193,7 @@ export default function Editor({ noteId }: EditorProps) {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return cleanup;
-  }, [user, editor, isContentLoaded, noteId]);
+  }, [user, editor, isContentLoaded, noteId, onSaveStart, onSaveEnd]);
 
   if (loading) {
     return (

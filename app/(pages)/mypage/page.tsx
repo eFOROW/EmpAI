@@ -22,6 +22,7 @@ export default function Page() {
     const [modal, contextHolder] = Modal.useModal();
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+    const [isEditorSaving, setIsEditorSaving] = useState(false);
 
     useEffect(() => {
         getCurrentUser().then((user) => {
@@ -122,6 +123,13 @@ export default function Page() {
         });
     };
 
+    const handleNoteSelection = async (noteId: string) => {
+        if (isEditorSaving) {
+            return;
+        }
+        setSelectedNoteId(noteId);
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex flex-grow">
@@ -216,7 +224,7 @@ export default function Page() {
                                                             }`}
                                                         >
                                                             <span
-                                                                onClick={() => setSelectedNoteId(note._id)}
+                                                                onClick={() => handleNoteSelection(note._id)}
                                                                 className="flex-1"
                                                             >
                                                                 {note.title}
@@ -277,7 +285,11 @@ export default function Page() {
                                             </div>
                                             <div className="flex-1">
                                                 {selectedNoteId ? (
-                                                    <BlockNoteEditor noteId={selectedNoteId} />
+                                                    <BlockNoteEditor 
+                                                        noteId={selectedNoteId} 
+                                                        onSaveStart={() => setIsEditorSaving(true)}
+                                                        onSaveEnd={() => setIsEditorSaving(false)}
+                                                    />
                                                 ) : (
                                                     <div className="text-center p-8 text-gray-500">
                                                         노트를 선택하거나 새로 만들어주세요
