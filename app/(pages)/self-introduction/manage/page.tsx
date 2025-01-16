@@ -425,161 +425,163 @@ const ListPage = ({ user }: ListPageProps) => {
   }
 
   return (
-    <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="mx-auto">
-      <JoyRide
-        steps={steps}
-        run={runTour}
-        continuous
-        showProgress
-        showSkipButton
-        scrollToFirstStep={true}
-        scrollOffset={0}
-        disableScrolling={true}
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: '#3B82F6',
-            backgroundColor: '#ffffff',
-            textColor: '#333',
-          },
-          buttonBack: {
-            display: 'none'
-          }
-        }}
-        locale={{
-          close: '닫기',
-          last: '완료',
-          next: '다음',
-          skip: '건너뛰기',
-        }}
-      />
-      
-      <div className="flex items-center justify-between bg-white py-2 px-4">
-        <h1 className="text-2xl font-bold">자기소개서 리스트</h1>
-        <div className="flex items-center gap-4">
-          <QuestionCircleOutlined 
-            className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl transition-colors"
-            onClick={() => setRunTour(true)}
-          />
-          <select
-            value={selectedJobCode}
-            onChange={(e) => setSelectedJobCode(e.target.value)}
-            className="job-filter p-2 border border-gray-300 rounded-md"
-            style={{ flex: '0 0 auto', minWidth: '200px' }}
-          >
-            <option value="">전체</option>
-            {jobOptions.map((job, index) => (
-              <option key={index} value={job}>
-                {job}
-              </option>
-            ))}
-          </select>
+    <div>
+      {contextHolder}
+      <div style={{ width: '100%', minWidth: '800px', maxWidth: '1400px' }} className="mx-auto">
+        <JoyRide
+          steps={steps}
+          run={runTour}
+          continuous
+          showProgress
+          showSkipButton
+          scrollToFirstStep={true}
+          scrollOffset={0}
+          disableScrolling={true}
+          callback={handleJoyrideCallback}
+          styles={{
+            options: {
+              primaryColor: '#3B82F6',
+              backgroundColor: '#ffffff',
+              textColor: '#333',
+            },
+            buttonBack: {
+              display: 'none'
+            }
+          }}
+          locale={{
+            close: '닫기',
+            last: '완료',
+            next: '다음',
+            skip: '건너뛰기',
+          }}
+        />
+        
+        <div className="flex items-center justify-between bg-white py-2 px-4">
+          <h1 className="text-2xl font-bold">자기소개서 리스트</h1>
+          <div className="flex items-center gap-4">
+            <QuestionCircleOutlined 
+              className="text-gray-400 hover:text-gray-600 cursor-pointer text-xl transition-colors"
+              onClick={() => setRunTour(true)}
+            />
+            <select
+              value={selectedJobCode}
+              onChange={(e) => setSelectedJobCode(e.target.value)}
+              className="job-filter p-2 border border-gray-300 rounded-md"
+              style={{ flex: '0 0 auto', minWidth: '200px' }}
+            >
+              <option value="">전체</option>
+              {jobOptions.map((job, index) => (
+                <option key={index} value={job}>
+                  {job}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
 
-      <Row gutter={[32, 32]}>
-        {filteredDocuments.map((document) => (
-        <Col key={document._id} className="intro-card">
-          <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
-            <div className={`${style.front}`}>
-              <Card
-                hoverable
-                cover={
-                  <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
-                    <div style={{ display: 'inline-flex' }}>
-                      <Text
-                        className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
-                        style={{
-                          color: jobStyles[document.job_code]?.color ?? "#666",
-                          backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
-                          border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
-                          width: 'fit-content',
-                          display: 'inline-flex'
-                        }}
-                      >
-                        {jobStyles[document.job_code]?.icon ?? null}
-                        {document.job_code || "N/A"}
+        <Row gutter={[32, 32]}>
+          {filteredDocuments.map((document) => (
+            <Col key={document._id} className="intro-card">
+              <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
+                <div className={`${style.front}`}>
+                  <Card
+                    hoverable
+                    cover={
+                      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
+                        <div style={{ display: 'inline-flex' }}>
+                          <Text
+                            className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                            style={{
+                              color: jobStyles[document.job_code]?.color ?? "#666",
+                              backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
+                              border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
+                              width: 'fit-content',
+                              display: 'inline-flex'
+                            }}
+                          >
+                            {jobStyles[document.job_code]?.icon ?? null}
+                            {document.job_code || "N/A"}
+                          </Text>
+                        </div>
+                        <div style={{ marginLeft: 'auto' }}>
+                          <button
+                            className="text-gray-800 bg-transparent border-none cursor-pointer more-options"
+                            onClick={() => handleFlip(document._id)}
+                          >
+                            <EllipsisOutlined
+                              style={{
+                                fontSize: '24px',
+                                cursor: 'pointer',
+                                transform: 'rotate(90deg)',
+                              }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    }
+                    style={{ padding: 0, maxWidth: 320 }}
+                  >
+                    <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
+                      onClick={() => handleDocumentClick(document)}>
+                      {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <Text type="secondary" style={{ fontSize: "12px" }}>
+                        {document.last_modified.toLocaleDateString()}{" "}
+                        {document.last_modified.toLocaleTimeString()}
                       </Text>
                     </div>
-                    <div style={{ marginLeft: 'auto' }}>
-                      <button
-                        className="text-gray-800 bg-transparent border-none cursor-pointer more-options"
-                        onClick={() => handleFlip(document._id)}
-                      >
-                        <EllipsisOutlined
-                          style={{
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            transform: 'rotate(90deg)',
-                          }}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                }
-                style={{ padding: 0, maxWidth: 320 }}
-              >
-                <div className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
-                  onClick={() => handleDocumentClick(document)}>
-                  {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+                  </Card>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <Text type="secondary" style={{ fontSize: "12px" }}>
-                    {document.last_modified.toLocaleDateString()}{" "}
-                    {document.last_modified.toLocaleTimeString()}
-                  </Text>
-                </div>
-              </Card>
-            </div>
-            <div
-              className={`${style.back} border border-gray-150 p-4 min-h-[135px] min-w-[270px] max-w-[320px] rounded-lg hover:shadow-lg relative`}
-            >
-              {/* 우측 상단 뒤집기 버튼 */}
-              <button
-                className="absolute top-2 right-2 text-gray-800 bg-transparent border-none cursor-pointer"
-                onClick={() => handleFlip(document._id)}
-              >
-                <CloseOutlined style={{ fontSize: '15px', cursor: 'pointer' }} />
-              </button>
+                <div
+                  className={`${style.back} border border-gray-150 p-4 min-h-[135px] min-w-[270px] max-w-[320px] rounded-lg hover:shadow-lg relative`}
+                >
+                  {/* 우측 상단 뒤집기 버튼 */}
+                  <button
+                    className="absolute top-2 right-2 text-gray-800 bg-transparent border-none cursor-pointer"
+                    onClick={() => handleFlip(document._id)}
+                  >
+                    <CloseOutlined style={{ fontSize: '15px', cursor: 'pointer' }} />
+                  </button>
 
-              {/* 중앙의 두 개 버튼 */}
-              <div className="flex justify-center space-x-4 mt-10">
-                <Button 
-                  color="danger" 
-                  variant="solid" 
-                  className="px-4 py-2"
-                  onClick={() => confirm_Delete(document._id)}
-                >
-                  삭제하기
-                </Button>
-                {contextHolder}
-                <Button 
-                  color="primary" 
-                  variant="solid" 
-                  className="px-4 py-2"
-                  onClick={() => handleFeedbackClick(document._id)}
-                >
-                  첨삭받기
-                </Button>
+                  {/* 중앙의 두 개 버튼 */}
+                  <div className="flex justify-center space-x-4 mt-10">
+                    <Button 
+                      color="danger" 
+                      variant="solid" 
+                      className="px-4 py-2"
+                      onClick={() => confirm_Delete(document._id)}
+                    >
+                      삭제하기
+                    </Button>
+                    <Button 
+                      color="primary" 
+                      variant="solid" 
+                      className="px-4 py-2"
+                      onClick={() => handleFeedbackClick(document._id)}
+                    >
+                      첨삭받기
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </Col>
-      ))}
-        <Col>
-          <Card
-            className="add-new-card flex items-center justify-center cursor-pointer p-2"
-            hoverable
-            onClick={handleAddNewDocument}
-            style={{
-              minHeight: 130,
-              minWidth: 250  // 고정 너비
-            }}
-          >
-            <Text className="text-3xl text-blue-500 font-bold">+</Text>
-          </Card>
-        </Col>
-      </Row>
+            </Col>
+          ))}
+          <Col>
+            <Card
+              className="add-new-card flex items-center justify-center cursor-pointer p-2"
+              hoverable
+              onClick={handleAddNewDocument}
+              style={{
+                minHeight: 130,
+                minWidth: 250  // 고정 너비
+              }}
+            >
+              <Text className="text-3xl text-blue-500 font-bold">+</Text>
+            </Card>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
