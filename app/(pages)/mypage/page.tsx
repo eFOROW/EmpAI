@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Button, Modal } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import dynamic from 'next/dynamic';
 
 import { User, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { MyProfile, LoginForm, Career } from "@/app/components/mypage";
+import { Note } from '@/app/types/note';
 
 const BlockNoteEditor = dynamic(() => 
   import('@/app/components/note/Editor').then((mod) => mod.default), 
@@ -19,6 +20,8 @@ export default function Page() {
     const [control_id, setID] = useState(0);
     const [user, setUser] = useState<User | null>(null);
     const [modal, contextHolder] = Modal.useModal();
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
     useEffect(() => {
         getCurrentUser().then((user) => {
@@ -54,6 +57,54 @@ export default function Page() {
             window.location.reload();
         } catch (error) {
             console.error("Error logging out:", error);
+        }
+    };
+
+    const loadNotes = async () => {
+        if (!user) return;
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/note?uid=${user.uid}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        setNotes(data.notes);
+    };
+
+    useEffect(() => {
+        if (user && control_id === 3) {
+            loadNotes();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, control_id]);
+
+    const createNewNote = async () => {
+        if (!user) return;
+        const token = await user.getIdToken();
+        await fetch('/api/note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                uid: user.uid,
+                title: `새 노트 ${notes.length + 1}`,
+                content: []
+            })
+        });
+        loadNotes();
+    };
+
+    const deleteNote = async (noteId: string) => {
+        if (!user) return;
+        const token = await user.getIdToken();
+        await fetch(`/api/note?noteId=${noteId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadNotes();
+        if (selectedNoteId === noteId) {
+            setSelectedNoteId(null);
         }
     };
 
@@ -121,7 +172,54 @@ export default function Page() {
                                 {control_id === 2 && <Career user={user} />}
                                 {control_id === 3 && (
                                     <div className="container mx-auto px-4">
-                                        <BlockNoteEditor />
+                                        <div className="flex space-x-4">
+                                            <div className="w-64 bg-white p-4 rounded-lg shadow">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h3 className="font-semibold">내 노트 목록</h3>
+                                                    <Button
+                                                        icon={<PlusOutlined />}
+                                                        onClick={createNewNote}
+                                                        type="primary"
+                                                        size="small"
+                                                    >
+                                                        새 노트
+                                                    </Button>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {notes.map((note) => (
+                                                        <div
+                                                            key={note._id}
+                                                            className={`flex justify-between items-center p-2 rounded cursor-pointer ${
+                                                                selectedNoteId === note._id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                                                            }`}
+                                                        >
+                                                            <span
+                                                                onClick={() => setSelectedNoteId(note._id)}
+                                                                className="flex-1"
+                                                            >
+                                                                {note.title}
+                                                            </span>
+                                                            <Button
+                                                                icon={<DeleteOutlined />}
+                                                                onClick={() => deleteNote(note._id)}
+                                                                type="text"
+                                                                danger
+                                                                size="small"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                {selectedNoteId ? (
+                                                    <BlockNoteEditor noteId={selectedNoteId} />
+                                                ) : (
+                                                    <div className="text-center p-8 text-gray-500">
+                                                        노트를 선택하거나 새로 만들어주세요
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </>
