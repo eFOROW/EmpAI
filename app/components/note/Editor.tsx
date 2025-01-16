@@ -142,9 +142,18 @@ export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) 
   useEffect(() => {
     if (!user?.uid || !isContentLoaded || !noteId) return;
 
+    let saveInProgress = false;
+    let pendingSave = false;
+
     const saveContent = async () => {
-        if (!user) return;
+        if (!user || saveInProgress) {
+            pendingSave = true;
+            return;
+        }
+
+        saveInProgress = true;
         onSaveStart?.();
+        
         try {
             const blocks = editor.topLevelBlocks;
             const token = await user.getIdToken();
@@ -163,7 +172,13 @@ export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) 
         } catch (error) {
             console.error('저장 실패:', error);
         } finally {
+            saveInProgress = false;
             onSaveEnd?.();
+            
+            if (pendingSave) {
+                pendingSave = false;
+                saveContent();
+            }
         }
     };
 
