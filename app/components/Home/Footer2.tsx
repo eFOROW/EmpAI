@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { socials } from "@/app/constants";
 import { footerVariants } from "@/app/utils/motion";
 
 const Footer = () => (
@@ -22,18 +20,6 @@ const Footer = () => (
           <p className="font-normal text-[14px] text-primary-black">
             Copyright © 2024 - 2025 EmpAI. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            {socials.map((social) => (
-              <Image
-                key={social.name}
-                src={social.url}
-                width={24}
-                height={24}
-                alt={social.name}
-                className="object-contain cursor-pointer"
-              />
-            ))}
-          </div>
         </div>
       </div>
     </div>
