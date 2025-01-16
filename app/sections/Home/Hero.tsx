@@ -72,7 +72,7 @@ const Hero = () => {
   const currentLink = textLinks.find(item => item.text === currentText);
 
   return (
-    <section className="yPaddings sm:pl-16 pl-6">
+    <section className="yPaddings sm:pl-16 pl-6 container mx-auto max-w-[2560px] min-w-[1024px] h-screen">
       <motion.div
         variants={staggerContainer(0.25, 0.25)}
         initial="hidden"

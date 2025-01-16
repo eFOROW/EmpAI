@@ -7,7 +7,7 @@ import { fadeIn, staggerContainer } from "../../utils/motion";
 import { TypingText } from "../../components/Home";
 
 const About = () => (
-  <section className="paddings relative z-10" id="about">
+  <section className="paddings relative z-10 container mx-auto max-w-[2560px] min-w-[1024px]" id="about">
     <div className="gradient-02 z-0" />
     <motion.div
       variants={staggerContainer(0.25, 0.25)}

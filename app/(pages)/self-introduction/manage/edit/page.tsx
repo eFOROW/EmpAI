@@ -367,8 +367,8 @@ const ManagePage: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center justify-start min-h-screen bg-white">
-            <div className="w-full h-screen px-6 flex justify-center items-start mt-10">
-                {!isFormGenerated && (
+            <div className="w-full px-6 flex justify-center items-start">
+                {!isFormGenerated ? (
                     <div className="relative w-full max-w-3xl min-h-[450px] p-10 bg-white rounded-2xl shadow-[0_4px_30px_0_rgba(173,235,250,0.8)] flex flex-col items-center space-y-8 border border-blue-200 mt-20">
                         {/* 상단 타이틀 및 설명 추가 */}
                         <div className="text-center mb-8">
@@ -391,6 +391,157 @@ const ManagePage: React.FC = () => {
                                 질문 선택하기
                             </Button>
                         </div>
+                    </div>
+                ) : (
+                    <div className="w-full max-w-4xl px-4 mt-8">
+                        <Form layout="vertical" className="bg-white rounded-xl shadow-lg p-8 space-y-6 border border-gray-100">
+                            {/* 제목 섹션 */}
+                            <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
+                                    <span className="text-gray-500">
+                                        <i className="fas fa-heading"></i> {/* 제목 아이콘 */}
+                                    </span>
+                                    <Title level={3} className="text-xl text-gray-900 font-semibold">
+                                        제목
+                                    </Title>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-gray-500">
+                                        <i className="fas fa-edit"></i> {/* 입력 아이콘 */}
+                                    </span>
+                                    <Input
+                                        value={title}
+                                        onChange={handleTitleChange}
+                                        placeholder="제목을 입력하세요"
+                                        className="w-full p-3 text-lg border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white shadow-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* 공통역량 질문 섹션 */}
+                            <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                                <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
+                                    공통역량 질문
+                                </Title>
+                                {answers.map((answer, index) => (
+                                    <Form.Item
+                                        key={index}
+                                        label={
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full">
+                                                    <span className="text-gray-600 font-bold">Q</span>
+                                                </div>
+                                                <Text strong className="text-base text-gray-800">
+                                                    {answer.question}
+                                                </Text>
+                                            </div>
+                                        }
+                                        className="space-y-2"
+                                    >
+                                        <TextArea
+                                            value={answer.answer}
+                                            onChange={(e) => handleAnswerChange(index, e.target.value)}
+                                            rows={6}
+                                            maxLength={550}
+                                            showCount
+                                            className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-shadow bg-white text-gray-700 placeholder-gray-400"
+                                            placeholder="여기에 내용을 입력하세요."
+                                        />
+                                    </Form.Item>
+                                ))}
+                            </div>
+                            {/* 직무관련 질문 섹션 */}
+                            <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                                <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
+                                    직무관련 질문
+                                </Title>
+
+                                {/* 드롭다운 섹션 */}
+                                <div className="flex gap-6 items-center">
+                                    {/* 직무 선택 */}
+                                    <div className="flex items-center w-1/3">
+                                        <span className="mr-2 text-gray-500">
+                                            <i className="fas fa-briefcase"></i> {/* 직무 아이콘 */}
+                                        </span>
+                                        <select
+                                            className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
+                                            value={selectedValue}
+                                            onChange={handleSelectChange}
+                                        >
+                                            <option value="">직무를 선택하세요</option>
+                                            {options.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* 직무 관련 질문 선택 */}
+                                    {selectedValue && (
+                                        <div className="flex items-center w-2/3">
+                                            <span className="mr-2 text-gray-500">
+                                                <i className="fas fa-question-circle"></i> {/* 질문 아이콘 */}
+                                            </span>
+                                            <select
+                                                className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
+                                                value={selectJobQ}
+                                                onChange={handleSelectJobChange}
+                                            >
+                                                {selectedQuestions.map((question, index) => (
+                                                    <option key={index} value={question}>
+                                                        {question}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 직무 관련 질문 답변 */}
+                                {selectJobQ && (
+                                    <div className="space-y-2 mt-6">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full">
+                                                <span className="text-gray-600 font-bold">Q</span>
+                                            </div>
+                                            <Text strong className="text-base text-gray-800">
+                                                {selectJobQ}
+                                            </Text>
+                                        </div>
+                                        <TextArea
+                                            value={jobAnswer}
+                                            onChange={(e) => handleJobAnswerChange(e.target.value)}
+                                            rows={6}
+                                            maxLength={550}
+                                            showCount
+                                            className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white text-gray-700 placeholder-gray-400 shadow-sm"
+                                            placeholder="여기에 내용을 입력하세요."
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 버튼 그룹 */}
+                            <div className="flex justify-center gap-4 mt-8">
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    className="py-3 px-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-lg rounded-lg 
+                                    shadow-md hover:shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-700"
+                                >
+                                    제출하기
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => router.push('/self-introduction/manage')}
+                                    className="py-3 px-8 bg-gray-500 text-white text-lg rounded-lg shadow-md hover:shadow-lg 
+                                    transition-all duration-300 hover:bg-gray-600"
+                                >
+                                    취소
+                                </button>
+                            </div>
+                        </Form>
                     </div>
                 )}
             </div>
@@ -480,160 +631,6 @@ const ManagePage: React.FC = () => {
                 </div>
 
             </Modal>
-
-            {/* Form styling */}
-            {isFormGenerated && (
-                <div className="w-full max-w-4xl px-4 mt-8">
-                    <Form layout="vertical" className="bg-white rounded-xl shadow-lg p-8 space-y-6 border border-gray-100">
-                        {/* 제목 섹션 */}
-                        <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
-                                <span className="text-gray-500">
-                                    <i className="fas fa-heading"></i> {/* 제목 아이콘 */}
-                                </span>
-                                <Title level={3} className="text-xl text-gray-900 font-semibold">
-                                    제목
-                                </Title>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="text-gray-500">
-                                    <i className="fas fa-edit"></i> {/* 입력 아이콘 */}
-                                </span>
-                                <Input
-                                    value={title}
-                                    onChange={handleTitleChange}
-                                    placeholder="제목을 입력하세요"
-                                    className="w-full p-3 text-lg border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* 공통역량 질문 섹션 */}
-                        <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-                            <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
-                                공통역량 질문
-                            </Title>
-                            {answers.map((answer, index) => (
-                                <Form.Item
-                                    key={index}
-                                    label={
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full">
-                                                <span className="text-gray-600 font-bold">Q</span>
-                                            </div>
-                                            <Text strong className="text-base text-gray-800">
-                                                {answer.question}
-                                            </Text>
-                                        </div>
-                                    }
-                                    className="space-y-2"
-                                >
-                                    <TextArea
-                                        value={answer.answer}
-                                        onChange={(e) => handleAnswerChange(index, e.target.value)}
-                                        rows={6}
-                                        maxLength={550}
-                                        showCount
-                                        className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-shadow bg-white text-gray-700 placeholder-gray-400"
-                                        placeholder="여기에 내용을 입력하세요."
-                                    />
-                                </Form.Item>
-                            ))}
-                        </div>
-                        {/* 직무관련 질문 섹션 */}
-                        <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-                            <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
-                                직무관련 질문
-                            </Title>
-
-                            {/* 드롭다운 섹션 */}
-                            <div className="flex gap-6 items-center">
-                                {/* 직무 선택 */}
-                                <div className="flex items-center w-1/3">
-                                    <span className="mr-2 text-gray-500">
-                                        <i className="fas fa-briefcase"></i> {/* 직무 아이콘 */}
-                                    </span>
-                                    <select
-                                        className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
-                                        value={selectedValue}
-                                        onChange={handleSelectChange}
-                                    >
-                                        <option value="">직무를 선택하세요</option>
-                                        {options.map(option => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {/* 직무 관련 질문 선택 */}
-                                {selectedValue && (
-                                    <div className="flex items-center w-2/3">
-                                        <span className="mr-2 text-gray-500">
-                                            <i className="fas fa-question-circle"></i> {/* 질문 아이콘 */}
-                                        </span>
-                                        <select
-                                            className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
-                                            value={selectJobQ}
-                                            onChange={handleSelectJobChange}
-                                        >
-                                            {selectedQuestions.map((question, index) => (
-                                                <option key={index} value={question}>
-                                                    {question}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* 직무 관련 질문 답변 */}
-                            {selectJobQ && (
-                                <div className="space-y-2 mt-6">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full">
-                                            <span className="text-gray-600 font-bold">Q</span>
-                                        </div>
-                                        <Text strong className="text-base text-gray-800">
-                                            {selectJobQ}
-                                        </Text>
-                                    </div>
-                                    <TextArea
-                                        value={jobAnswer}
-                                        onChange={(e) => handleJobAnswerChange(e.target.value)}
-                                        rows={6}
-                                        maxLength={550}
-                                        showCount
-                                        className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white text-gray-700 placeholder-gray-400 shadow-sm"
-                                        placeholder="여기에 내용을 입력하세요."
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 버튼 그룹 */}
-                        <div className="flex justify-center gap-4 mt-8">
-                            <button
-                                type="button"
-                                onClick={handleSubmit}
-                                className="py-3 px-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-lg rounded-lg 
-                                shadow-md hover:shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-700"
-                            >
-                                제출하기
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => router.push('/self-introduction/manage')}
-                                className="py-3 px-8 bg-gray-500 text-white text-lg rounded-lg shadow-md hover:shadow-lg 
-                                transition-all duration-300 hover:bg-gray-600"
-                            >
-                                취소
-                            </button>
-                        </div>
-                    </Form>
-                </div>
-            )}
         </div>
     );
 };
