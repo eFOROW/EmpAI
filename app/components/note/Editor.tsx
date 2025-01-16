@@ -141,6 +141,8 @@ export default function Editor({ noteId }: EditorProps) {
     if (!user?.uid || !isContentLoaded || !noteId) return;
 
     const saveContent = async () => {
+        if (!isContentLoaded) return;
+
         const blocks = editor.topLevelBlocks;
         try {
             const token = await user.getIdToken();
@@ -164,6 +166,7 @@ export default function Editor({ noteId }: EditorProps) {
     let timeoutId: NodeJS.Timeout;
 
     const debouncedSave = () => {
+        if (!isContentLoaded) return;
         clearTimeout(timeoutId);
         timeoutId = setTimeout(saveContent, 1000);
     };
@@ -171,11 +174,13 @@ export default function Editor({ noteId }: EditorProps) {
     const unsubscribe = editor.onChange(debouncedSave);
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        if (!isContentLoaded) return;
         clearTimeout(timeoutId);
         saveContent();
     };
 
     const cleanup = () => {
+        if (!isContentLoaded) return;
         clearTimeout(timeoutId);
         saveContent();
         unsubscribe?.();
@@ -210,14 +215,6 @@ export default function Editor({ noteId }: EditorProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="p-4 bg-blue-50 mb-4 rounded-lg">
-        <h1 className="text-xl text-blue-700 font-semibold">
-          나만의 취업노트를 꾸며보세요! ✨
-        </h1>
-        <p className="text-blue-600 mt-1">
-          면접 준비, 자기소개서, 포트폴리오 등 취업 준비에 필요한 모든 것을 기록해보세요.
-        </p>
-      </div>
       <BlockNoteView
         editor={editor} 
         slashMenu={false}
