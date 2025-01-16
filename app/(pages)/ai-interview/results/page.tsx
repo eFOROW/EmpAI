@@ -506,6 +506,32 @@ export default function AnalysisResultsPage() {
     null
   );
 
+  // 전체 면접 데이터의 평균 점수 계산
+  const calculateOverallAverages = (allResults: Analysis[]) => {
+    const allScores = allResults.flatMap(analysis => {
+      const interviewData = analysis[analysis.uid];
+      return Object.values(interviewData)
+        .filter((round: any) => round?.Score && Object.values(round.Score).every(score => score !== null))
+        .map((round: any) => round.Score);
+    });
+
+    if (allScores.length === 0) return null;
+
+    const average = (arr: number[]) => 
+      Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
+
+    return {
+      말하기속도: average(allScores.map(s => s.말하기속도)),
+      "추임새/침묵": average(allScores.map(s => s["추임새/침묵"])),
+      목소리변동성: average(allScores.map(s => s.목소리변동성)),
+      표정분석: average(allScores.map(s => s.표정분석)),
+      머리기울기: average(allScores.map(s => s.머리기울기)),
+      시선분석: average(allScores.map(s => s.시선분석)),
+      답변평가: average(allScores.map(s => s.답변평가))
+    };
+  };
+
+  // useEffect 내부에서 데이터를 가져온 후 평균 계산
   useEffect(() => {
     const fetchUserAndAnalysis = async () => {
       try {
@@ -644,6 +670,7 @@ export default function AnalysisResultsPage() {
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           analysis={selectedAnalysis}
+          averageScores={calculateOverallAverages(analysisResults)}
         />
       </div>
     </div>
