@@ -14,11 +14,11 @@ export const Bookmark = createReactBlockSpec(
   },
   {
     render: ({ block }) => (
-      <div className="border rounded-lg my-2 hover:bg-gray-50">
+      <div className="border rounded-lg my-2 max-w-[60%] hover:bg-gray-50">
         <a href={block.props.url} target="_blank" rel="noopener noreferrer" className="no-underline">
           <div className="flex gap-6">
             {block.props.image && (
-              <div className="w-[20vh] h-[11vh] relative overflow-hidden">
+              <div className="w-[20vh] aspect-[2/1] max-w-[35%] relative overflow-hidden">
                 <Image 
                   src={block.props.image}
                   alt={block.props.title || "북마크 이미지"}
