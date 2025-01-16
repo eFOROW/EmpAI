@@ -114,14 +114,18 @@ export default function Page() {
                 ) : null} {/* user가 없으면 null을 렌더링하여 메뉴 숨김 */}
 
                 <section className="flex-1 p-8">
-                    <div>
-                        {user ? ( // user가 있을 때
+                    <div className="max-w-[1200px] mx-auto">
+                        {user ? (
                             <>
                                 {control_id === 0 && <MyProfile user={user} />}
                                 {control_id === 2 && <Career user={user} />}
-                                {control_id === 3 && <BlockNoteEditor />}
+                                {control_id === 3 && (
+                                    <div className="container mx-auto px-4">
+                                        <BlockNoteEditor />
+                                    </div>
+                                )}
                             </>
-                        ) : ( // user가 없을 때
+                        ) : (
                             <LoginForm />
                         )}
                     </div>
