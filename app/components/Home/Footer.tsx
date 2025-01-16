@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { socials } from "../../constants";
 import { footerVariants } from "../../utils/motion";
+import Link from 'next/link';
 
 const Footer = () => (
   <>
@@ -19,21 +19,23 @@ const Footer = () => (
         <h4 className="font-bold md:text-[50px] text-[44px] text-primary-black">
           EmpAI와 함께
         </h4>
-        <button
-          type="button"
-          className="flex items-center h-fit py-4 px-6 bg-[#2561AB] rounded-[32px] gap-[12px]"
-        >
-          <Image
-            src="/headset.svg"
-            width={24}
-            height={24}
-            alt="headset"
-            className="object-contain"
-          />
-          <span className="font-normal text-[16px] text-white uppercase">
-            회원가입
-          </span>
-        </button>
+        <Link href="/mypage">
+          <button
+            type="button"
+            className="flex items-center h-fit py-4 px-6 bg-[#2561AB] rounded-[32px] gap-[12px] hover:bg-[#1d4c8c] transition-colors duration-300"
+          >
+            <Image
+              src="/headset.svg"
+              width={24}
+              height={24}
+              alt="headset"
+              className="object-contain"
+            />
+            <span className="font-normal text-[16px] text-white uppercase">
+              회원가입
+            </span>
+          </button>
+        </Link>
       </div>
       <div className="flex flex-col">
         <div className="mb-[50px] h-[2px] bg-black opacity-10" />
@@ -42,18 +44,6 @@ const Footer = () => (
           <p className="font-normal text-[14px] text-primary-black">
             Copyright © 2024 - 2025 EmpAI. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            {socials.map((social) => (
-              <Image
-                key={social.name}
-                src={social.url}
-                width={24}
-                height={24}
-                alt={social.name}
-                className="object-contain cursor-pointer"
-              />
-            ))}
-          </div>
         </div>
       </div>
     </div>
