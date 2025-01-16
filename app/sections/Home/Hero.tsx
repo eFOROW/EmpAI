@@ -82,14 +82,14 @@ const Hero = () => {
       >
         <div className="flexCenter flex-col relative z-10">
           <motion.h1 
-            variants={textVariant(1.1)} 
+            variants={textVariant(0.4)} 
             className="heroHeading relative bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent overflow-hidden"
           >
             EmpAI
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/30 to-transparent animate-shine pointer-events-none" />
           </motion.h1>
           <motion.div
-            variants={textVariant(1.2)}
+            variants={textVariant(0.5)}
             className="flex flex-col items-center justify-center gap-4"
           >
             <motion.div 
