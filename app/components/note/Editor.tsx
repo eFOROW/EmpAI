@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { locales, filterSuggestionItems } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { SuggestionMenuController, getDefaultReactSlashMenuItems, useCreateBlockNote } from "@blocknote/react";
@@ -26,7 +26,6 @@ const insertDivider = (editor: any) => ({
     onItemClick: () => {
       const pos = editor.getTextCursorPosition();
       editor.insertBlocks([{ type: "divider" }], pos.block, 'after');
-      editor.insertBlocks([{ type: "paragraph" }], pos.block.id, 'after');
     },
     group: "기타",
     icon: <RiDivideLine />,
@@ -62,7 +61,6 @@ const insertBookmark = (editor: any) => ({
               }
             }
           ], pos.block, 'after');
-          editor.insertBlocks([{ type: "paragraph" }], pos.block.id, 'after');
         } else {
           throw new Error(metadata.error);
         }
@@ -97,7 +95,11 @@ export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
-  
+  const [isSaving, setIsSaving] = useState(false);
+  const lastSavedContent = useRef<string>("");
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastSavePromiseRef = useRef<Promise<void>>(Promise.resolve());
+
   useEffect(() => {
     getCurrentUser().then(user => {
       setUser(user);
@@ -116,99 +118,96 @@ export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) 
   useEffect(() => {
     const loadContent = async () => {
         if (!user?.uid || !noteId) return;
-        setIsContentLoaded(false); // 로딩 시작
         
         try {
             const token = await user.getIdToken();
             const response = await fetch(`/api/note?noteId=${noteId}&uid=${user.uid}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
+            
+            setIsContentLoaded(false);
             if (data.content) {
                 editor.replaceBlocks(editor.topLevelBlocks, data.content);
+                lastSavedContent.current = JSON.stringify(data.content);
             }
         } catch (error) {
             console.error('로드 실패:', error);
         } finally {
-            setIsContentLoaded(true); // 로딩 완료
+            setIsContentLoaded(true);
         }
     };
 
     loadContent();
   }, [user, editor, noteId]);
 
+  const saveContent = async () => {
+    if (!user?.uid || !noteId || !isContentLoaded) return;
+
+    try {
+      const currentContent = JSON.stringify(editor.topLevelBlocks);
+      if (currentContent === lastSavedContent.current) return;
+
+      setIsSaving(true);
+      onSaveStart?.();
+
+      // 이전 저장 작업 완료 대기
+      await lastSavePromiseRef.current;
+
+      const savePromise = (async () => {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/note', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+            noteId: noteId,
+            content: editor.topLevelBlocks
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('저장 실패');
+        }
+
+        lastSavedContent.current = currentContent;
+      })();
+
+      lastSavePromiseRef.current = savePromise;
+      await savePromise;
+
+    } catch (error) {
+      console.error('저장 중 오류:', error);
+      // 여기서 사용자에게 오류 알림을 표시할 수 있습니다
+    } finally {
+      setIsSaving(false);
+      onSaveEnd?.();
+    }
+  };
+
   useEffect(() => {
-    if (!user?.uid || !isContentLoaded || !noteId) return;
-
-    let saveInProgress = false;
-    let pendingSave = false;
-
-    const saveContent = async () => {
-        if (!user || saveInProgress) {
-            pendingSave = true;
-            return;
-        }
-
-        saveInProgress = true;
-        onSaveStart?.();
-        
-        try {
-            const blocks = editor.topLevelBlocks;
-            const token = await user.getIdToken();
-            await fetch('/api/note', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    uid: user.uid,
-                    noteId: noteId,
-                    content: blocks
-                })
-            });
-        } catch (error) {
-            console.error('저장 실패:', error);
-        } finally {
-            saveInProgress = false;
-            onSaveEnd?.();
-            
-            if (pendingSave) {
-                pendingSave = false;
-                saveContent();
-            }
-        }
-    };
-
-    let timeoutId: NodeJS.Timeout;
+    if (!isContentLoaded) return;
 
     const debouncedSave = () => {
-        if (!isContentLoaded) return;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(saveContent, 1000);
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(saveContent, 1000);
     };
 
     const unsubscribe = editor.onChange(debouncedSave);
 
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-        if (!isContentLoaded) return;
-        clearTimeout(timeoutId);
-        saveContent();
+    return () => {
+      clearTimeout(saveTimeoutRef.current);
+      // 컴포넌트 언마운트 시 즉시 저장
+      if (editor.topLevelBlocks.length > 0) {
+        void saveContent();
+      }
+      unsubscribe?.();
     };
-
-    const cleanup = () => {
-        if (!isContentLoaded) return;
-        clearTimeout(timeoutId);
-        saveContent();
-        unsubscribe?.();
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return cleanup;
-  }, [user, editor, isContentLoaded, noteId, onSaveStart, onSaveEnd]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, isContentLoaded]);
 
   if (loading) {
     return (
