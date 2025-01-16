@@ -485,6 +485,7 @@ const ListPage = ({ user }: ListPageProps) => {
               <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
                 <div className={`${style.front}`}>
                   <Card
+                    onClick={() => handleDocumentClick(document)}
                     hoverable
                     cover={
                       <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
@@ -506,7 +507,10 @@ const ListPage = ({ user }: ListPageProps) => {
                         <div style={{ marginLeft: 'auto' }}>
                           <button
                             className="text-gray-800 bg-transparent border-none cursor-pointer more-options"
-                            onClick={() => handleFlip(document._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();  // 이벤트 전파 중단
+                              handleFlip(document._id);
+                            }}
                           >
                             <EllipsisOutlined
                               style={{
