@@ -9,7 +9,7 @@ export async function GET(request: Request) {
         const data = await fs.promises.readFile(logFilePath, 'utf8');
         const logs = data.split('\n').filter(Boolean);
 
-        const recentLogs = logs.slice(-100);
+        const recentLogs = logs.slice(-500);
 
         return NextResponse.json(recentLogs, { status: 200 });
     } catch (error) {
