@@ -25,6 +25,8 @@ export default function WebStatus() {
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [errorLogs, setErrorLogs] = useState<string[]>([]);
   const [loadingErrorLogs, setLoadingErrorLogs] = useState(true);
+  const [accessLogSearch, setAccessLogSearch] = useState('');
+  const [errorLogSearch, setErrorLogSearch] = useState('');
   
   const accessLogRef = useRef<HTMLDivElement>(null);
   const errorLogRef = useRef<HTMLDivElement>(null);
@@ -161,6 +163,14 @@ export default function WebStatus() {
     </ResponsiveContainer>
   );
 
+  const filteredAccessLogs = accessLogs.filter(log => 
+    log.toLowerCase().includes(accessLogSearch.toLowerCase())
+  );
+
+  const filteredErrorLogs = errorLogs.filter(log => 
+    log.toLowerCase().includes(errorLogSearch.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -245,24 +255,33 @@ export default function WebStatus() {
         <Card title={
           <div className="flex justify-between items-center">
             <span>Access Logs</span>
-            <Button 
-              onClick={fetchAccessLogs} 
-              icon={<ReloadOutlined />} 
-              loading={loadingLogs}
-              type="text"
-            >
-              다시 가져오기
-            </Button>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="로그 검색..."
+                value={accessLogSearch}
+                onChange={(e) => setAccessLogSearch(e.target.value)}
+                className="px-3 py-1 border border-gray-300 rounded-md"
+              />
+              <Button 
+                onClick={fetchAccessLogs} 
+                icon={<ReloadOutlined />} 
+                loading={loadingLogs}
+                type="text"
+              >
+                다시 가져오기
+              </Button>
+            </div>
           </div>
         } bordered={false} className="mt-4">
           {loadingLogs ? (
             <Spin tip="로그 로딩 중..." />
           ) : (
             <div ref={accessLogRef} style={{ maxHeight: '300px', overflowY: 'auto' }} className="whitespace-pre-wrap">
-              {accessLogs.length > 0 ? accessLogs.map((log, index) => (
+              {filteredAccessLogs.length > 0 ? filteredAccessLogs.map((log, index) => (
                 <div key={index}>{log}</div>
               )) : (
-                <Alert message="로그가 없습니다." type="info" />
+                <Alert message={accessLogSearch ? "검색 결과가 없습니다." : "로그가 없습니다."} type="info" />
               )}
             </div>
           )}
@@ -271,24 +290,33 @@ export default function WebStatus() {
         <Card title={
           <div className="flex justify-between items-center">
             <span>Error Logs</span>
-            <Button 
-              onClick={fetchErrorLogs} 
-              icon={<ReloadOutlined />} 
-              loading={loadingErrorLogs}
-              type="text"
-            >
-              다시 가져오기
-            </Button>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="로그 검색..."
+                value={errorLogSearch}
+                onChange={(e) => setErrorLogSearch(e.target.value)}
+                className="px-3 py-1 border border-gray-300 rounded-md"
+              />
+              <Button 
+                onClick={fetchErrorLogs} 
+                icon={<ReloadOutlined />} 
+                loading={loadingErrorLogs}
+                type="text"
+              >
+                다시 가져오기
+              </Button>
+            </div>
           </div>
         } bordered={false} className="mt-4">
           {loadingErrorLogs ? (
             <Spin tip="에러 로그 로딩 중..." />
           ) : (
             <div ref={errorLogRef} style={{ maxHeight: '300px', overflowY: 'auto' }} className="whitespace-pre-wrap">
-              {errorLogs.length > 0 ? errorLogs.map((log, index) => (
+              {filteredErrorLogs.length > 0 ? filteredErrorLogs.map((log, index) => (
                 <div key={index}>{log}</div>
               )) : (
-                <Alert message="에러 로그가 없습니다." type="info" />
+                <Alert message={errorLogSearch ? "검색 결과가 없습니다." : "에러 로그가 없습니다."} type="info" />
               )}
             </div>
           )}
