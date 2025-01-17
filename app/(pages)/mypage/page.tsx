@@ -23,6 +23,7 @@ export default function Page() {
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
     const [isEditorSaving, setIsEditorSaving] = useState(false);
+    const [isNoteLoading, setIsNoteLoading] = useState(false);
 
     useEffect(() => {
         getCurrentUser().then((user) => {
@@ -131,16 +132,27 @@ export default function Page() {
                 okText: '기다리기',
                 cancelText: '취소',
                 onOk: async () => {
-                    // 저장 완료 대기
-                    while (isEditorSaving) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
+                    try {
+                        setIsNoteLoading(true);
+                        // 저장 완료 대기
+                        while (isEditorSaving) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                        setSelectedNoteId(noteId);
+                    } finally {
+                        setIsNoteLoading(false);
                     }
-                    setSelectedNoteId(noteId);
-                }
+                },
             });
             return;
         }
-        setSelectedNoteId(noteId);
+        
+        try {
+            setIsNoteLoading(true);
+            setSelectedNoteId(noteId);
+        } finally {
+            setIsNoteLoading(false);
+        }
     };
 
     return (
@@ -297,7 +309,14 @@ export default function Page() {
                                                 </div>
                                             </div>
                                             <div className="flex-1">
-                                                {selectedNoteId ? (
+                                                {isNoteLoading ? (
+                                                    <div className="flex items-center justify-center h-[500px]">
+                                                        <div className="flex flex-col items-center">
+                                                            <EditOutlined className="text-5xl text-blue-500 animate-bounce mb-4" />
+                                                            <h2 className="text-xl font-semibold text-gray-700">노트 불러오는 중...</h2>
+                                                        </div>
+                                                    </div>
+                                                ) : selectedNoteId ? (
                                                     <BlockNoteEditor 
                                                         noteId={selectedNoteId} 
                                                         onSaveStart={() => setIsEditorSaving(true)}
