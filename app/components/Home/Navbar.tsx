@@ -57,6 +57,11 @@ const Navbar = () => {
               </div>
             </div>
 
+            {/* 커뮤니티 */}
+            <div className="nav-item">
+              <Link href="/community" className="text-primary-black text-lg font-bold">커뮤니티</Link>
+            </div>
+
             {/* 마이페이지 */}
             <div className="nav-item">
               <Link href="/mypage" className="text-primary-black text-lg font-bold">마이페이지</Link>

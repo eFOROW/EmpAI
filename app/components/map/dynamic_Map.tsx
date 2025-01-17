@@ -338,8 +338,25 @@ const Map: React.FC<MapProps> = ({
             border-radius: 0.5rem; 
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
             background-color: #ffffff;
+            position: relative;
           ">
-            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #1f2937;">
+            <button 
+              onclick="window.closeInfoWindow && window.closeInfoWindow('${location.url}')"
+              style="
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.25rem;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1.25rem;
+                line-height: 1;
+                color: #6b7280;
+              "
+            >×</button>
+            
+            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #1f2937; padding-right: 1.5rem;">
               ${location.position_title}
             </h4>
             <p style="margin: 0.25rem 0; color: #4b5563;">
@@ -458,11 +475,18 @@ const Map: React.FC<MapProps> = ({
     window.navigateToAIInterview = (jobCode: string, company: string) => {
       router.push(`/ai-interview/evaluation?jobCode=${jobCode}&company=${company}`);
     };
+
+    window.closeInfoWindow = (jobId: string) => {
+      if (jobMarkersMapRef.current[jobId]) {
+        jobMarkersMapRef.current[jobId].infoWindow.close();
+      }
+    };
   
     return () => {
       window.drawRouteToJob = undefined;
       window.showRoadview = undefined;
       window.navigateToAIInterview = undefined;
+      window.closeInfoWindow = undefined;
     };
   }, [markerPosition, jobs, onJobSelect, router]);
 
@@ -524,6 +548,7 @@ declare global {
     drawRouteToJob?: (destLat: number, destLng: number) => void;
     showRoadview?: (destLat: number, destLng: number) => void;
     navigateToAIInterview?: (jobCode: string, company: string) => void;
+    closeInfoWindow?: (jobId: string) => void;
   }
 }
 

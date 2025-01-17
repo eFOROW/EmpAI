@@ -13,7 +13,8 @@ const Hero = () => {
     { text: '자기소개서 피드백', href: '/self-introduction', linkText: '바로 피드백 받기' },
     { text: '지도기반 기업탐색', href: '/job-search', linkText: '기업 찾아보기' },
     { text: '나만의 취업노트', href: null, linkText: null },
-    { text: 'AI 모의 면접', href: '/ai-interview', linkText: '면접 연습하기' }
+    { text: 'AI 모의 면접', href: '/ai-interview', linkText: '면접 연습하기' },
+    { text: '취업 커뮤니티', href: null, linkText: null }
   ], []);
 
   const [showArrow, setShowArrow] = useState(true);

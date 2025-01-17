@@ -64,7 +64,7 @@
     .flipCard {
       transition: transform 0.8s ease-in-out; /* 부드러운 전환을 위해 easing을 추가 */
       transform-style: preserve-3d;
-      width: 270px;
+      width: 330px;
       min-height: 130px;
     }
   
