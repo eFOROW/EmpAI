@@ -125,30 +125,18 @@ export default function Page() {
     };
 
     const handleNoteSelection = async (noteId: string) => {
-        if (isEditorSaving) {
-            Modal.confirm({
-                title: '저장 중',
-                content: '현재 노트를 저장하고 있습니다. 저장이 완료될 때까지 기다리시겠습니까?',
-                okText: '기다리기',
-                cancelText: '취소',
-                onOk: async () => {
-                    try {
-                        setIsNoteLoading(true);
-                        // 저장 완료 대기
-                        while (isEditorSaving) {
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                        }
-                        setSelectedNoteId(noteId);
-                    } finally {
-                        setIsNoteLoading(false);
-                    }
-                },
-            });
-            return;
-        }
-        
         try {
             setIsNoteLoading(true);
+            if (selectedNoteId && selectedNoteId !== noteId) {
+                await new Promise(resolve => {
+                    const checkSaveStatus = setInterval(() => {
+                        if (!isEditorSaving) {
+                            clearInterval(checkSaveStatus);
+                            resolve(true);
+                        }
+                    }, 100);
+                });
+            }
             setSelectedNoteId(noteId);
         } finally {
             setIsNoteLoading(false);
