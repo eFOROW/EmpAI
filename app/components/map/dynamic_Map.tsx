@@ -47,19 +47,25 @@ const Map: React.FC<MapProps> = ({
   }}>({})
   const router = useRouter();
   const [currentDestination, setCurrentDestination] = useState<{lat: number, lng: number} | null>(null);
+  const routeInfoWindowRef = useRef<any>(null);  // 길찾기 정보 InfoWindow 참조 추가
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
     try {
-      setCurrentDestination(end); // 현재 목적지 저장
+      setCurrentDestination(end);
       
       // 기존 경로들이 있다면 모두 제거
       if (polylineRef.current) {
         polylineRef.current.forEach((polyline: any) => {
           polyline.setMap(null);
         });
-        polylineRef.current = []; // 배열 초기화
+        polylineRef.current = [];
       }
-  
+
+      // 기존 길찾기 정보 InfoWindow가 있다면 제거
+      if (routeInfoWindowRef.current) {
+        routeInfoWindowRef.current.close();
+      }
+
       const response = await fetch(
         `/api/naver?start=${start.lng},${start.lat}&goal=${end.lng},${end.lat}`
       );
@@ -111,7 +117,7 @@ const Map: React.FC<MapProps> = ({
         polylineRef.current.push(polyline);
       });
 
-      // InfoWindow 내용에 혼잡도 범례 추가
+      // InfoWindow 생성 및 참조 저장
       const infoWindow = new naver.maps.InfoWindow({
         content: `
           <div style="padding: 1rem; font-family: 'Arial', sans-serif; font-size: 0.875rem; color: #333;">
@@ -161,8 +167,13 @@ const Map: React.FC<MapProps> = ({
         maxWidth: 400,
       });
   
+      routeInfoWindowRef.current = infoWindow;  // 참조 저장
+      
       // InfoWindow를 경로의 중간 지점에 띄우기
-      infoWindow.open(mapRef.current, new naver.maps.LatLng(route.path[Math.floor(route.path.length / 2)][1], route.path[Math.floor(route.path.length / 2)][0]));
+      infoWindow.open(mapRef.current, new naver.maps.LatLng(
+        route.path[Math.floor(route.path.length / 2)][1], 
+        route.path[Math.floor(route.path.length / 2)][0]
+      ));
   
       // 경로가 모두 보이도록 지도 영역 조정
       const bounds = new naver.maps.LatLngBounds(
@@ -484,12 +495,37 @@ const Map: React.FC<MapProps> = ({
         jobMarkersMapRef.current[jobId].infoWindow.close();
       }
     };
-  
+
+    // 경로와 InfoWindow 제거 이벤트 리스너 추가
+    const handleClearMapElements = () => {
+      // 경로 제거
+      if (polylineRef.current) {
+        polylineRef.current.forEach((polyline: any) => {
+          polyline.setMap(null);
+        });
+        polylineRef.current = [];
+      }
+      setCurrentDestination(null);
+
+      // 열려있는 모든 InfoWindow 닫기
+      Object.values(jobMarkersMapRef.current).forEach(({ infoWindow }) => {
+        infoWindow.close();
+      });
+
+      // 길찾기 정보 InfoWindow 닫기
+      if (routeInfoWindowRef.current) {
+        routeInfoWindowRef.current.close();
+      }
+    };
+
+    window.addEventListener('clearMapElements', handleClearMapElements);
+
     return () => {
       window.drawRouteToJob = undefined;
       window.showRoadview = undefined;
       window.navigateToAIInterview = undefined;
       window.closeInfoWindow = undefined;
+      window.removeEventListener('clearMapElements', handleClearMapElements);
     };
   }, [markerPosition, jobs, onJobSelect, router]);
 

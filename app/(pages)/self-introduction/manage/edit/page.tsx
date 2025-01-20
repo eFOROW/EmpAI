@@ -1,14 +1,21 @@
-// edit
-
 "use client";
 
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { User } from "firebase/auth";
 import getCurrentUser from '@/lib/firebase/auth_state_listener';
 import { useRouter } from 'next/navigation';
-import { Form, Input, Typography, Modal, Button, message, Checkbox } from "antd";
+import { Form, Input, Typography, Button, message } from "antd";
 import QuestionSelectionModal from '@/app/components/self-introduction/QuestionSelectionModal';
+import { LeftOutlined, ExclamationCircleOutlined, CloseOutlined, EllipsisOutlined,
+    CodeOutlined, ProjectOutlined, DollarOutlined, TeamOutlined,
+    FileTextOutlined, SketchOutlined, ShoppingOutlined,
+    CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
+    CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
+    ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
+    BankOutlined, SafetyOutlined, QuestionCircleOutlined
+} from '@ant-design/icons';
+import SidebarList from '@/app/components/self-introduction/SidebarList';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -191,14 +198,26 @@ const questionsData: {[key: string]: string[]} = {
         "공공·복지 분야에서의 직무 윤리와 사회적 책임을 어떻게 실현해 나갈 계획인가요?",
         "사회적 약자를 위한 공공·복지 서비스 개선을 위해 본인이 제안할 수 있는 새로운 프로그램이나 정책은 무엇인가요?",
     ]
-    };
+};
 
-
+  interface Document {
+    _id: string;
+    title: string;
+    job_code: string;
+    last_modified: Date;
+    data: {
+      question: string;
+      answer: string;
+    }[];
+  }
 
 const ManagePage: React.FC = () => {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [answers, setAnswers] = useState<Answer[]>([]);
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [title, setTitle] = useState('')
 
@@ -216,23 +235,53 @@ const ManagePage: React.FC = () => {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
+    const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
+    const [isPanelOpen, setIsPanelOpen] = useState(true);
+
+    const toggleDocument = (docId: string) => {
+        setExpandedDocId(expandedDocId === docId ? null : docId);
+    };
+
+    const fetchDocuments = useCallback(async () => {
+        try {
+            if (!user) return;
+            const token = await user.getIdToken();
+            const response = await fetch(`/api/self-introduction?uid=${user.uid}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error("Failed to fetch documents");
+            }
+            const data = await response.json();
+            const transformedData = data.map((doc: any) => ({
+                ...doc,
+                last_modified: new Date(doc.last_modified),
+            }));
+            setDocuments(transformedData);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, [user]);
+
     useEffect(() => {
         getCurrentUser().then((user) => {
-          if (!user) {
-            router.push('/mypage');
-          } else {
-            setUser(user);
-          }
+            if (!user) {
+                router.push('/mypage');
+            } else {
+                setUser(user);
+            }
         });
-        if (selectedValue) {
-            const questions = questionsData[selectedValue] || [];
-            setSelectedQuestions(questions);
-            setSelectJobQ(questions[0] || '');
-        } else {
-            setSelectedQuestions([]);
-            setSelectJobQ('');
+    }, [router]);
+
+    useEffect(() => {
+        if (user) {
+            fetchDocuments();
         }
-    }, [router, selectedValue]);
+    }, [user, fetchDocuments]);
 
     const handleTitleChange = (e:any) => {
         setTitle(e.target.value);
@@ -329,8 +378,26 @@ const ManagePage: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-screen bg-white">
-            <div className="w-full px-6 flex justify-center items-start">
+        <div className="flex min-h-screen bg-white relative">
+            {isFormGenerated && (
+                <div className="absolute top-0 left-0 h-full z-10">
+                    <SidebarList
+                        loading={loading}
+                        error={error}
+                        documents={documents}
+                        expandedDocId={expandedDocId}
+                        toggleDocument={toggleDocument}
+                        isPanelOpen={isPanelOpen}
+                        setIsPanelOpen={setIsPanelOpen}
+                    />
+                </div>
+            )}
+
+            <div 
+                className={`w-full transition-all duration-300 ${
+                    isFormGenerated && isPanelOpen ? 'pl-[20%]' : ''
+                } px-6 flex justify-center items-start`}
+            >
                 {!isFormGenerated ? (
                     <div className="relative w-full max-w-3xl min-h-[450px] p-10 bg-white rounded-2xl shadow-[0_4px_30px_0_rgba(173,235,250,0.8)] flex flex-col items-center space-y-8 border border-blue-200 mt-20">
                         <div className="text-center mb-8">
