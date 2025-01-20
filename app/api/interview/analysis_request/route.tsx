@@ -163,7 +163,7 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     // 외부 분석 서버로 인터뷰 분석 요청
-    const analyzeResponse = await fetch('https://safe-harmless-shark.ngrok-free.app/health', {
+    const analyzeResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/health', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
