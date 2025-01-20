@@ -103,7 +103,7 @@ export async function POST(request: Request) {
    });
 
    // 분석 서버로 전송
-   const analyzeResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/analyze', {
+   const analyzeResponse = await fetch(process.env.AI_SERVER_URL + '/analyze', {
      method: 'POST',
      body: analyzeFormData
    });
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     // 외부 분석 서버로 인터뷰 분석 요청
-    const analyzeResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/health', {
+    const analyzeResponse = await fetch(process.env.AI_SERVER_URL + '/health', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
