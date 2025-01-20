@@ -80,9 +80,13 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
     });
   };
 
-  // 맞춤검색을 위한 별도 함수 생성
+  // 맞춤검색을 위한 별도 함수 수정
   const executeFilterSearch = (index: number) => {
     enterLoading(index);
+    
+    // 기존 경로와 InfoWindow 제거를 위해 이벤트 발생
+    const customEvent = new CustomEvent('clearMapElements');
+    window.dispatchEvent(customEvent);
     
     let experienceLevelCode = 0;
     switch (selectedCareerCode) {
@@ -155,6 +159,10 @@ const SlidePanel: React.FC<SlidePanelProps> = ({ children, onRadiusChange, marke
     }
 
     enterLoading(0);
+
+    // 기존 경로와 InfoWindow 제거를 위해 이벤트 발생
+    const customEvent = new CustomEvent('clearMapElements');
+    window.dispatchEvent(customEvent);
 
     try {
       const searchCode = searchType === 'company' ? '0' : '1';

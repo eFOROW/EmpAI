@@ -124,7 +124,7 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
             {contextHolder}
             <div className="flex" style={{ height: '500px' }}>
                 {/* 좌측 메뉴 */}
-                <div className="w-48 border-r pr-4 pt-[5%]">
+                <div className="w-48 border-r pr-4 pt-[4%]">
                     <div 
                         className={`p-3 cursor-pointer mb-2 relative ${
                             activeTab === 'common' ? 'text-blue-600' : 'text-gray-500'
