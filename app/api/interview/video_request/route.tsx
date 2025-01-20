@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 //https://driving-skylark-grand.ngrok-free.app
 //https://safe-harmless-shark.ngrok-free.app 셧다운
-const BASE_URL = 'https://driving-skylark-grand.ngrok-free.app';
+const BASE_URL = process.env.AI_SERVER_URL;
 //https://52e6599bccb1c6.lhr.life 바뀜
 //http://220.90.180.86:5001
 export async function POST(request: Request) {

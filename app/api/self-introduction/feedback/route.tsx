@@ -7,7 +7,7 @@ import { ObjectId } from "mongodb";
 export async function GET(request: Request) {
     try {
       // AI 서버 상태 체크
-      const healthCheck = await fetch('https://cicada-musical-donkey.ngrok-free.app/gemma3', {
+      const healthCheck = await fetch(process.env.LLM_SERVER_URL + '/gemma3', {
         method: 'GET',
         headers: {
             'Cache-Control': 'no-cache'
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
       };
   
       // 3. AI 서버로 요청
-      const aiResponse = await fetch('https://cicada-musical-donkey.ngrok-free.app/gemma3', {
+      const aiResponse = await fetch(process.env.LLM_SERVER_URL + '/gemma3', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

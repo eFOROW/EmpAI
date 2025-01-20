@@ -329,8 +329,8 @@ const ListPage = ({ user }: ListPageProps) => {
   if (selectedDocument) {
     return (
       <div className="flex flex-col items-center min-h-screen bg-white">
-        <div style={{ width: '100%', minWidth: '900px', maxWidth: '1050px' }} className="p-6 mx-auto mt-8">
-          <div className="p-6 mx-auto mt-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.15)] rounded-xl">
+        <div style={{ width: '100%', minWidth: '900px', maxWidth: '1050px' }} className="p-6 mx-auto">
+          <div className="p-6 mx-auto bg-white shadow-[0_8px_30px_rgb(0,0,0,0.15)] rounded-xl">
             <div className="flex items-start mb-8">
               <Button
                 onClick={() => setSelectedDocument(null)}

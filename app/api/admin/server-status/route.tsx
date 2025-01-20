@@ -6,7 +6,7 @@ export async function GET() {
 
     // LLM 서버 상태 확인
     try {
-        const llmResponse = await fetch('https://cicada-musical-donkey.ngrok-free.app/gemma3', {
+        const llmResponse = await fetch(process.env.LLM_SERVER_URL + '/gemma3', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ export async function GET() {
 
     // AI 면접 서버 상태 확인
     try {
-        const interviewResponse = await fetch('https://driving-skylark-grand.ngrok-free.app/health', {
+        const interviewResponse = await fetch(process.env.AI_SERVER_URL + '/health', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
