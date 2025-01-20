@@ -46,9 +46,12 @@ const Map: React.FC<MapProps> = ({
     jobIndex: number;
   }}>({})
   const router = useRouter();
+  const [currentDestination, setCurrentDestination] = useState<{lat: number, lng: number} | null>(null);
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
     try {
+      setCurrentDestination(end); // 현재 목적지 저장
+      
       // 기존 경로들이 있다면 모두 제거
       if (polylineRef.current) {
         polylineRef.current.forEach((polyline: any) => {
@@ -498,7 +501,15 @@ const Map: React.FC<MapProps> = ({
       infoWindow.open(mapRef.current, marker);
     }
   }, [selectedJobId]);
-  
+
+  // markerPosition이 변경될 때 현재 길찾기 정보 업데이트
+  useEffect(() => {
+    if (markerPosition && currentDestination) {
+      drawRoute(markerPosition, currentDestination);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markerPosition]);
+
   return (
     <div className="relative w-full h-screen">
       <div id="map" className="w-full h-full"></div>

@@ -1,3 +1,5 @@
+// edit
+
 "use client";
 
 import React from 'react';
@@ -6,6 +8,7 @@ import { User } from "firebase/auth";
 import getCurrentUser from '@/lib/firebase/auth_state_listener';
 import { useRouter } from 'next/navigation';
 import { Form, Input, Typography, Modal, Button, message, Checkbox } from "antd";
+import QuestionSelectionModal from '@/app/components/self-introduction/QuestionSelectionModal';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -14,39 +17,6 @@ interface Answer {
   question: string;
   answer: string;
 }
-
-const allQuestions = [
-  "자기소개를 해주세요.",
-  "본인의 강점과 약점을 각각 설명해주세요.",
-  "회사의 비전과 본인의 목표가 어떻게 일치하는지 설명해주세요.",
-  "어려움을 극복한 경험을 설명해주세요.",
-  "팀워크를 발휘한 경험을 설명해주세요.",
-  "리더십을 발휘한 경험을 설명해주세요.",
-  "목표를 설정하고 달성한 경험을 설명해주세요.",
-  "문제를 해결한 경험을 설명해주세요.",
-  "업무 중 가장 큰 갈등을 해결한 경험을 설명해주세요.",
-  "어떤 일을 할 때 가장 만족감을 느끼나요?",
-  "스트레스 상황에서 어떻게 대처했는지 설명해주세요.",
-  "자기개발을 위해 노력한 경험을 설명해주세요.",
-  "실수를 통해 배운 경험을 설명해주세요.",
-  "시간 관리에 대한 본인의 방법을 설명해주세요.",
-  "예상치 못한 상황에서 어떻게 대처했는지 설명해주세요.",
-  "다양한 의견이 충돌할 때 어떻게 조율했는지 설명해주세요.",
-  "본인이 중요하게 생각하는 가치는 무엇인가요?",
-  "회사에서 이루고 싶은 목표가 무엇인지 설명해주세요.",
-  "새로운 아이디어나 방안을 제시했던 경험을 설명해주세요.",
-  "자신이 맡은 일을 어떻게 개선하거나 혁신했는지 설명해주세요.",
-  "다양한 사람들과 협업한 경험을 설명해주세요.",
-  "다른 사람과의 갈등을 해결한 경험을 설명해주세요.",
-  "장기적인 목표를 설정하고 어떻게 실행에 옮겼는지 설명해주세요.",
-  "자신이 경험한 가장 큰 실패는 무엇이며, 그로부터 배운 점은 무엇인가요?",
-  "변화에 민첩하게 적응했던 경험을 공유해주세요. 그 상황에서 어떻게 적응했으며, 어떤 결과를 가져왔나요?",
-  "주어진 자원과 시간이 제한된 상황에서 우선순위를 정하고 목표를 달성했던 경험을 이야기해주세요.",
-  "기존의 시스템이나 방식을 개선하기 위해 주도한 경험에 대해 설명해주세요.",
-  "압박을 받을 때 어떻게 감정을 조절하고 효율적으로 일처리를 하나요?",
-  "새로운 업무나 분야에 도전했을 때의 경험을 설명하고, 그 과정에서 배운 점은 무엇인가요?",
-  "한정된 시간 내에 중요한 결정을 내려야 했던 경험이 있나요? 그 결정을 내리기 위한 과정과 결과에 대해 설명해주세요.",
-];
 
 const options = [
     { value: "기획·전략", label: "기획·전략" },
@@ -232,20 +202,19 @@ const ManagePage: React.FC = () => {
 
     const [title, setTitle] = useState('')
 
-    const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]); // 선택된 질문
-    const [isFormGenerated, setIsFormGenerated] = useState(false); // 질문 생성 여부
+    const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
+    const [isFormGenerated, setIsFormGenerated] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
     
-    const [selectedValue, setSelectedValue] = useState(''); // 직무 선택
-    const [selectJobQ, setSelectJobQ] = useState(''); // 선택된 질문
-    const [jobAnswer, setJobAnswer] = useState(''); // 답변
+    const [selectedValue, setSelectedValue] = useState('');
+    const [selectJobQ, setSelectJobQ] = useState('');
+    const [jobAnswer, setJobAnswer] = useState('');
+    const [customQuestion, setCustomQuestion] = useState('');
+    const [isCustomSelected, setIsCustomSelected] = useState(false);
 
-
-    // 모달 열기/닫기 핸들러
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
-
 
     useEffect(() => {
         getCurrentUser().then((user) => {
@@ -258,7 +227,7 @@ const ManagePage: React.FC = () => {
         if (selectedValue) {
             const questions = questionsData[selectedValue] || [];
             setSelectedQuestions(questions);
-            setSelectJobQ(questions[0] || ''); // 첫 번째 질문을 기본값으로 설정
+            setSelectJobQ(questions[0] || '');
         } else {
             setSelectedQuestions([]);
             setSelectJobQ('');
@@ -270,15 +239,15 @@ const ManagePage: React.FC = () => {
     };
 
     const handleSelectChange = (e:any) => {
-        setSelectedValue(e.target.value); // 직무 선택 변경
+        setSelectedValue(e.target.value);
     };
 
     const handleSelectJobChange = (e:any) => {
-        setSelectJobQ(e.target.value); // 질문 선택 변경
+        setSelectJobQ(e.target.value);
     };
 
     const handleJobAnswerChange = (value:any) => {
-        setJobAnswer(value); // 답변 변경
+        setJobAnswer(value);
     };
 
     const warning = () => {
@@ -296,7 +265,6 @@ const ManagePage: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-            // 필수 입력값 검증
             if (!title) {
                 messageApi.error('제목을 입력해주세요.');
                 return;
@@ -307,7 +275,6 @@ const ManagePage: React.FC = () => {
                 return;
             }
 
-            // answers 배열의 모든 답변이 입력되었는지 확인
             const isAllAnswersFilled = answers.every(answer => answer.answer.trim() !== '');
             if (!isAllAnswersFilled) {
                 messageApi.error('모든 공통역량 질문에 답변을 입력해주세요.');
@@ -316,10 +283,8 @@ const ManagePage: React.FC = () => {
 
             const token = await user?.getIdToken();
             
-            // 기존 answers 배열 복사
             let allAnswers = [...answers];
 
-            // 직무 관련 질문과 답변이 모두 있을 때만 추가
             if (selectJobQ && jobAnswer.trim()) {
                 allAnswers.push({
                     question: selectJobQ,
@@ -353,16 +318,14 @@ const ManagePage: React.FC = () => {
         }
     };
 
-    const handleGenerateForm = () => {
-        if (selectedQuestions.length === 3) {
+    const handleQuestionsConfirmed = (questions: string[]) => {
         setAnswers(
-            selectedQuestions.map((question) => ({
-            question,
-            answer: "",
+            questions.map((question) => ({
+                question,
+                answer: "",
             }))
         );
-        setIsFormGenerated(true); // 질문 폼 생성 상태 업데이트
-        }
+        setIsFormGenerated(true);
     };
 
     return (
@@ -370,7 +333,6 @@ const ManagePage: React.FC = () => {
             <div className="w-full px-6 flex justify-center items-start">
                 {!isFormGenerated ? (
                     <div className="relative w-full max-w-3xl min-h-[450px] p-10 bg-white rounded-2xl shadow-[0_4px_30px_0_rgba(173,235,250,0.8)] flex flex-col items-center space-y-8 border border-blue-200 mt-20">
-                        {/* 상단 타이틀 및 설명 추가 */}
                         <div className="text-center mb-8">
                             <h1 className="text-4xl font-bold text-gray-800 mt-5 mb-12">자기소개서 등록</h1>
                             <p className="text-lg text-gray-600 max-w-lg mx-auto mt-15">
@@ -379,14 +341,13 @@ const ManagePage: React.FC = () => {
                             </p>
                         </div>
 
-                        {/* 버튼 및 폼 내용 */}
                         <div className="flex flex-col items-center space-y-6 w-full">
                             <Button
                                 onClick={openModal}
                                 className="bg-gradient-to-r from-[#00b0f3] to-[#001fb6] text-white hover:from-[#00aaff] hover:to-[#003366] 
                                 transition-all duration-300 ease-in-out py-7 px-12 text-xl rounded-full shadow-md hover:shadow-2xl focus:outline-none 
                                 focus:ring-2 focus:ring-blue-500"
-                                style={{ marginTop: '60px' }}  // 버튼을 약간 아래로 내리기 위한 margin-top 추가
+                                style={{ marginTop: '60px' }}
                             >
                                 질문 선택하기
                             </Button>
@@ -395,11 +356,10 @@ const ManagePage: React.FC = () => {
                 ) : (
                     <div className="w-full max-w-4xl px-4 mt-8">
                         <Form layout="vertical" className="bg-white rounded-xl shadow-lg p-8 space-y-6 border border-gray-100">
-                            {/* 제목 섹션 */}
                             <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                                 <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
                                     <span className="text-gray-500">
-                                        <i className="fas fa-heading"></i> {/* 제목 아이콘 */}
+                                        <i className="fas fa-heading"></i>
                                     </span>
                                     <Title level={3} className="text-xl text-gray-900 font-semibold">
                                         제목
@@ -407,7 +367,7 @@ const ManagePage: React.FC = () => {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <span className="text-gray-500">
-                                        <i className="fas fa-edit"></i> {/* 입력 아이콘 */}
+                                        <i className="fas fa-edit"></i>
                                     </span>
                                     <Input
                                         value={title}
@@ -418,7 +378,6 @@ const ManagePage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* 공통역량 질문 섹션 */}
                             <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
                                 <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
                                     공통역량 질문
@@ -450,18 +409,15 @@ const ManagePage: React.FC = () => {
                                     </Form.Item>
                                 ))}
                             </div>
-                            {/* 직무관련 질문 섹션 */}
                             <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
                                 <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
                                     직무관련 질문
                                 </Title>
 
-                                {/* 드롭다운 섹션 */}
                                 <div className="flex gap-6 items-center">
-                                    {/* 직무 선택 */}
                                     <div className="flex items-center w-1/3">
                                         <span className="mr-2 text-gray-500">
-                                            <i className="fas fa-briefcase"></i> {/* 직무 아이콘 */}
+                                            <i className="fas fa-briefcase"></i>
                                         </span>
                                         <select
                                             className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
@@ -477,11 +433,10 @@ const ManagePage: React.FC = () => {
                                         </select>
                                     </div>
 
-                                    {/* 직무 관련 질문 선택 */}
                                     {selectedValue && (
                                         <div className="flex items-center w-2/3">
                                             <span className="mr-2 text-gray-500">
-                                                <i className="fas fa-question-circle"></i> {/* 질문 아이콘 */}
+                                                <i className="fas fa-question-circle"></i>
                                             </span>
                                             <select
                                                 className="w-full p-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white"
@@ -498,7 +453,6 @@ const ManagePage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* 직무 관련 질문 답변 */}
                                 {selectJobQ && (
                                     <div className="space-y-2 mt-6">
                                         <div className="flex items-center space-x-2">
@@ -522,7 +476,6 @@ const ManagePage: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* 버튼 그룹 */}
                             <div className="flex justify-center gap-4 mt-8">
                                 <button
                                     type="button"
@@ -546,91 +499,13 @@ const ManagePage: React.FC = () => {
                 )}
             </div>
 
-            {/* Modal styling */}
-            <Modal
-                title={
-                    <div className="text-2xl font-bold text-gray-800 pb-2 border-b">
-                        질문 선택
-                    </div>
-                }
-                open={isModalOpen}
-                onCancel={closeModal}
-                footer={[
-                    <Button 
-                        key="close"
-                        disabled={selectedQuestions.length !== 3}
-                        className={`mt-4 py-3 px-8 rounded-lg text-white text-lg transition-all duration-300 ${
-                            selectedQuestions.length === 3 
-                            ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg" 
-                            : "bg-gray-400 cursor-not-allowed"
-                        }`}
-                        onClick={() => {
-                            closeModal();
-                            handleGenerateForm();
-                        }}
-                        style={{ width: '30%' }}
-                    >
-                        생성하기
-                    </Button>
-                ]}
-                centered
-                width={700}
-                className="rounded-2xl"
-            >
-                {/* 질문 선택 내용 카드 */}
-                <div
-                    style={{
-                        flexDirection: "row", // 수직으로 항목 정렬
-                        gap: "12px", // 항목 간 간격
-                        maxWidth: "700px",
-                        maxHeight: "700px", // 최대 높이 조정
-                        overflowY: "auto", // 세로 스크롤만 허용
-                    }}
-                >{contextHolder}
-                    <Checkbox.Group
-                        value={selectedQuestions}
-                        onChange={(values) => {
-                            // 선택된 질문이 3개 이하일 경우에만 업데이트
-                            if (values.length <= 3) {
-                                setSelectedQuestions(values);
-                            } else {
-                                warning();
-                            }
-                        }}
-                        style={{
-                            display: "flex",
-                            flexDirection: "row", // 세로로 항목 정렬
-                            gap: "10px", // 항목 간의 간격
-                            overflowY: "auto", // 세로 스크롤을 활성화
-                            maxWidth: "700px",
-                            maxHeight: "550px", // 높이를 지정해 스크롤을 추가할 공간 확보
-                        }}
-                    >
-                        {allQuestions.map((question, index) => (
-                            <Checkbox
-                                key={index}
-                                value={question}
-                                style={{
-                                    width: "610px",
-                                    padding: "15px 15px", // 체크박스 패딩
-                                    borderRadius: "6px", // 둥근 테두리
-                                    border: "1px solid #e5e7eb", // 체크박스 경계선
-                                    transition: "all 0.3s", // 애니메이션
-                                    fontSize: "18px", // 글자 크기 조정
-                                }}
-                            >{question}</Checkbox>
-                        ))}
-                    </Checkbox.Group>
-                    <p
-                        style={{
-                            marginTop: "12px",
-                            fontSize: "12px",
-                            color: "#888", // 안내문구 색상
-                        }}
-                    >3개의 질문을 선택하세요.</p>
-                </div>
-
-            </Modal>
+            <QuestionSelectionModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onQuestionsConfirmed={handleQuestionsConfirmed}
+                selectedQuestions={selectedQuestions}
+                setSelectedQuestions={setSelectedQuestions}
+            />
         </div>
     );
 };
