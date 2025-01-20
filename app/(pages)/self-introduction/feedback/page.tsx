@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Typography, Tabs, Card, Progress  } from 'antd';
+import { Button, Input, Typography, Tabs, Card, Progress, Alert  } from 'antd';
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { User } from "firebase/auth";
 import { LeftOutlined, 
@@ -44,6 +44,7 @@ interface AIResponse {
     similar_question: string;
     similar_answer: string;
     similarity: number;
+    using_gpt?: boolean;
   }[];
 }
 
@@ -87,6 +88,8 @@ export default function FeedbackPage() {
     setIsLoading(true);
     try {
       const token = await user.getIdToken();
+      
+      // 메인 AI 서버 시도
       const response = await fetch('/api/self-introduction/feedback', {
         method: 'POST',
         headers: {
@@ -95,16 +98,33 @@ export default function FeedbackPage() {
         },
         body: JSON.stringify({ _id: document._id })
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         setFeedbackData(data);
-      } else {
-        alert('AI 분석 요청에 실패했습니다.');
+        return;
       }
+  
+      // 메인 서버 실패시 GPT로 시도
+      const response_gpt = await fetch('/api/self-introduction/feedback_gpt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ _id: document._id })
+      });
+  
+      if (!response_gpt.ok) {
+        throw new Error('Both AI services failed');
+      }
+  
+      const data = await response_gpt.json();
+      setFeedbackData(data);
+  
     } catch (error) {
       console.error('Error:', error);
-      alert('서버 연결에 실패했습니다.');
+      alert('AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -387,7 +407,6 @@ export default function FeedbackPage() {
               className="h-full"
               headStyle={{ backgroundColor: '#eff6ff' }}
             >
-              <div>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <Card size="small">
                   <div className="text-center">
@@ -445,45 +464,53 @@ export default function FeedbackPage() {
                   </div>
 
                   {/* 유사도 분석 결과 */}
-                  {feedbackData.results[parseInt(activeTab)].similarity > 0 && (
                   <div className="mt-4 pt-4 border-t">
                     <Typography.Title level={4}>유사도 분석 결과</Typography.Title>
-                    <div className="space-y-4">  {/* 각 항목 사이 간격 추가 */}
-                      <Card size="small">
-                        <div>
-                          <div className="text-gray-600 font-semibold mb-1">합격한 회사</div>
-                          <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_h2_tag}</div>
-                        </div>
-                      </Card>
+                    
+                    {feedbackData.results[parseInt(activeTab)].using_gpt ? (
+                      <Alert
+                        type="info"
+                        message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
+                        showIcon
+                      />
+                    ) : (
+                      feedbackData.results[parseInt(activeTab)].similarity > 0 && (
+                        <div className="space-y-4">
+                          <Card size="small">
+                            <div>
+                              <div className="text-gray-600 font-semibold mb-1">합격한 회사</div>
+                              <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_h2_tag}</div>
+                            </div>
+                          </Card>
 
-                      <Card size="small">
-                        <div>
-                          <div className="text-gray-600 font-semibold mb-1">유사한 문항</div>
-                          <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_question}</div>
-                        </div>
-                      </Card>
+                          <Card size="small">
+                            <div>
+                              <div className="text-gray-600 font-semibold mb-1">유사한 문항</div>
+                              <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_question}</div>
+                            </div>
+                          </Card>
 
-                      <Card size="small">
-                        <div>
-                          <div className="text-gray-600 font-semibold mb-1">유사한 답변</div>
-                          <div className="text-lg" style={{ whiteSpace: 'pre-wrap' }}>
-                            {feedbackData.results[parseInt(activeTab)].similar_answer}
-                          </div>
-                        </div>
-                      </Card>
+                          <Card size="small">
+                            <div>
+                              <div className="text-gray-600 font-semibold mb-1">유사한 답변</div>
+                              <div className="text-lg" style={{ whiteSpace: 'pre-wrap' }}>
+                                {feedbackData.results[parseInt(activeTab)].similar_answer}
+                              </div>
+                            </div>
+                          </Card>
 
-                      <Card size="small" className="bg-blue-50">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600 font-semibold">유사도</span>
-                          <span className="text-xl font-bold text-blue-600">
-                            {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
-                          </span>
+                          <Card size="small" className="bg-blue-50">
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600 font-semibold">유사도</span>
+                              <span className="text-xl font-bold text-blue-600">
+                                {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
+                              </span>
+                            </div>
+                          </Card>
                         </div>
-                      </Card>
-                    </div>
+                      )
+                    )}
                   </div>
-                )}
-                </div>
               </div>
             </Card>
           </div>

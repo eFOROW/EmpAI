@@ -10,7 +10,7 @@ export const Divider = createReactBlockSpec(
     render: () => {
       return (
         <div className="w-[80%] py-2">
-          <hr className="border-0 h-[1px] bg-gray-200 dark:bg-gray-700" />
+          <hr className="border-0 h-[1px] bg-gray-300 dark:bg-gray-700" />
         </div>
       );
     },

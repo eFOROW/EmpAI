@@ -219,23 +219,7 @@ const ListPage = ({ user }: ListPageProps) => {
     };
 
     const handleFeedbackClick = async (_id: string) => {
-      try {
-        const token = await user.getIdToken();
-        const response = await fetch('/api/self-introduction/feedback', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (response.ok) {
-          router.push(`/self-introduction/feedback?_id=${_id}`);
-        } else {
-          alert('AI 서버가 응답하지 않습니다. 잠시 후 다시 시도해주세요.');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('서버 연결에 실패했습니다.');
-      }
+      router.push(`/self-introduction/feedback?_id=${_id}`);
     };
     
     const handleDelete = async (_id: string) => {
