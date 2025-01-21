@@ -6,11 +6,11 @@
 
 | 이름     | 역할          |
 |----------|---------------|
-| 김민수   | - |
-| 김원형   | - |
-| 이강민   | - |
-| 장소영   | - |
-| 정형준   | - | 
+| 김민수   | -             |
+| 김원형   | -             |
+| 이강민   | -             |
+| 장소영   | -             |
+| 정형준   | -             | 
 
 ## 프로젝트 목표
 
@@ -34,38 +34,28 @@
 
 - .env.local 파일을 설정합니다.
   ```
-<<<<<<< HEAD
-   NEXT_PUBLIC_FIREBASE_API_KEY=
-=======
   NEXT_PUBLIC_FIREBASE_API_KEY=
->>>>>>> e4541a58d44770b63f4ead89dfc5bf8f93ab0705
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-   NEXT_PUBLIC_FIREBASE_APP_ID=
-   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
-   NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=
-<<<<<<< HEAD
-   NEXT_PUBLIC_CLIENT_ID=
-   NEXT_PUBLIC_SECRET_KEY=
-   MONGODB_URI=
-=======
-   MONGODB_URI=
-   NEXT_PUBLIC_CLIENT_ID=
-   NEXT_PUBLIC_SECRET_KEY=
->>>>>>> e4541a58d44770b63f4ead89dfc5bf8f93ab0705
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+  NEXT_PUBLIC_FIREBASE_APP_ID=
+  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+  NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=
+  NEXT_PUBLIC_CLIENT_ID=
+  NEXT_PUBLIC_SECRET_KEY=
+  MONGODB_URI=
 
-   #Sever Url
-   AI_SERVER_URL=
-   LLM_SERVER_URL=
-   
-   #openai
-   OPENAI_API_KEY=
-   
-   # Firebase Admin SDK
-   FIREBASE_CLIENT_EMAIL=
-   FIREBASE_PRIVATE_KEY=
+  # Server Url
+  AI_SERVER_URL=
+  LLM_SERVER_URL=
+  
+  # OpenAI
+  OPENAI_API_KEY=
+  
+  # Firebase Admin SDK
+  FIREBASE_CLIENT_EMAIL=
+  FIREBASE_PRIVATE_KEY=
   ```
 
 - 애플리케이션을 실행합니다.
