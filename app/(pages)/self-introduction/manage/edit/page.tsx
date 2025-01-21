@@ -395,13 +395,15 @@ const ManagePage: React.FC = () => {
 
             <div 
                 className={`w-full transition-all duration-300 ${
-                    isFormGenerated && isPanelOpen ? 'pl-[20%]' : ''
+                    isFormGenerated && isPanelOpen ? 'pl-[30%]' : ''
                 } px-6 flex justify-center items-start`}
             >
                 {!isFormGenerated ? (
-                    <div className="relative w-full max-w-3xl min-h-[450px] p-10 bg-white rounded-2xl shadow-[0_4px_30px_0_rgba(173,235,250,0.8)] flex flex-col items-center space-y-8 border border-blue-200 mt-20">
+                    <div className="relative w-full max-w-3xl min-h-[450px] p-10 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-[0_8px_32px_rgba(173,235,250,0.4)] flex flex-col items-center space-y-8 border border-blue-200 mt-20 hover:shadow-[0_12px_48px_rgba(173,235,250,0.6)] transition-all duration-300">
                         <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-gray-800 mt-5 mb-12">자기소개서 등록</h1>
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mt-5 mb-12 animate-gradient">
+                                자기소개서 등록
+                            </h1>
                             <p className="text-lg text-gray-600 max-w-lg mx-auto mt-15">
                                 자신을 소개하는 중요한 문서를 쉽게 작성해보세요. 질문을 선택하고 
                                 답변을 통해 나만의 자기소개서를 만들어보세요!
@@ -422,8 +424,8 @@ const ManagePage: React.FC = () => {
                     </div>
                 ) : (
                     <div className="w-full max-w-4xl px-4 mt-8">
-                        <Form layout="vertical" className="bg-white rounded-xl shadow-lg p-8 space-y-6 border border-gray-100">
-                            <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <Form layout="vertical" className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] p-8 space-y-6 border border-gray-100 hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-all duration-300">
+                            <div className="space-y-6 bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                                 <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
                                     <span className="text-gray-500">
                                         <i className="fas fa-heading"></i>
@@ -445,7 +447,7 @@ const ManagePage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                            <div className="space-y-8 mt-10 bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                                 <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
                                     공통역량 질문
                                 </Title>
@@ -476,7 +478,7 @@ const ManagePage: React.FC = () => {
                                     </Form.Item>
                                 ))}
                             </div>
-                            <div className="space-y-8 mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                            <div className="space-y-8 mt-10 bg-gradient-to-br from-white to-gray-50 p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                                 <Title level={3} className="text-xl text-gray-900 font-semibold border-b pb-3">
                                     직무관련 질문
                                 </Title>
@@ -548,15 +550,15 @@ const ManagePage: React.FC = () => {
                                     type="button"
                                     onClick={handleSubmit}
                                     className="py-3 px-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-lg rounded-lg 
-                                    shadow-md hover:shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-700"
+                                    shadow-md hover:shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-700 transform hover:scale-105"
                                 >
                                     제출하기
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => router.push('/self-introduction/manage')}
-                                    className="py-3 px-8 bg-gray-500 text-white text-lg rounded-lg shadow-md hover:shadow-lg 
-                                    transition-all duration-300 hover:bg-gray-600"
+                                    className="py-3 px-8 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-lg rounded-lg shadow-md hover:shadow-lg 
+                                    transition-all duration-300 hover:from-gray-600 hover:to-gray-700 transform hover:scale-105"
                                 >
                                     취소
                                 </button>
