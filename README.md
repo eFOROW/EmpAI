@@ -68,5 +68,5 @@
 
 - 애플리케이션을 실행합니다.
   ```bash
-  npm start
+  npm run build && npm run start
   ```
