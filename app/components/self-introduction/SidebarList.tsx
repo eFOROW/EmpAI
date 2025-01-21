@@ -75,7 +75,7 @@ const SidebarList: React.FC<SidebarListProps> = ({
     return (
         <div className="relative h-full">
             <div
-                className={`fixed top-[50vh] -translate-y-1/2 left-2 h-[80vh] bg-white border border-gray-200 rounded-xl shadow-xl transition-all duration-300 ease-in-out overflow-hidden ${
+                className={`fixed top-[50vh] -translate-y-1/2 left-2 h-[80vh] bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] border border-gray-200 rounded-xl shadow-xl transition-all duration-300 ease-in-out overflow-hidden ${
                     isPanelOpen ? 'translate-x-0' : '-translate-x-[100%]'
                 }`}
                 style={{ 
@@ -109,7 +109,9 @@ const SidebarList: React.FC<SidebarListProps> = ({
                     `}</style>
                     <div className="p-4">
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">내 자기소개서</h2>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                                내 자기소개서
+                            </h2>
                         </div>
                         {loading ? (
                             <div className="text-center py-4">로딩 중...</div>
@@ -122,7 +124,7 @@ const SidebarList: React.FC<SidebarListProps> = ({
                                 {documents.map((document) => (
                                     <div key={document._id}>
                                         <div
-                                            className="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                                            className="p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
                                             onClick={() => toggleDocument(document._id)}
                                         >
                                             <div className="flex items-center gap-2 mb-2">
@@ -148,9 +150,9 @@ const SidebarList: React.FC<SidebarListProps> = ({
                                             </p>
                                         </div>
                                         {expandedDocId === document._id && (
-                                            <div className="mt-2 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+                                            <div className="mt-2 p-4 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100">
                                                 <div className="space-y-8">
-                                                    <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                                    <div className="space-y-6 bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-200">
                                                         <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
                                                             <Title level={3} className="text-xl text-gray-900 font-semibold">
                                                                 공통역량 질문
@@ -186,7 +188,7 @@ const SidebarList: React.FC<SidebarListProps> = ({
                                                         ))}
                                                     </div>
 
-                                                    <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                                    <div className="space-y-6 bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-200">
                                                         <div className="flex items-center space-x-2 pb-3 border-b border-gray-200">
                                                             <Title level={3} className="text-xl text-gray-900 font-semibold">
                                                                 직무관련 질문
@@ -234,7 +236,7 @@ const SidebarList: React.FC<SidebarListProps> = ({
 
             <button
                 onClick={() => setIsPanelOpen(!isPanelOpen)}
-                className={`fixed top-[50vh] -translate-y-1/2 bg-[#e6f4ff] hover:bg-[#bae0ff] text-[#1677ff] p-2 rounded-r-lg shadow-md transition-all duration-300 flex items-center justify-center ${
+                className={`fixed top-[50vh] -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-2 rounded-r-lg shadow-md transition-all duration-300 flex items-center justify-center ${
                     isPanelOpen ? 'hover:translate-x-1' : 'hover:-translate-x-1'
                 }`}
                 style={{
