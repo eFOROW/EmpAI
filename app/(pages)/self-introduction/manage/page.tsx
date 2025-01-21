@@ -472,108 +472,79 @@ const ListPage = ({ user }: ListPageProps) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.3,
-                delay: index * 0.1, // 각 카드마다 0.1초씩 딜레이
+                delay: index * 0.1,
                 ease: "easeOut"
               }}
             >
               <Col className="intro-card">
-                <div className={`${style.flipCard} ${flippedCards[document._id] ? style.flipped : ""}`}>
-                  <div className={`${style.front} ml-4`}>
-                    <Card
-                      onClick={() => handleDocumentClick(document)}
-                      hoverable
-                      cover={
-                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', padding: '16px 16px 0 16px' }}>
-                          <div style={{ display: 'inline-flex' }}>
-                            <Text
-                              className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
-                              style={{
-                                color: jobStyles[document.job_code]?.color ?? "#666",
-                                backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
-                                border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
-                                width: 'fit-content',
-                                display: 'inline-flex'
-                              }}
-                            >
-                              {jobStyles[document.job_code]?.icon ?? null}
-                              {document.job_code || "N/A"}
-                            </Text>
-                          </div>
-                          <motion.div 
-                            style={{ marginLeft: 'auto' }}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
+                <motion.div
+                  className="group relative"
+                >
+                  <Card
+                    onClick={() => handleDocumentClick(document)}
+                    hoverable
+                    cover={
+                      <div className="w-full flex justify-between px-4 pt-4">
+                        <div className="inline-flex">
+                          <Text
+                            className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                            style={{
+                              color: jobStyles[document.job_code]?.color ?? "#666",
+                              backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
+                              border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
+                              width: 'fit-content',
+                              display: 'inline-flex'
+                            }}
                           >
-                            <button
-                              className="text-gray-800 bg-transparent border-none cursor-pointer more-options"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleFlip(document._id);
-                              }}
-                            >
-                              <EllipsisOutlined
-                                style={{
-                                  fontSize: '24px',
-                                  cursor: 'pointer',
-                                  transform: 'rotate(90deg)',
-                                }}
-                              />
-                            </button>
-                          </motion.div>
+                            {jobStyles[document.job_code]?.icon ?? null}
+                            {document.job_code || "N/A"}
+                          </Text>
                         </div>
-                      }
-                      style={{ padding: 0, maxWidth: 320 }}
-                    >
-                      <div 
-                        className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
-                        onClick={() => handleDocumentClick(document)}
-                      >
-                        {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <Text type="secondary" style={{ fontSize: "12px" }}>
-                          {document.last_modified.toLocaleDateString()}{" "}
-                          {document.last_modified.toLocaleTimeString()}
-                        </Text>
-                      </div>
-                    </Card>
-                  </div>
-                  <div
-                    className={`${style.back} border border-gray-150 p-4 min-h-[142px] min-w-[270px] max-w-[330px] rounded-lg hover:shadow-lg relative`}
+                    }
+                    className="w-80 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 z-10"
                   >
-                    <motion.button
-                      className="absolute top-2 right-2 text-gray-800 bg-transparent border-none cursor-pointer"
-                      onClick={() => handleFlip(document._id)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
+                    <div 
+                      className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
+                      onClick={() => handleDocumentClick(document)}
                     >
-                      <CloseOutlined style={{ fontSize: '15px', cursor: 'pointer' }} />
-                    </motion.button>
+                      {document.title.length > 20 ? `${document.title.substring(0, 15)}...` : document.title}
+                    </div>
+                    <div className="text-right">
+                      <Text type="secondary" className="text-xs">
+                        {document.last_modified.toLocaleDateString()}{" "}
+                        {document.last_modified.toLocaleTimeString()}
+                      </Text>
+                    </div>
+                  </Card>
 
-                    <div className="flex justify-center space-x-4 mt-10">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button 
-                          color="danger" 
-                          variant="solid" 
-                          className="px-4 py-2"
-                          onClick={() => confirm_Delete(document._id)}
-                        >
-                          삭제하기
-                        </Button>
-                      </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button 
-                          color="primary" 
-                          variant="solid" 
-                          className="px-4 py-2"
-                          onClick={() => handleFeedbackClick(document._id)}
-                        >
-                          첨삭받기
-                        </Button>
-                      </motion.div>
+                  <div
+                    className="absolute top-[calc(100%-10px)] left-0 right-0 flex justify-center z-0 w-70 mx-auto h-12 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+                    style={{
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      overflow: 'hidden',
+                      gap: 0,
+                    }}
+                  >
+                    <div className="flex-1 flex justify-center items-end bg-red-500 hover:bg-red-500 transition-colors duration-200">
+                      <button
+                        onClick={() => confirm_Delete(document._id)}
+                        className="px-4 py-2 w-full text-white font-medium text-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      >
+                        삭제하기
+                      </button>
+                    </div>
+                    <div className="flex-1 flex justify-center items-end bg-blue-500 hover:bg-blue-500 transition-colors duration-200">
+                      <button
+                        onClick={() => handleFeedbackClick(document._id)}
+                        className="px-4 py-2 w-full text-white font-medium text-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      >
+                        첨삭받기
+                      </button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </Col>
             </motion.div>
           ))}
@@ -583,7 +554,7 @@ const ListPage = ({ user }: ListPageProps) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{
               duration: 0.3,
-              delay: filteredDocuments.length * 0.1, // 마지막 카드 이후에 나타나도록
+              delay: filteredDocuments.length * 0.1,
               ease: "easeOut"
             }}
           >
