@@ -47,7 +47,7 @@ Employment with AI
    npm install
    ```
 
-## 사용 방법
+## 사용 방법(Next.js)
 
 - .env.local 파일을 설정합니다.
   ```
