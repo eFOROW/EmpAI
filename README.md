@@ -15,7 +15,7 @@ Employment with AI
 |------------|---------------|
 | [김민수](https://github.com/mayway777)| - |
 | [김원형](https://github.com/eFOROW)| - |
-| 이강민     | - |
+| [이강민](https://github.com/lkmsdf159)     | - |
 | 장소영    | - |
 | [정형준](https://github.com/Junghyeongjun)     | - |
 
@@ -31,7 +31,7 @@ Employment with AI
     <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png" width="170" alt="Next.js 로고">
 </a>
 
-<a href="https://ai.google.dev/gemma/docs?hl=ko">
+<a href="https://github.com/lkmsdf159/EemAI_self-introduction_ai_server">
     <img src="https://it.chosun.com/news/photo/202402/2023092110644_374751_5441.png" width="170" alt="Gemma 로고">
 </a>
 
