@@ -19,7 +19,7 @@
 - 데이터 분석을 통한 취업 시장 트렌드 파악
 
 
-![Next.js 로고](https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png) **Next.js**: https://github.com/eFOROW/EmpAI
+![Next.js 로고](https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png){ width=50 } **Next.js**: https://github.com/eFOROW/EmpAI
 - **LLM 서버**: 
 - **AI 영상 분석 서버**: 
 
