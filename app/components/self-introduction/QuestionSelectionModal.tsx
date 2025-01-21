@@ -71,7 +71,7 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
         );
         const newSelected = Array.from(new Set([...currentSelected, ...values]));
         
-        if (newSelected.length <= 6) {
+        if (newSelected.length <= 5) {
             setSelectedQuestions(newSelected);
         } else {
             warning();
@@ -81,7 +81,7 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
     const warning = () => {
         messageApi.open({
             type: 'warning',
-            content: '총 2~6개까지 선택 가능합니다.',
+            content: '총 2~5개까지 선택 가능합니다.',
             duration: 2,
         });
     };
@@ -91,7 +91,7 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
             onQuestionsConfirmed(selectedQuestions);
             onClose();
         } else {
-            messageApi.warning('2~6개의 질문을 선택해주세요.');
+            messageApi.warning('2~5개의 질문을 선택해주세요.');
         }
     };
 
