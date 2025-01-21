@@ -21,11 +21,11 @@
 
 ## 전체 프로젝트
 <a href="https://github.com/eFOROW/EmpAI">
-    <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png" width="100" alt="Next.js 로고" style="margin-right: 20px;">
+    <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png" width="170" alt="Next.js 로고">
 </a>
 
 <a href="https://ai.google.dev/gemma/docs?hl=ko">
-    <img src="https://it.chosun.com/news/photo/202402/2023092110644_374751_5441.png" width="100" alt="Gemma 로고" style="margin-right: 20px;">
+    <img src="https://it.chosun.com/news/photo/202402/2023092110644_374751_5441.png" width="170" alt="Gemma 로고">
 </a>
 
 **AI 영상 분석 서버**: 
