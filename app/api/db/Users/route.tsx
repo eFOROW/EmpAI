@@ -64,13 +64,10 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    // 인증 검증
     const decodedToken = await verifyAuth();
-    
     const { searchParams } = new URL(request.url);
     const requestedUid = searchParams.get("uid");
 
-    // 요청한 uid와 토큰의 uid가 일치하는지 확인
     if (decodedToken.uid !== requestedUid) {
       return NextResponse.json(
         { message: "접근 권한이 없습니다" },
@@ -79,8 +76,19 @@ export async function PUT(request: Request) {
     }
 
     await connectToDatabase();
-    // ... 기존의 사용자 정보 수정 로직 ...
+    
+    const updateData = await request.json();
+    const updatedUser = await User.findOneAndUpdate(
+      { uid: requestedUid },
+      { $set: updateData },
+      { new: true }
+    );
 
+    if (!updatedUser) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
     if (error instanceof Error && (error.message === 'Invalid token' || error.message === 'No token provided')) {
       return NextResponse.json(
