@@ -140,6 +140,48 @@ const HeadPositionAnalysis = ({
   );
 };
 
+const SpeedGauge = ({ speed }: { speed: number }) => {
+  const getSpeedZone = (wpm: number) => {
+    if (wpm <= 80) return { zone: '매우 느림', color: '#FF4D4F', position: 10 };
+    if (wpm <= 94) return { zone: '느림', color: '#FAAD14', position: 30 };
+    if (wpm <= 124) return { zone: '적정', color: '#52C41A', position: 50 };
+    if (wpm <= 155) return { zone: '빠름', color: '#FAAD14', position: 70 };
+    return { zone: '매우 빠름', color: '#FF4D4F', position: 90 };
+  };
+
+  const speedInfo = getSpeedZone(speed);
+
+  return (
+    <div className="bg-white p-4 rounded-lg mb-4">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-medium text-gray-600">현재 말하기 속도</span>
+        <span className="text-sm font-bold text-blue-600">{speed.toFixed(0)} WPM</span>
+      </div>
+      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+        {/* 구간별 배경 */}
+        <div className="absolute h-full w-[20%] left-0" style={{ background: 'linear-gradient(90deg, #FF4D4F 0%, #FF7875 100%)' }} />
+        <div className="absolute h-full w-[20%] left-[20%]" style={{ background: 'linear-gradient(90deg, #FAAD14 0%, #FFD666 100%)' }} />
+        <div className="absolute h-full w-[20%] left-[40%]" style={{ background: 'linear-gradient(90deg, #52C41A 0%, #95DE64 100%)' }} />
+        <div className="absolute h-full w-[20%] left-[60%]" style={{ background: 'linear-gradient(90deg, #FFD666 0%, #FAAD14 100%)' }} />
+        <div className="absolute h-full w-[20%] left-[80%]" style={{ background: 'linear-gradient(90deg, #FF7875 0%, #FF4D4F 100%)' }} />
+        
+        {/* 현재 속도 마커 */}
+        <div 
+          className="absolute w-3 h-3 bg-white border-2 border-blue-600 rounded-full top-1/2 transform -translate-y-1/2 -translate-x-1/2 transition-all duration-300 shadow-md"
+          style={{ left: `${speedInfo.position}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-xs text-gray-500">
+        <span>매우 느림</span>
+        <span>느림</span>
+        <span>적정</span>
+        <span>빠름</span>
+        <span>매우 빠름</span>
+      </div>
+    </div>
+  );
+};
+
 const VoiceAnalysis = ({
   voiceData,
 }: {
@@ -151,11 +193,9 @@ const VoiceAnalysis = ({
   const voiceAnalysisItems = [
     {
       label: "말하기 속도",
-      value:
-        voiceData.말하기속도 !== null
-          ? `${voiceData.말하기속도.toFixed(0)+" WPM"}`
-          : "분석 결과 없음",
+      value: voiceData.말하기속도 !== null ? `${voiceData.말하기속도.toFixed(0)} WPM` : "분석 결과 없음",
       tooltip: "발화 속도에 대한 분석",
+      showValue: true,
     },
     {
       label: "목소리 변동성",
@@ -340,7 +380,7 @@ const EvaluationCard = ({
 }: {
   title: string;
   icon: React.ReactNode;
-  content: string | {
+  content: React.ReactNode | string | {
     strengths: string;
     improvements: string;
     overall: string;
@@ -410,77 +450,111 @@ const generateAttitudeEvaluation = (scores: {
   표정분석: number;
   머리기울기: number;
   시선분석: number;
-}) => {
+}, videoAnalysis: VideoAnalysis) => {
   const evaluations = [];
 
   // 말하기 속도 평가
-  evaluations.push(
-    "【말하기 속도】\n" + (scores.말하기속도 >= 8
-      ? "적절한 속도로 말하고 있어 면접관이 내용을 이해하기 쉽습니다. 말하기 속도가 너무 빠르거나 느리면 면접관이 내용을 놓칠 수 있으니, 이 점을 잘 유지하세요. 지속적으로 자신만의 자연스러운 말하기 속도를 유지하는 것이 중요합니다."
-      : scores.말하기속도 >= 5
-      ? "말하기 속도가 약간 빠르거나 느립니다. 속도 조절에 주의를 기울이세요. 면접관이 내용을 정확히 파악할 수 있도록 일정한 속도를 유지하려는 노력이 필요합니다."
-      : "말하기 속도가 너무 빠르거나 느립니다. 면접관의 이해를 돕기 위해 속도 조절이 필요합니다. 너무 빠르면 내용을 놓칠 수 있고, 너무 느리면 지루함을 유발할 수 있으니 균형을 맞추는 것이 중요합니다."
-    )
+  const speedEvaluation = (
+    <div>
+      <div className="text-lg font-semibold mb-2">【말하기 속도】</div>
+      <SpeedGauge speed={Number((videoAnalysis.말하기속도 ?? 0).toFixed(0))} />
+      <p className="mt-3">
+        {scores.말하기속도 >= 8
+          ? "적절한 속도로 말하고 있어 면접관이 내용을 이해하기 쉽습니다..."
+          : scores.말하기속도 >= 5
+          ? "말하기 속도가 약간 빠르거나 느립니다..."
+          : "말하기 속도가 너무 빠르거나 느립니다..."}
+      </p>
+    </div>
   );
+  evaluations.push(speedEvaluation);
 
-  // 추임새/침묵 갯수 평가
+  // 추임새/침묵 평가
   evaluations.push(
-    "【추임새와 침묵】\n" + (scores["추임새/침묵"] >= 8
-      ? "추임새와 침묵을 적절히 사용하여 자연스러운 대화 흐름을 유지하고 있습니다. 이는 면접관과의 원활한 소통에 크게 기여하며, 긴장을 완화시키는 데 도움이 됩니다. 이러한 적절한 사용은 당신의 대화 능력을 잘 보여줍니다."
-      : scores["추임새/침묵"] >= 5
-      ? "추임새나 침묵이 약간 많습니다. 줄이려는 노력이 필요합니다. 너무 많은 추임새는 대화의 흐름을 방해할 수 있으니, 보다 신중하게 선택하여 사용하는 것이 좋습니다."
-      : "추임새나 침묵이 너무 많아 대화의 흐름을 방해합니다. 이를 줄이는 연습이 필요합니다. 자연스러운 대화를 위해 불필요한 추임새와 침묵을 피하는 것이 좋습니다."
-    )
+    <div>
+      <div className="text-base font-semibold mb-2">【추임새와 침묵】</div>
+      <p>
+        {scores["추임새/침묵"] >= 8
+          ? "추임새와 침묵을 적절히 사용하여 자연스러운 대화 흐름을 유지하고 있습니다..."
+          : scores["추임새/침묵"] >= 5
+          ? "추임새나 침묵이 약간 많습니다..."
+          : "추임새나 침묵이 너무 많아 대화의 흐름을 방해합니다..."}
+      </p>
+    </div>
   );
 
   // 목소리 변동성 평가
   evaluations.push(
-    "【목소리 변화】\n" + (scores.목소리변동성 >= 8
-      ? "적절한 목소리 변동성으로 생동감 있게 말하고 있습니다. 이는 면접관에게 긍정적인 인상을 주며, 듣는 이의 관심을 끌기에 충분합니다. 목소리의 높낮이를 효과적으로 활용하고 있어 매우 좋습니다."
-      : scores.목소리변동성 >= 5
-      ? "목소리 변동성이 약간 과도합니다. 더 자연스러운 억양을 연습하세요. 목소리의 높낮이를 적절하게 조절하여 대화의 리듬을 맞추는 것이 중요합니다."
-      : "목소리 변동성이 지나치게 과도합니다. 청취자의 집중을 방해할 수 있으니 개선이 필요합니다. 목소리의 자연스러운 흐름을 유지하여 보다 신뢰감 있는 대화를 이끌어 나가세요."
-    )
+    <div>
+      <div className="text-base font-semibold mb-2">【목소리 변화】</div>
+      <p>
+        {scores.목소리변동성 >= 8
+          ? "적절한 목소리 변동성으로 생동감 있게 말하고 있습니다..."
+          : scores.목소리변동성 >= 5
+          ? "목소리 변동성이 약간 과도합니다..."
+          : "목소리 변동성이 지나치게 과도합니다..."}
+      </p>
+    </div>
   );
 
   // 표정 분석 평가
   evaluations.push(
-    "【표정 분석】\n" + (scores.표정분석 >= 8
-      ? "적절한 표정으로 자신감과 긍정적인 태도를 잘 표현하고 있습니다. 이는 면접관에게 긍정적인 인상을 주고, 신뢰성을 높이는 데 도움이 됩니다. 표정을 통해 전달되는 감정이 효과적으로 표현되고 있습니다."
-      : scores.표정분석 >= 5
-      ? "표정이 다소 단조롭거나 과도합니다. 더 자연스러운 표정 관리가 필요합니다. 적절한 표정을 통해 자신의 감정과 태도를 조절하며, 면접관과의 비언어적 소통을 향상시켜 보세요."
-      : "부정적이거나 부적절한 표정이 많습니다. 표정 관리에 주의를 기울이세요. 부정적인 표정은 면접관에게 좋지 않은 인상을 줄 수 있으니, 긍정적이고 자연스러운 표정을 유지하는 것이 중요합니다."
-    )
+    <div>
+      <div className="text-base font-semibold mb-2">【표정 분석】</div>
+      <p>
+        {scores.표정분석 >= 8
+          ? "적절한 표정으로 자신감과 긍정적인 태도를 잘 표현하고 있습니다..."
+          : scores.표정분석 >= 5
+          ? "표정이 다소 단조롭거나 과도합니다..."
+          : "부정적이거나 부적절한 표정이 많습니다..."}
+      </p>
+    </div>
   );
 
   // 머리 기울기 평가
   evaluations.push(
-    "【머리 기울기】\n" + (scores.머리기울기 >= 4
-      ? "고개를 바르게 유지하여 자신감과 집중도를 잘 보여주고 있습니다. 이는 면접관에게 신뢰감을 주고, 대화의 집중도를 높이는 데 기여합니다. 안정적인 자세가 긍정적인 인상을 남깁니다."
-      : scores.머리기울기 >= 2
-      ? "때때로 고개가 기울어집니다. 더 안정적인 자세를 유지하려 노력하세요. 고개를 바르게 유지하는 것은 자신감을 나타내는 중요한 요소입니다. 자세를 바로 잡아 더욱 긴장감 없는 모습을 보여주세요."
-      : "고개가 자주 기울어져 불안정해 보입니다. 자세 교정이 필요합니다. 안정적인 자세는 면접관에게 긍정적인 인상을 줄 수 있으며, 자신감 있는 태도를 전달하는 데 중요합니다."
-    )
+    <div>
+      <div className="text-base font-semibold mb-2">【머리 기울기】</div>
+      <p>
+        {scores.머리기울기 >= 4
+          ? "고개를 바르게 유지하여 자신감과 집중도를 잘 보여주고 있습니다..."
+          : scores.머리기울기 >= 2
+          ? "때때로 고개가 기울어집니다..."
+          : "고개가 자주 기울어져 불안정해 보입니다..."}
+      </p>
+    </div>
   );
 
   // 시선분석 평가
   evaluations.push(
-    "【시선 처리】\n" + (scores.시선분석 >= 4
-      ? "적절한 시선 처리로 집중력과 자신감을 잘 표현하고 있습니다. 이는 면접관과의 연결을 강화하고, 대화의 신뢰성을 높이는 데 도움이 됩니다. 자연스럽게 면접관을 바라보며 소통하고 있습니다."
-      : scores.시선분석 >= 2
-      ? "시선 처리가 다소 불안정합니다. 더 일관된 시선 유지를 연습하세요. 일관된 시선 처리는 대화의 집중도를 높이는 데 중요하며, 면접관과의 신뢰 관계를 형성하는 데 기여합니다."
-      : "시선 회피가 잦거나 눈 깜빡임이 과도합니다. 시선 관리에 주의를 기울이세요. 안정된 시선 처리는 면접에서의 자신감과 진정성을 전달하는 데 중요한 역할을 합니다."
-    )
+    <div>
+      <div className="text-base font-semibold mb-2">【시선 처리】</div>
+      <p>
+        {scores.시선분석 >= 4
+          ? "적절한 시선 처리로 집중력과 자신감을 잘 표현하고 있습니다..."
+          : scores.시선분석 >= 2
+          ? "시선 처리가 다소 불안정합니다..."
+          : "시선 회피가 잦거나 눈 깜빡임이 과도합니다..."}
+      </p>
+    </div>
   );
 
-  return evaluations.join("\n\n");
+  return (
+    <div className="space-y-6">
+      {evaluations.map((evaluation, index) => (
+        <div key={index} className="evaluation-item">
+          {evaluation}
+        </div>
+      ))}
+    </div>
+  );
 };
 
 const OverallEvaluation = ({
   attitudeEvaluation,
   answerEvaluation,
 }: {
-  attitudeEvaluation: string;
+  attitudeEvaluation: React.ReactNode;
   answerEvaluation: {
     strengths: string;
     improvements: string;
@@ -894,7 +968,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis, a
                 </div>
 
                 <OverallEvaluation
-                  attitudeEvaluation={generateAttitudeEvaluation(videoAnalysis.Score)}
+                  attitudeEvaluation={generateAttitudeEvaluation(videoAnalysis.Score, videoAnalysis)}
                   answerEvaluation={{
                     strengths: videoAnalysis.Evaluation?.답변강점 || "답변 강점 데이터가 없습니다.",
                     improvements: videoAnalysis.Evaluation?.답변개선사항 || "개선사항 데이터가 없습니다.",

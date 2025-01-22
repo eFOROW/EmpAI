@@ -15,9 +15,9 @@ Employment with AI
 |------------|---------------|
 | [김민수](https://github.com/mayway777)| - |
 | [김원형](https://github.com/eFOROW)| - |
-| [이강민](https://github.com/lkmsdf159)     | - |
-| 장소영    | - |
-| [정형준](https://github.com/Junghyeongjun)     | - |
+| [이강민](https://github.com/lkmsdf159)| - |
+| [장소영](https://github.com/sy56)| - |
+| [정형준](https://github.com/Junghyeongjun)| - |
 
 ## 프로젝트 목표(예시)
 
