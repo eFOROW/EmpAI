@@ -208,10 +208,15 @@ export default function FeedbackPage() {
         console.error('Failed to fetch document:', response.statusText);
         if (response.status === 401) {
           router.push('/mypage');
+        } else {
+          // 파라미터는 있지만 정상적으로 값을 받지 못한 경우
+          router.push('/self-introduction/manage');
         }
       }
     } catch (error) {
       console.error('Error fetching document:', error);
+      // 에러 발생 시 리다이렉션
+      router.push('/self-introduction/manage');
     }
   }, [user, router]);
 
@@ -463,9 +468,9 @@ export default function FeedbackPage() {
                     </Typography.Paragraph>
                   </div>
 
-                  {/* 유사도 분석 결과 */}
+                  {/* 유사 매칭 결과 */}
                   <div className="mt-4 pt-4 border-t">
-                    <Typography.Title level={4}>유사도 분석 결과</Typography.Title>
+                    <Typography.Title level={4}>자기소개서 매칭 결과</Typography.Title>
                     
                     {feedbackData.results[parseInt(activeTab)].using_gpt ? (
                       <Alert
@@ -474,7 +479,7 @@ export default function FeedbackPage() {
                         showIcon
                       />
                     ) : (
-                      feedbackData.results[parseInt(activeTab)].similarity > 0 && (
+                      feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
                         <div className="space-y-4">
                           <Card size="small">
                             <div>
@@ -508,6 +513,12 @@ export default function FeedbackPage() {
                             </div>
                           </Card>
                         </div>
+                      ) : (
+                        <Alert
+                          type="info"
+                          message="유사한 자기소개서가 없습니다."
+                          showIcon
+                        />
                       )
                     )}
                   </div>

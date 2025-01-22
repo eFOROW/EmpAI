@@ -255,7 +255,7 @@ export default function AnalysisResultsPage() {
           </div>
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
-            <span className="text-sm text-gray-600">분석 실패 영상</span>
+            <span className="text-sm text-gray-600">분석 중 or 실패 영상</span>
           </div>
         </div>
 

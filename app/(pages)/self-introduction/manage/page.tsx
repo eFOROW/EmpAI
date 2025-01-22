@@ -502,7 +502,7 @@ const ListPage = ({ user }: ListPageProps) => {
                         </div>
                       </div>
                     }
-                    className="w-80 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 z-10"
+                    className="w-80 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 z-10 hover:border-1 hover:border-gray-300"
                   >
                     <div 
                       className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap"
