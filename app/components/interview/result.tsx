@@ -13,6 +13,10 @@ import {
 import type { Analysis, VideoAnalysis } from "@/app/types/interview";
 import  VideoPlayer from '@/app/components/interview/videoplayer';
 import React, { useState, useEffect, useMemo } from "react";
+import { Radar } from 'react-chartjs-2';
+import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Legend } from 'chart.js';
+
+ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Legend);
 
 
 const emotionLabels: { [key: string]: string } = {
@@ -582,6 +586,130 @@ const ScoreAnalysis = ({
     { label: "시선 분석", value: scores.시선분석, average: averageScores.시선분석, total: 5 }
   ];
 
+  // 데이터 준비
+  const labels = [
+    "답변평가",
+    "표정분석",
+    "말하기속도",
+    "추임새/침묵",
+    "목소리변동성",
+    "머리기울기",
+    "시선분석",
+  ];
+
+  // 각 항목별 만점 점수
+  const maxScores = {
+    답변평가: 50,
+    표정분석: 10,
+    말하기속도: 10,
+    "추임새/침묵": 10,
+    목소리변동성: 10,
+    머리기울기: 5,
+    시선분석: 5,
+  };
+
+  // 백분율로 변환하는 함수
+  const calculatePercentage = (value: number, maxScore: number) => {
+    return (value / maxScore) * 100;
+  };
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: '현재 면접 영상',
+        data: [
+          calculatePercentage(scores.답변평가, maxScores.답변평가),
+          calculatePercentage(scores.표정분석, maxScores.표정분석),
+          calculatePercentage(scores.말하기속도, maxScores.말하기속도),
+          calculatePercentage(scores["추임새/침묵"], maxScores["추임새/침묵"]),
+          calculatePercentage(scores.목소리변동성, maxScores.목소리변동성),
+          calculatePercentage(scores.머리기울기, maxScores.머리기울기),
+          calculatePercentage(scores.시선분석, maxScores.시선분석),
+        ],
+        originalScores: [
+          scores.답변평가,
+          scores.표정분석,
+          scores.말하기속도,
+          scores["추임새/침묵"],
+          scores.목소리변동성,
+          scores.머리기울기,
+          scores.시선분석,
+        ],
+        backgroundColor: 'rgba(64, 169, 255, 0.4)',
+        borderColor: '#40A9FF',
+        borderWidth: 2,
+      },
+      {
+        label: '내 평균',
+        data: [
+          calculatePercentage(averageScores.답변평가, maxScores.답변평가),
+          calculatePercentage(averageScores.표정분석, maxScores.표정분석),
+          calculatePercentage(averageScores.말하기속도, maxScores.말하기속도),
+          calculatePercentage(averageScores["추임새/침묵"], maxScores["추임새/침묵"]),
+          calculatePercentage(averageScores.목소리변동성, maxScores.목소리변동성),
+          calculatePercentage(averageScores.머리기울기, maxScores.머리기울기),
+          calculatePercentage(averageScores.시선분석, maxScores.시선분석),
+        ],
+        originalScores: [
+          averageScores.답변평가,
+          averageScores.표정분석,
+          averageScores.말하기속도,
+          averageScores["추임새/침묵"],
+          averageScores.목소리변동성,
+          averageScores.머리기울기,
+          averageScores.시선분석,
+        ],
+        backgroundColor: 'rgba(255, 165, 0, 0.4)',
+        borderColor: '#FFA500',
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const options = {
+    scales: {
+      r: {
+        suggestedMin: 0,
+        suggestedMax: 100,
+        ticks: {
+          stepSize: 20,
+          display: true,
+          backdropColor: 'transparent',
+        },
+        grid: {
+          color: '#ddd',
+        },
+        angleLines: {
+          color: '#aaa',
+        },
+        pointLabels: {
+          color: '#333',
+          font: {
+            size: 12,
+          },
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          boxWidth: 12,
+          padding: 20,
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+    maintainAspectRatio: true,
+    responsive: true
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex gap-6">
@@ -590,72 +718,63 @@ const ScoreAnalysis = ({
             <div className="bg-yellow-100 rounded-full p-3 mr-4">
               <BarChartOutlined className="text-yellow-500 text-2xl" />
             </div>
-            <h4 className="text-xl font-bold text-gray-800">종합 분석 점수</h4>
-            <Tooltip title="면접 전체 평가 점수">
+            <h4 className="text-xl font-bold text-gray-800">종합 분석</h4>
+            <Tooltip title="면접 전체 분석 및 평가">
               <InfoCircleOutlined className="ml-2 text-gray-500" />
             </Tooltip>
           </div>
           
-          <div className="flex items-center">
-            <div className="flex-none w-72 flex items-center justify-center">
-              <Progress
-                type="circle"
-                percent={scorePercentage}
-                format={() => (
+          <div className="flex">           
+            {/* 레이더 차트 */}
+            <div className="w-[50%]">              
+              <div className="space-y-4">
+                <div style={{ width: '80%', margin: '0 auto' }}>
+                  <Radar data={data} options={options} />
+                </div>
+              </div>
+            </div>
+            
+            {/* 우측 */}
+            <div className="w-[50%] space-y-2 flex flex-col justify-center">
+              <div className="flex items-center mt-8">
+                <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-5xl font-bold" style={{ color: Object.values(circleColor)[0] }}>
+                    <div className="text-6xl font-bold" style={{ color: Object.values(circleColor)[0] }}>
                       {scorePercentage.toFixed(0)}
                     </div>
-                    <div className="text-base mt-1" style={{ color: scoreLabel.color }}>
+                    <div className="text-lg mt-1" style={{ color: scoreLabel.color }}>
                       {scoreLabel.text}
                     </div>
                   </div>
-                )}
-                strokeColor={circleColor}
-                size={240}
-                strokeWidth={12}
-              />
-            </div>
-            
-            <div className="w-px h-[400px] bg-gray-200 mx-12" />
-            
-            <div className="flex-1">
-              <div className="flex justify-end gap-6 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#40A9FF]"></div>
-                  <span className="text-sm text-gray-600">현재 면접 영상</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FFA500]"></div>
-                  <span className="text-sm text-gray-600">내 평균</span>
+                <div className="w-px h-[60%] bg-gray-200 mx-7" />
+                <div className="flex-1 bg-white p-6 rounded-xl">
+                  <div className="flex items-center mb-4">
+                    <h4 className="text-xl font-bold text-gray-800">종합 평가</h4>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    (추후 업데이트 예정)
+                    우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 좋은 평가를 받았으며, 일부 개선점을 보완하면 더욱 좋은 결과를 얻을 수 있습니다.
+                    우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 좋은 평가를 받았으며, 일부 개선점을 보완하면 더욱 좋은 결과를 얻을 수 있습니다.
+                  </p>
                 </div>
               </div>
-              
-              <div className="space-y-4">
+              <div className="w-[90%] mx-auto">
                 {scoreItems.map(({ label, value, average, total }) => (
-                  <div key={label} className="space-y-1">
+                  <div key={label} className="space-y-1.5 mb-1.5">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600 font-semibold w-24">{label}</span>
                       <span className="text-gray-900 font-medium">
                         {value}/{total}점
                       </span>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-0.5">
                       <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
                           style={{
                             width: `${(value / total) * 100}%`,
                             background: 'linear-gradient(90deg, #0E7CD2 0%, #36CFFB 100%)',
-                          }}
-                        />
-                      </div>
-                      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ease-out"
-                          style={{
-                            width: `${(average / total) * 100}%`,
-                            background: 'linear-gradient(90deg, #FF6347 0%, #FFA500 100%)',
                           }}
                         />
                       </div>

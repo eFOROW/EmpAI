@@ -299,11 +299,6 @@ const ListPage = ({ user }: ListPageProps) => {
       title: '자기소개서 카드',
     },
     {
-      target: '.more-options',
-      content: '더보기 버튼을 클릭하면 자기소개서 삭제 및 AI 첨삭 기능을 사용할 수 있습니다.',
-      title: '추가 기능',
-    },
-    {
       target: '.add-new-card',
       content: '새로운 자기소개서를 작성할 수 있습니다.',
       title: '새 자기소개서 작성',

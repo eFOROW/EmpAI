@@ -32,6 +32,7 @@
     "next": "^14.2.20",
     "openai": "^4.78.0",
     "react": "^18",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18",
     "react-joyride": "^2.9.3",
     "recharts": "^2.15.0",
