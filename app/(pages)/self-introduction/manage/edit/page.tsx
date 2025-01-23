@@ -287,8 +287,11 @@ const ManagePage: React.FC = () => {
         setTitle(e.target.value);
     };
 
-    const handleSelectChange = (e:any) => {
-        setSelectedValue(e.target.value);
+    const handleSelectChange = (e: any) => {
+        const jobCode = e.target.value;
+        setSelectedValue(jobCode);
+        setSelectJobQ(''); // 직무가 변경될 때 선택된 질문 초기화
+        setJobAnswer(''); // 직무가 변경될 때 답변도 초기화
     };
 
     const handleSelectJobChange = (e:any) => {
@@ -512,7 +515,8 @@ const ManagePage: React.FC = () => {
                                                 value={selectJobQ}
                                                 onChange={handleSelectJobChange}
                                             >
-                                                {selectedQuestions.map((question, index) => (
+                                                <option value="">질문을 선택하세요</option>
+                                                {questionsData[selectedValue]?.map((question, index) => (
                                                     <option key={index} value={question}>
                                                         {question}
                                                     </option>

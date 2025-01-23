@@ -50,11 +50,24 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const newCareer = new Career(data)
+    
+    // _id 제거
+    delete data._id;
+    
+    // certifications 배열 정리
+    if (data.certifications) {
+      data.certifications = data.certifications.map((cert: any) => ({
+        name: cert.name || '',
+        description: cert.description || ''
+      }));
+    }
+
+    const newCareer = new Career(data);
     const savedCareer = await newCareer.save();
 
     return NextResponse.json(savedCareer, { status: 201 });
   } catch (error) {
+    console.error('POST Error:', error);
     return NextResponse.json(
       { message: "경력 정보 생성 실패", error: (error as Error).message },
       { status: 500 }
@@ -76,10 +89,12 @@ export async function PUT(request: Request) {
       );
     }
 
-    const { education, certifications } = await request.json();
+    const { highSchool, university, graduateSchool, certifications } = await request.json();
 
     const updateData = {
-      education,
+      highSchool,
+      university,
+      graduateSchool,
       certifications,
       last_modified: Date.now(),
     };
@@ -87,10 +102,6 @@ export async function PUT(request: Request) {
     const updatedCareer = await Career.findOneAndUpdate(
       { uid },
       updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
     );
 
     if (!updatedCareer) {
@@ -102,6 +113,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedCareer, { status: 200 });
   } catch (error) {
+    console.error("PUT 에러:", error);
     return NextResponse.json(
       { message: "경력 정보 업데이트 실패", error: (error as Error).message },
       { status: 500 }

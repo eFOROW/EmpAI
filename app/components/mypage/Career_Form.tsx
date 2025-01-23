@@ -169,7 +169,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                             size="large"
                         >
                             <Option value="인문계">인문계</Option>
-                            <Option value="이공계">이공계</Option>
+                            <Option value="이공계">자연계</Option>
                             <Option value="예체능계">예체능계</Option>
                             <Option value="검정고시">검정고시</Option>
                         </Select>
