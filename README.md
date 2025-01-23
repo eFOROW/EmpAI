@@ -27,7 +27,7 @@ Employment with AI
 
 
 ## 전체 프로젝트
-** 웹 서버**: https://github.com/eFOROW/EmpAI
+**웹 서버**: https://github.com/eFOROW/EmpAI
 
 **자기소개서 피드백 LLM 서버**: https://github.com/lkmsdf159/EemAI_self-introduction_ai_server
 
