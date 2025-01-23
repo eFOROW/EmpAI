@@ -17,6 +17,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/navermaps": "^3.7.8",
     "antd": "^5.22.5",
+    "browser-image-compression": "^2.0.2",
     "cheerio": "^1.0.0",
     "date-fns": "^4.1.0",
     "empai": "file:",

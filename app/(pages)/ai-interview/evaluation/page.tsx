@@ -10,14 +10,17 @@ import { Select_Self_Intro } from "@/app/components/interview/selectselfintro";
 import { InterviewProgress } from "@/app/components/interview/Progess";
 import { ClockCircleOutlined } from "@ant-design/icons";
 
-// 인터뷰 데이터 인터페이스 (타입 정의)
 interface InterviewData {
-  userUid: string;      // 로그인한 사용자 UID
-  resumeUid: string;    // 자기소개서 UID
+  userUid: string;      
+  resumeUid: string;    
   job_code: string;
   company?: string; 
-  resume_title: string; // 자기소개서 제목
-  questions: string[];
+  resume_title: string;
+  data: {              // 자기소개서 질문-답변 데이터 추가
+    question: string;
+    answer: string;
+  }[];
+  questions: string[]; // AI가 생성한 질문들을 위한 배열
   videoFiles: File[];
   generatedQuestions?: string[];
   interviewMode: 'practice' | 'mock';
@@ -125,6 +128,7 @@ export default function Page({ searchParams }: PageProps) {
                 userUid: user.uid,
                 resumeUid: introData.resumeUid,
                 job_code: introData.job_code,
+                data: introData.data,
                 company: company || undefined,
                 resume_title: introData.resume_title || "자기소개서",
                 questions: introData.data.map((item) => item.question),
@@ -133,6 +137,7 @@ export default function Page({ searchParams }: PageProps) {
                 interviewMode: interviewMode
                 
               };
+              console.log('Page 컴포넌트가 생성한 completeIntroData:', completeIntroData);
               setSelectedIntroData(completeIntroData);
               setStep("progress");
             }}

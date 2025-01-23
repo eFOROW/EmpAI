@@ -1,208 +1,187 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from "@/lib/mongodb/mongodb";
 import Post from '@/lib/mongodb/models/Post';
+import Interaction from '@/lib/mongodb/models/Interaction';
 import { verifyAuth } from "@/lib/firebase/auth_middleware";
-import { Types } from 'mongoose';
+import mongoose from 'mongoose';
+
+export async function GET(request: Request) {
+  try {
+    const decodedToken = await verifyAuth();
+    const { searchParams } = new URL(request.url);
+    const postId = searchParams.get('id');
+    const action = searchParams.get('action');
+    const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 5;
+
+    if (!postId) {
+      return NextResponse.json({ message: "게시글 ID가 필요합니다." }, { status: 400 });
+    }
+
+    await connectToDatabase();
+
+    if (action === 'comments') {
+      const comments = await Interaction.find({
+        postId: new mongoose.Types.ObjectId(postId),
+        type: 'comment'
+      })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+      const totalComments = await Interaction.countDocuments({
+        postId: new mongoose.Types.ObjectId(postId),
+        type: 'comment'
+      });
+
+      return NextResponse.json({ 
+        comments,
+        total: totalComments,
+        page,
+        limit
+      });
+    }
+
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'Invalid token' || error.message === 'No token provided')) {
+      return NextResponse.json({ message: "인증이 필요합니다." }, { status: 401 });
+    }
+    return NextResponse.json(
+      { message: "요청 처리 실패", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: Request) {
- try {
-   console.log("=== API Called ===");
-   const decodedToken = await verifyAuth();
-   console.log("Auth verified:", decodedToken);
+  try {
+    const decodedToken = await verifyAuth();
+    const { searchParams } = new URL(request.url);
+    const postId = searchParams.get('id');
+    const action = searchParams.get('action');
+    
+    if (!postId || !action) {
+      return NextResponse.json({ message: "필수 매개변수가 누락되었습니다." }, { status: 400 });
+    }
 
-   const { searchParams } = new URL(request.url);
-   const postId = searchParams.get('id');
-   const action = searchParams.get('action');
-   console.log("Params:", { postId, action });
+    await connectToDatabase();
 
-   let data;
-   try {
-     data = await request.json();
-   } catch (e) {
-     console.log("No request body");
-   }
+    const post = await Post.findById(postId);
+    if (!post || post.isDeleted) {
+      return NextResponse.json({ message: "게시글을 찾을 수 없습니다." }, { status: 404 });
+    }
 
-   if (!postId || !action) {
-     return NextResponse.json(
-       { message: "필수 매개변수가 누락되었습니다." },
-       { status: 400 }
-     );
-   }
+    if (action === 'like') {
+      const existingLike = await Interaction.findOne({
+        postId: new mongoose.Types.ObjectId(postId),
+        type: 'like',
+        'author.uid': decodedToken.uid
+      });
 
-   console.log("Connecting to DB...");
-   await connectToDatabase();
-   console.log("DB Connected");
+      if (existingLike) {
+        await Interaction.findByIdAndDelete(existingLike._id);
+        await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
 
-   const post = await Post.findById(postId);
-   console.log("Post found:", post ? "yes" : "no");
+        return NextResponse.json({
+          message: "좋아요가 취소되었습니다.",
+          likesCount: Math.max((post.likesCount || 1) - 1, 0)
+        });
+      }
 
-   if (!post || post.isDeleted) {
-     return NextResponse.json(
-       { message: "게시글을 찾을 수 없습니다." },
-       { status: 404 }
-     );
-   }
+      await Interaction.create({
+        postId: new mongoose.Types.ObjectId(postId),
+        type: 'like',
+        author: {
+          uid: decodedToken.uid,
+          name: decodedToken.name || decodedToken.email?.split('@')[0] || 'Anonymous',
+          email: decodedToken.email
+        }
+      });
 
-   if (!decodedToken || !decodedToken.uid) {
-     return NextResponse.json(
-       { message: "유효하지 않은 사용자 인증 정보입니다." },
-       { status: 401 }
-     );
-   }
+      await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
 
-   if (action === 'like') {
-     try {
-       console.log("=== Like Action Start ===");
-       console.log("Current post:", post);
-       console.log("Current likes:", post.likes);
+      return NextResponse.json({
+        message: "좋아요가 추가되었습니다.",
+        likesCount: (post.likesCount || 0) + 1
+      });
+    }
 
-       // likes 배열이 없으면 초기화
-       if (!Array.isArray(post.likes)) {
-         post.likes = [];
-         console.log("Initialized likes array");
-       }
+    if (action === 'comment') {
+      const data = await request.json();
+      
+      const newComment = await Interaction.create({
+        postId: new mongoose.Types.ObjectId(postId),
+        type: 'comment',
+        content: data.content,
+        author: {
+          uid: decodedToken.uid,
+          name: data.authorName || decodedToken.email?.split('@')[0] || 'Anonymous',
+          email: decodedToken.email
+        }
+      });
 
-       const userUid = String(decodedToken.uid);
-       console.log("User UID:", userUid);
+      await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-       const likeIndex = post.likes.indexOf(userUid);
-       console.log("Like index:", likeIndex);
+      return NextResponse.json(newComment, { status: 201 });
+    }
 
-       // 좋아요 토글
-       if (likeIndex > -1) {
-         post.likes = post.likes.filter((id: string) => id !== userUid);
-         console.log("Like removed");
-       } else {
-         post.likes.push(userUid);
-         console.log("Like added");
-       }
+    return NextResponse.json({ message: "잘못된 action 매개변수입니다." }, { status: 400 });
 
-       console.log("Updated likes before save:", post.likes);
-       await post.save();
-       console.log("Post saved successfully");
-
-       return NextResponse.json({
-         message: likeIndex > -1 ? "좋아요가 취소되었습니다." : "좋아요가 추가되었습니다.",
-         likes: post.likes,
-         totalLikes: post.likes.length,
-         isLiked: post.likes.includes(userUid)
-       }, { status: 200 });
-     } catch (error) {
-       console.error("=== Like Error ===");
-       console.error("Error type:", typeof error);
-       console.error("Error details:", error);
-       return NextResponse.json(
-         { message: "좋아요 처리 중 오류가 발생했습니다.", error: String(error) },
-         { status: 500 }
-       );
-     }
-   }
-
-   // 댓글 작성
-   if (action === 'comment') {
-     const newComment = {
-       content: data.content,
-       author: {
-         uid: decodedToken.uid,
-         name: data.authorName,
-         email: decodedToken.email
-       },
-       createdAt: new Date()
-     };
-
-     post.comments.push(newComment);
-     await post.save();
-     return NextResponse.json(newComment, { status: 201 });
-   }
-
-   return NextResponse.json(
-     { message: "잘못된 action 매개변수입니다." },
-     { status: 400 }
-   );
-
- } catch (error) {
-   console.error("=== Main Error ===");
-   console.error("Error type:", typeof error);
-   console.error("Error details:", error);
-
-   if (error instanceof Error && (error.message === 'Invalid token' || error.message === 'No token provided')) {
-     return NextResponse.json(
-       { message: "인증이 필요합니다." },
-       { status: 401 }
-     );
-   }
-   return NextResponse.json(
-     { 
-       message: "요청 처리 실패", 
-       error: error instanceof Error ? error.message : 'Unknown error',
-       details: String(error)
-     },
-     { status: 500 }
-   );
- }
+  } catch (error) {
+    return NextResponse.json(
+      { message: "요청 처리 실패", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(request: Request) {
- try {
-   const decodedToken = await verifyAuth();
-   const { searchParams } = new URL(request.url);
-   const postId = searchParams.get('id');
-   const commentId = searchParams.get('commentId');
+  try {
+    const decodedToken = await verifyAuth();
+    const { searchParams } = new URL(request.url);
+    const postId = searchParams.get('id');
+    const action = searchParams.get('action');
+    const commentId = searchParams.get('commentId');
 
-   if (!postId || !commentId) {
-     return NextResponse.json(
-       { message: "필수 매개변수가 누락되었습니다." },
-       { status: 400 }
-     );
-   }
+    if (!postId || !action) {
+      return NextResponse.json({ message: "필수 매개변수가 누락되었습니다." }, { status: 400 });
+    }
 
-   await connectToDatabase();
+    await connectToDatabase();
 
-   const post = await Post.findById(postId);
-   if (!post || post.isDeleted) {
-     return NextResponse.json(
-       { message: "게시글을 찾을 수 없습니다." },
-       { status: 404 }
-     );
-   }
+    // 댓글 삭제 처리
+    if (action === 'delete_comment') {
+      if (!commentId) {
+        return NextResponse.json({ message: "댓글 ID가 필요합니다." }, { status: 400 });
+      }
 
-   const comment = post.comments.id(commentId);
-   if (!comment) {
-     return NextResponse.json(
-       { message: "댓글을 찾을 수 없습니다." },
-       { status: 404 }
-     );
-   }
+      const comment = await Interaction.findOne({
+        _id: commentId,
+        postId: postId,
+        type: 'comment'
+      });
 
-   if (comment.author.uid !== decodedToken.uid) {
-     return NextResponse.json(
-       { message: "댓글 삭제 권한이 없습니다." },
-       { status: 403 }
-     );
-   }
+      if (!comment) {
+        return NextResponse.json({ message: "댓글을 찾을 수 없습니다." }, { status: 404 });
+      }
 
-   comment.remove();
-   await post.save();
-   return NextResponse.json({ message: "댓글이 삭제되었습니다." });
+      if (comment.author.uid !== decodedToken.uid) {
+        return NextResponse.json({ message: "댓글 삭제 권한이 없습니다." }, { status: 403 });
+      }
 
- } catch (error) {
-   console.error("=== Delete Error ===");
-   console.error("Error type:", typeof error);
-   console.error("Error details:", error);
+      await Interaction.findByIdAndDelete(commentId);
+      await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: -1 } });
 
-   if (error instanceof Error && (error.message === 'Invalid token' || error.message === 'No token provided')) {
-     return NextResponse.json(
-       { message: "인증이 필요합니다." },
-       { status: 401 }
-     );
-   }
-   return NextResponse.json(
-     { 
-       message: "댓글 삭제 실패", 
-       error: error instanceof Error ? error.message : 'Unknown error',
-       details: String(error)
-     },
-     { status: 500 }
-   );
- }
+      return NextResponse.json({ message: "댓글이 삭제되었습니다." });
+    }
+
+    return NextResponse.json({ message: "잘못된 action 매개변수입니다." }, { status: 400 });
+
+  } catch (error) {
+    console.error('Error in DELETE:', error);
+    return NextResponse.json(
+      { message: "삭제 실패", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
 }
