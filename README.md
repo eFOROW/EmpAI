@@ -27,15 +27,11 @@ Employment with AI
 
 
 ## 전체 프로젝트
-<a href="https://github.com/eFOROW/EmpAI">
-    <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/09/next-js-logo-freelogovectors.net_.png" width="170" alt="Next.js 로고">
-</a>
+** 웹 서버**: https://github.com/eFOROW/EmpAI
 
-<a href="https://github.com/lkmsdf159/EemAI_self-introduction_ai_server">
-    <img src="https://it.chosun.com/news/photo/202402/2023092110644_374751_5441.png" width="170" alt="Gemma 로고">
-</a>
+**자기소개서 피드백 LLM 서버**: https://github.com/lkmsdf159/EemAI_self-introduction_ai_server
 
-**AI 영상 분석 서버**: 
+**영상 분석 AI 서버**: 
 
 ## 설치 방법
 
