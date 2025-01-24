@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Chatbot from "@/app/components/Chat_gpt/chat";
 
 interface RiverTemp {
   TEMP: number;
@@ -112,6 +113,7 @@ const HangangTemperature = () => {
             <p className="text-2xl mb-3 font-medium">{quote.text}</p>
             <p className="text-lg text-gray-300">- {quote.author}</p>
           </div>
+            <Chatbot />
         </div>
       </div>
     </div>

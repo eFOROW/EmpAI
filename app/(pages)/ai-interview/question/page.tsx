@@ -86,7 +86,7 @@ const interviewQuestions = [
     id: "6",
     category: "성장가능성",
     level: "기본",
-    question: "향후 5년 후의 목표는 무엇인가요?",
+    question: "향후 5년 간의 목표는 무엇인가요?",
     tips: [
       "현실적이면서도 진취적인 목표 설정",
       "구체적인 성장 계획 제시",

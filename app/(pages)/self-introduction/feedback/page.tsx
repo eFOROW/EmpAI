@@ -374,7 +374,7 @@ export default function FeedbackPage() {
                   data: newData
                 });
               }}
-              autoSize={{ minRows: 12, maxRows: 12 }}
+              autoSize={{ minRows: 12, maxRows: 22 }}
               className="mb-4 text-base"
             />
             <Button 
