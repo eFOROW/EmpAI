@@ -22,7 +22,7 @@ const { Content, Sider } = Layout;
 type MenuTab = 'server' | 'web' | 'analytics' | 'db';
 
 // 허용된 관리자 UID 목록
-const ALLOWED_ADMIN_UIDS = ['qGmWLRZX8xdYlAbXNiTitsdq6mY2', 'D5z4xFJiekWCR6HjDNCu3qR6KAX2'];
+const ALLOWED_ADMIN_UIDS = ['qGmWLRZX8xdYlAbXNiTitsdq6mY2', 'D5z4xFJiekWCR6HjDNCu3qR6KAX2', 'ZKpNN75r5ZSCRjZ8E6HlB33r6T12'];
 
 export default function AdminPage() {
   const [selectedTab, setSelectedTab] = useState<MenuTab>('server');

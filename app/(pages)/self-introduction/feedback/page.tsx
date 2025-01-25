@@ -183,7 +183,7 @@ export default function FeedbackPage() {
 
   const getColorByScore = (score: number) => {
     if (score <= 3) return '#ff4d4f';      // 빨간색 (1-3점)
-    if (score <= 7) return '#ffa940';      // 주황색 (4-7점)
+    if (score <= 6) return '#ffa940';      // 주황색 (4-7점)
     return '#1890ff';                      // 파란색 (8-10점)
   };
   
