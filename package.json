@@ -20,6 +20,7 @@
     "browser-image-compression": "^2.0.2",
     "cheerio": "^1.0.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
     "empai": "file:",
     "EmpAI": "file:",
     "firebase": "^11.1.0",
@@ -38,6 +39,7 @@
     "react-joyride": "^2.9.3",
     "recharts": "^2.15.0",
     "sharp": "^0.32.6",
+    "systeminformation": "^5.25.11",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   },
