@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Form, Input, Button, Divider, Select } from 'antd';
 import { PlusOutlined, TrophyOutlined, BookOutlined, DeleteOutlined } from '@ant-design/icons';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Option } = Select;
 
@@ -61,6 +62,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
         }
     }, [initialValues, form]);
 
+    // 기존 함수들 유지
     const onFinish = (values: any) => {
         console.log('Success:', values);
         onSubmit(values);
@@ -122,216 +124,263 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
     };
 
     return (
-        <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
-            className="space-y-6"
-            onValuesChange={handleFormChange}
-            initialValues={initialValues}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto px-2 py-2"
         >
-            {/* 학력 섹션 */}
-            <div className="bg-white p-6 rounded-lg">
-                <Divider orientation="left" className="text-xl font-semibold text-blue-600">
-                    <span className="flex items-center">
-                        <BookOutlined className="mr-2" />
-                        학력사항
-                    </span>
-                </Divider>
-
-                {/* 고등학교 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Form.Item name="highSchoolStatus" label="고등학교 학적 상태" className="text-gray-700"
-                    rules={[{ required: true, message: '고등학교 학적 상태를 선택해주세요' }]}
-                    >
-                        <Select
-                            placeholder="고등학교 학적 상태 선택"
-                            className="w-full"
-                            onChange={handleHighSchoolStatusChange}
-                            size="large"
-                        >
-                            <Option value="해당없음">해당없음</Option>
-                            <Option value="재학중">재학중</Option>
-                            <Option value="중퇴">중퇴</Option>
-                            <Option value="졸업">졸업</Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="highSchoolField" label="고등학교 계열" className="text-gray-700"
-                    rules={[{ required: true, message: '고등학교 계열을 선택해주세요' }]}
-                    >
-                        <Select 
-                            placeholder="계열 선택" 
-                            className="w-full" 
-                            disabled={isHighSchoolDisabled}
-                            size="large"
-                        >
-                            <Option value="인문계">인문계</Option>
-                            <Option value="이공계">자연계</Option>
-                            <Option value="예체능계">예체능계</Option>
-                            <Option value="검정고시">검정고시</Option>
-                        </Select>
-                    </Form.Item>
-                </div>
-
-                {/* 대학교 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    <Form.Item name="universityStatus" label="대학교 학적 상태" className="text-gray-700"
-                    rules={[{ required: true, message: '대학교 학적 상태를 선택해주세요' }]}
-                    >
-                        <Select
-                            placeholder="대학교 학적 상태"
-                            className="w-full"
-                            onChange={handleUniversityStatusChange}
-                            size="large"
-                        >
-                            <Option value="해당없음">해당없음</Option>
-                            <Option value="재학중">재학중</Option>
-                            <Option value="중퇴">중퇴</Option>
-                            <Option value="2,3년 수료/졸업">2,3년 수료/졸업</Option>
-                            <Option value="4년 졸업">4년 졸업</Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="universityMajor" label="대학교 전공" className="md:col-span-2 text-gray-700"
-                        rules={[
-                            {
-                                validator: (_, value) => {
-                                    const universityStatus = form.getFieldValue('universityStatus');
-                                    if (universityStatus !== '해당없음' && !value) {
-                                        return Promise.reject('대학교 전공을 입력해주세요.');
-                                    }
-                                    return Promise.resolve();
-                                },
-                            },
-                        ]}
-                    >
-                        <Input 
-                            placeholder="대학교 전공" 
-                            className="w-full" 
-                            disabled={isUniversityDisabled}
-                            size="large" 
-                        />
-                    </Form.Item>
-                </div>
-
-                {/* 대학원 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    <Form.Item name="graduateSchoolStatus" label="대학원 학적 상태" className="text-gray-700"
-                    rules={[{ required: true, message: '대학원 학적 상태를 선택해주세요' }]}
-                    >
-                        <Select
-                            placeholder="대학원 학적 상태"
-                            className="w-full"
-                            onChange={handleGraduateSchoolStatusChange}
-                            size="large"
-                        >
-                            <Option value="해당없음">해당없음</Option>
-                            <Option value="재학중">재학중</Option>
-                            <Option value="수료">수료</Option>
-                            <Option value="졸업">졸업</Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="graduateSchoolMajor" label="대학원 전공" className="md:col-span-2 text-gray-700"
-                        rules={[
-                            {
-                                validator: (_, value) => {
-                                    const universityStatus = form.getFieldValue('graduateSchoolStatus');
-                                    if (universityStatus !== '해당없음' && !value) {
-                                        return Promise.reject('대학원 전공을 입력해주세요.');
-                                    }
-                                    return Promise.resolve();
-                                },
-                            },
-                        ]}
-                    >
-                        <Input 
-                            placeholder="대학원 전공" 
-                            className="w-full" 
-                            disabled={isGraduateSchoolDisabled}
-                            size="large" 
-                        />
-                    </Form.Item>
-                </div>
-            </div>
-
-            {/* 자격증 및 수상 내역 */}
-            <div className="bg-gray-50 p-6 rounded-lg mt-8">
-                <Divider orientation="left" className="text-xl font-semibold text-blue-600">
-                    <span className="flex items-center">
-                        <TrophyOutlined className="mr-2" />
-                        자격증 및 수상 내역
-                    </span>
-                </Divider>
-
-                {certifications.map((certification, index) => (
-                    <div key={certification.id} className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-gray-700">자격증/수상 #{index + 1}</h3>
-                            {certifications.length > 1 && index !== 0 && (
-                                <Button 
-                                    type="text" 
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => removeCertification(certification.id)}
-                                >
-                                    삭제
-                                </Button>
-                            )}
-                        </div>
-                        <Form.Item
-                            name={['certifications', index, 'name']}
-                            label="자격증/수상명"
-                        >
-                            <Input
-                                placeholder="자격증/수상 이름"
-                                className="w-full"
-                                value={certification.name}
-                                onChange={(e) => {
-                                    const newCertifications = [...certifications];
-                                    newCertifications[index].name = e.target.value;
-                                    setCertifications(newCertifications);
-                                }}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            name={['certifications', index, 'description']}
-                            label="상세 설명"
-                        >
-                            <Input.TextArea
-                                placeholder="상세 설명"
-                                rows={4}
-                                className="w-full"
-                            />
-                        </Form.Item>
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+                className="space-y-8"
+                onValuesChange={handleFormChange}
+                initialValues={initialValues}
+            >
+                {/* 학력 섹션 */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden"
+                >
+                    <div className="bg-gradient-to-r from-blue-400 to-indigo-500 p-4">
+                        <h2 className="text-2xl font-bold text-white flex items-center">
+                            <BookOutlined className="mr-3" />
+                            학력사항
+                        </h2>
+                        <p className="text-blue-100 mt-2">교육 이력을 입력해주세요</p>
                     </div>
-                ))}
 
-                <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={addCertification}
-                    block
-                    disabled={certifications.length >= 3}
-                >
-                    자격증/수상 추가
-                </Button>
-            </div>
+                    <div className="p-8">
+                        {/* 고등학교 */}
+                        <div className="bg-gray-50 rounded-xl p-2 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">고등학교</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Form.Item 
+                                    name="highSchoolStatus" 
+                                    label="학적 상태" 
+                                    className="text-gray-700"
+                                    rules={[{ required: true, message: '고등학교 학적 상태를 선택해주세요' }]}
+                                >
+                                    <Select
+                                        placeholder="학적 상태 선택"
+                                        className="w-full"
+                                        onChange={handleHighSchoolStatusChange}
+                                        size="large"
+                                    >
+                                        <Option value="해당없음">해당없음</Option>
+                                        <Option value="재학중">재학중</Option>
+                                        <Option value="중퇴">중퇴</Option>
+                                        <Option value="졸업">졸업</Option>
+                                    </Select>
+                                </Form.Item>
 
-            <div className="mt-8 flex justify-center">
-                <Button
-                    type="primary"
-                    onClick={handleSubmit}
-                    size="large"
-                    className="px-8 w-[20vh] text-lg font-semibold bg-blue-500 hover:bg-blue-600"
+                                <Form.Item 
+                                    name="highSchoolField" 
+                                    label="계열" 
+                                    className="text-gray-700"
+                                    rules={[{ required: true, message: '고등학교 계열을 선택해주세요' }]}
+                                >
+                                    <Select 
+                                        placeholder="계열 선택" 
+                                        className="w-full" 
+                                        disabled={isHighSchoolDisabled}
+                                        size="large"
+                                    >
+                                        <Option value="인문계">인문계</Option>
+                                        <Option value="이공계">자연계</Option>
+                                        <Option value="예체능계">예체능계</Option>
+                                        <Option value="검정고시">검정고시</Option>
+                                    </Select>
+                                </Form.Item>
+                            </div>
+                        </div>
+
+                        {/* 대학교 */}
+                        <div className="bg-gray-50 rounded-xl p-2 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">대학교</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <Form.Item 
+                                    name="universityStatus" 
+                                    label="학적 상태" 
+                                    className="text-gray-700"
+                                    rules={[{ required: true, message: '대학교 학적 상태를 선택해주세요' }]}
+                                >
+                                    <Select
+                                        placeholder="학적 상태"
+                                        className="w-full"
+                                        onChange={handleUniversityStatusChange}
+                                        size="large"
+                                    >
+                                        <Option value="해당없음">해당없음</Option>
+                                        <Option value="재학중">재학중</Option>
+                                        <Option value="중퇴">중퇴</Option>
+                                        <Option value="2,3년 수료/졸업">2,3년 수료/졸업</Option>
+                                        <Option value="4년 졸업">4년 졸업</Option>
+                                    </Select>
+                                </Form.Item>
+
+                                <Form.Item 
+                                    name="universityMajor" 
+                                    label="전공" 
+                                    className="md:col-span-2 text-gray-700"
+                                    rules={[
+                                        {
+                                            validator: (_, value) => {
+                                                const universityStatus = form.getFieldValue('universityStatus');
+                                                if (universityStatus !== '해당없음' && !value) {
+                                                    return Promise.reject('대학교 전공을 입력해주세요.');
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        },
+                                    ]}
+                                >
+                                    <Input 
+                                        placeholder="전공을 입력하세요" 
+                                        className="w-full" 
+                                        disabled={isUniversityDisabled}
+                                        size="large" 
+                                    />
+                                </Form.Item>
+                            </div>
+                        </div>
+
+                        {/* 대학원 */}
+                        <div className="bg-gray-50 rounded-xl p-6">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">대학원</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <Form.Item 
+                                    name="graduateSchoolStatus" 
+                                    label="학적 상태" 
+                                    className="text-gray-700"
+                                    rules={[{ required: true, message: '대학원 학적 상태를 선택해주세요' }]}
+                                >
+                                    <Select
+                                        placeholder="학적 상태"
+                                        className="w-full"
+                                        onChange={handleGraduateSchoolStatusChange}
+                                        size="large"
+                                    >
+                                        <Option value="해당없음">해당없음</Option>
+                                        <Option value="재학중">재학중</Option>
+                                        <Option value="수료">수료</Option>
+                                        <Option value="졸업">졸업</Option>
+                                    </Select>
+                                </Form.Item>
+
+                                <Form.Item 
+                                    name="graduateSchoolMajor" 
+                                    label="전공" 
+                                    className="md:col-span-2 text-gray-700"
+                                    rules={[
+                                        {
+                                            validator: (_, value) => {
+                                                const universityStatus = form.getFieldValue('graduateSchoolStatus');
+                                                if (universityStatus !== '해당없음' && !value) {
+                                                    return Promise.reject('대학원 전공을 입력해주세요.');
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        },
+                                    ]}
+                                >
+                                    <Input 
+                                        placeholder="전공을 입력하세요" 
+                                        className="w-full" 
+                                        disabled={isGraduateSchoolDisabled}
+                                        size="large" 
+                                    />
+                                </Form.Item>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* 자격증 및 수상 내역 */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden"
                 >
-                    저장
-                </Button>
-            </div>
-        </Form>
+                    <div className="bg-gradient-to-r from-purple-400 to-pink-400 p-6">
+                        <h2 className="text-2xl font-bold text-white flex items-center">
+                            <TrophyOutlined className="mr-3" />
+                            자격증 및 수상 내역
+                        </h2>
+                        <p className="text-purple-100 mt-2">최대 3개까지 등록 가능합니다</p>
+                    </div>
+
+                    <div className="p-2">
+                        <AnimatePresence>
+                            {certifications.map((certification, index) => (
+                                <motion.div
+                                    key={certification.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="bg-gray-50 rounded-xl p-3 mb-3"
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">
+                                            자격증/수상 #{index + 1}
+                                        </h3>
+                                        {certifications.length > 1 && index !== 0 && (
+                                            <Button 
+                                                type="text" 
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() => removeCertification(certification.id)}
+                                                className="hover:bg-red-50"
+                                            >
+                                                삭제                                            </Button>
+                                        )}
+                                    </div>
+
+                                    <Form.Item
+                                        name={['certifications', index, 'name']}
+                                        label="자격증/수상 이름"
+                                        className="text-gray-700"
+                                        rules={[{ required: true, message: '자격증 또는 수상 이름을 입력해주세요.' }]}
+                                    >
+                                        <Input placeholder="예: 정보처리기사" size="large" />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        name={['certifications', index, 'description']}
+                                        label="설명"
+                                        className="text-gray-700"
+                                        rules={[{ required: true, message: '자격증 또는 수상 설명을 입력해주세요.' }]}
+                                    >
+                                        <Input placeholder="예: 2023년 취득, 한국산업인력공단" size="large" />
+                                    </Form.Item>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+
+                        {certifications.length < 3 && (
+                            <Button 
+                                type="dashed" 
+                                onClick={addCertification} 
+                                className="w-full flex items-center justify-center py-2 text-lg"
+                                icon={<PlusOutlined />}
+                            >
+                                추가하기
+                            </Button>
+                        )}
+                    </div>
+                </motion.div>
+
+                {/* 제출 버튼 */}
+                <div className="flex justify-end mt-8">
+                    <Button type="primary" size="large" onClick={handleSubmit}>
+                        제출하기
+                    </Button>
+                </div>
+            </Form>
+        </motion.div>
     );
 };
 

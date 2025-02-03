@@ -19,6 +19,7 @@ import {
 interface VideoPlayerProps {
     uid: string;
     filename: string;
+    className?: string;
   }
 
   export default function VideoPlayer({ uid, filename }: VideoPlayerProps) {

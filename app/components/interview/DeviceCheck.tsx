@@ -117,6 +117,41 @@ const GuidePoint = ({ icon, title, description }: { icon: JSX.Element, title: st
     </motion.div>
 );
 
+{/* 먼저 비디오 위에 겹칠 CameraGuide 컴포넌트를 만듭니다 */}
+const CameraGuide = () => (
+    <div className="absolute inset-0 pointer-events-none z-10">
+      {/* 타겟팅 가이드라인 */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-48 h-48">
+          {/* 중앙 십자 가이드 */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-[3px] h-12 bg-blue-400/50 rounded-full animate-pulse"></div>
+            <div className="absolute w-12 h-[3px] bg-blue-400/50 rounded-full animate-pulse"></div>
+          </div>
+          {/* 외곽 프레임 */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-400/80"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-blue-400/80"></div>
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-blue-400/80"></div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-400/80"></div>
+          </div>
+        </div>
+      </div>
+      {/* 안내 메시지 */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 transform">
+        <div className="bg-gradient-to-r from-blue-600/90 to-indigo-600/90 backdrop-blur-sm text-white px-6 py-2 rounded-full shadow-lg">
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16H12.01M12 8V12M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" 
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span className="text-sm font-medium">얼굴을 프레임 안에 맞춰주세요</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
 export function DeviceCheck({ user, stream, setStream, onComplete }: DeviceCheckProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -349,23 +384,33 @@ export function DeviceCheck({ user, stream, setStream, onComplete }: DeviceCheck
                         </Select>
                     </div>
                     
-                    <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-video">
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            playsInline
-                            muted
-                            className="w-full h-full object-cover"
-                        />
-                        {!deviceStatus.video && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 text-white">
-                                <div className="text-center">
-                                    <Video className="w-12 h-12 mb-2 mx-auto text-gray-400" />
-                                    <p>카메라가 연결되지 않았습니다</p>
-                                </div>
+                    <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 aspect-video shadow-2xl group">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className="w-full h-full object-cover"
+                    />
+                    
+                    {deviceStatus.video ? (
+                        <CameraGuide />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 backdrop-blur-sm">
+                        <div className="text-center space-y-3">
+                            <div className="w-16 h-16 mx-auto bg-red-500/10 rounded-full flex items-center justify-center">
+                            <Video className="w-8 h-8 text-red-500" />
                             </div>
-                        )}
-                    </div>
+                            <div>
+                            <p className="text-white font-medium">카메라가 연결되지 않았습니다</p>
+                            <p className="text-gray-400 text-sm mt-1">카메라 연결 상태를 확인해주세요</p>
+                            </div>
+                        </div>
+                        </div>
+                    )}
+                </div>
                 </div>
 
                 <div className="flex justify-end">

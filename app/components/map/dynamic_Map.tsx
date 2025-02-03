@@ -3,6 +3,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
 import { useRouter } from 'next/navigation';
+import { 
+  MapPin, 
+  Navigation, 
+  Clock, 
+  Building2, 
+  Compass, 
+  X 
+} from 'lucide-react';
 
 interface MapProps {
   clientId: string;
@@ -38,16 +46,16 @@ const Map: React.FC<MapProps> = ({
   const jobMarkersRef = useRef<any[]>([]);
   const polylineRef = useRef<any>(null);
   const roadviewRef = useRef<any>(null);
-  const [isRoadviewVisible, setIsRoadviewVisible] = useState(false);
-  const [currentRoadviewPosition, setCurrentRoadviewPosition] = useState<{lat: number, lng: number} | null>(null);
   const jobMarkersMapRef = useRef<{[key: string]: {
     marker: any;
     infoWindow: any;
     jobIndex: number;
   }}>({})
   const router = useRouter();
+  const [isRoadviewVisible, setIsRoadviewVisible] = useState(false);
+  const [currentRoadviewPosition, setCurrentRoadviewPosition] = useState<{lat: number, lng: number} | null>(null);
   const [currentDestination, setCurrentDestination] = useState<{lat: number, lng: number} | null>(null);
-  const routeInfoWindowRef = useRef<any>(null);  // 길찾기 정보 InfoWindow 참조 추가
+  const routeInfoWindowRef = useRef<any>(null);
 
   const drawRoute = async (start: { lat: number; lng: number }, end: { lat: number; lng: number }) => {
     try {
@@ -88,16 +96,16 @@ const Map: React.FC<MapProps> = ({
         let strokeColor;
         switch (congestion) {
           case 0: // 원활
-            strokeColor = '#2EA52C';  // 초록색으로 변경
+            strokeColor = '#2EA52C';
             break;
           case 1: // 서행
-            strokeColor = '#F7B500';  // 노란색
+            strokeColor = '#F7B500';
             break;
           case 2: // 지체
-            strokeColor = '#E03131';  // 더 진한 빨간색으로 변경
+            strokeColor = '#E03131';
             break;
           default:
-            strokeColor = '#2EA52C';  // 기본값도 초록색으로 변경
+            strokeColor = '#2EA52C';
         }
 
         const polyline = new naver.maps.Polyline({
@@ -120,51 +128,139 @@ const Map: React.FC<MapProps> = ({
       // InfoWindow 생성 및 참조 저장
       const infoWindow = new naver.maps.InfoWindow({
         content: `
-          <div style="padding: 1rem; font-family: 'Arial', sans-serif; font-size: 0.875rem; color: #333;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <!-- 시간과 거리 정보 -->
+          <div style="
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f4f7fa, #ffffff);
+            border-radius: 1rem;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.08);
+            color: #1f2937;
+            overflow: hidden;
+            max-width: 380px;
+            position: relative;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+          ">
+            <div style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 4px;
+              background: linear-gradient(90deg, #3b82f6, #6366f1);
+            "></div>
+      
+            <div style="padding: 1rem; position: relative; display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 1rem;">
-                <div style="display: flex; align-items: center;">
-                  <svg style="width: 20px; height: 20px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 6V12L16 14" stroke="#4B5563" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="12" cy="12" r="9" stroke="#4B5563" stroke-width="2"/>
+                <div style="
+                  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  box-shadow: 0 6px 12px -3px rgba(59,130,246,0.2);
+                ">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
-                  <span style="font-size: 1rem; font-weight: 600; color: #111827;">
-                    ${Math.round(route.summary.duration / 60000)}분
-                  </span>
                 </div>
-                <div style="display: flex; align-items: center;">
-                  <svg style="width: 20px; height: 20px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="#4B5563"/>
-                  </svg>
-                  <span style="font-size: 1rem; font-weight: 600; color: #111827;">
-                    ${(route.summary.distance / 1000).toFixed(1)}km
-                  </span>
+                <div>
+                  <h4 style="
+                    margin: 0; 
+                    font-size: 1rem; 
+                    font-weight: 700; 
+                    color: #1f2937;
+                    margin-bottom: 0.25rem;
+                  ">
+                    ${Math.round(route.summary.duration / 60000)}분
+                  </h4>
+                  <p style="
+                    margin: 0; 
+                    font-size: 0.75rem; 
+                    color: #6b7280;
+                  ">
+                    소요 시간
+                  </p>
                 </div>
               </div>
-
-              <!-- 구분선 -->
-              <div style="width: 1px; height: 40px; background-color: #e5e7eb;"></div>
-
-              <!-- 교통 정보 (수직 정렬) -->
-              <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                <div style="display: flex; align-items: center;">
-                  <div style="width: 20px; height: 3px; background: #2EA52C; margin-right: 4px; border-radius: 2px;"></div>
-                  <span style="color: #4B5563; font-size: 0.75rem;">원활</span>
+              
+              <div style="width: 1px; height: 40px; background-color: #e5e7eb; margin: 0 1rem;"></div>
+              
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="
+                  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  box-shadow: 0 6px 12px -3px rgba(16,185,129,0.2);
+                ">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0 6-7 10-7 10S6 16 6 10a7 7 0 0 1 14 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
                 </div>
-                <div style="display: flex; align-items: center;">
-                  <div style="width: 20px; height: 3px; background: #F7B500; margin-right: 4px; border-radius: 2px;"></div>
-                  <span style="color: #4B5563; font-size: 0.75rem;">서행</span>
+                <div>
+                  <h4 style="
+                    margin: 0; 
+                    font-size: 1rem; 
+                    font-weight: 700; 
+                    color: #1f2937;
+                    margin-bottom: 0.25rem;
+                  ">
+                    ${(route.summary.distance / 1000).toFixed(1)}km
+                  </h4>
+                  <p style="
+                    margin: 0; 
+                    font-size: 0.75rem; 
+                    color: #6b7280;
+                  ">
+                    거리
+                  </p>
                 </div>
-                <div style="display: flex; align-items: center;">
-                  <div style="width: 20px; height: 3px; background: #E03131; margin-right: 4px; border-radius: 2px;"></div>
-                  <span style="color: #4B5563; font-size: 0.75rem;">지체</span>
+              </div>
+            </div>
+            
+            <div style="
+              background: #f3f4f6;
+              border-radius: 0.75rem;
+              padding: 1rem;
+              margin: 0 1rem 1rem;
+              border: 1px solid rgba(229,231,235,0.7);
+            ">
+              <h4 style="
+                margin: 0 0 0.75rem 0; 
+                font-size: 0.875rem; 
+                font-weight: 600; 
+                color: #1f2937;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              ">
+                교통 상황
+              </h4>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div style="width: 20px; height: 3px; background: #2EA52C; border-radius: 2px;"></div>
+                  <span style="color: #6b7280; font-size: 0.625rem;">원활</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div style="width: 20px; height: 3px; background: #F7B500; border-radius: 2px;"></div>
+                  <span style="color: #6b7280; font-size: 0.625rem;">서행</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div style="width: 20px; height: 3px; background: #E03131; border-radius: 2px;"></div>
+                  <span style="color: #6b7280; font-size: 0.625rem;">지체</span>
                 </div>
               </div>
             </div>
           </div>
         `,
-        maxWidth: 400,
+        maxWidth: 380,
+        borderWidth: 0
       });
   
       routeInfoWindowRef.current = infoWindow;  // 참조 저장
@@ -192,7 +288,7 @@ const Map: React.FC<MapProps> = ({
     setCurrentRoadviewPosition({ lat, lng });
     setIsRoadviewVisible(true);
   };
-
+  // 로드뷰 렌더링 useEffect
   useEffect(() => {
     if (isRoadviewVisible && currentRoadviewPosition) {
       const roadviewContainer = document.getElementById('roadview');
@@ -233,6 +329,7 @@ const Map: React.FC<MapProps> = ({
     }
   }, [isRoadviewVisible, currentRoadviewPosition]);
   
+  // 지도 초기화 useEffect
   useEffect(() => {
     const initMap = () => {
       const initialCenter = markerPosition 
@@ -290,6 +387,7 @@ const Map: React.FC<MapProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
+  // 마커 및 원 생성 useEffect
   useEffect(() => {
     if (!mapRef.current || !markerRef.current || !markerPosition) return;
   
@@ -320,6 +418,7 @@ const Map: React.FC<MapProps> = ({
     circleRef.current = circle;
   }, [markerPosition, radius]);
 
+  // 잡 마커 생성 useEffect
   useEffect(() => {
     if (!mapRef.current || !markerPosition || !jobs.length) return;
   
@@ -343,116 +442,222 @@ const Map: React.FC<MapProps> = ({
       const jobInfoWindow = new naver.maps.InfoWindow({
         content: `
           <div style="
-            padding: 1rem; 
-            font-family: 'Arial', sans-serif; 
-            font-size: 0.875rem; 
-            line-height: 1.5; 
-            max-width: 370px; 
-            border: 1px solid #e5e7eb; 
-            border-radius: 0.5rem; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-            background-color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f8fafc, #ffffff);
+            border-radius: 1.2rem;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.08), 
+                        0 15px 25px -10px rgba(0, 0, 0, 0.04);
+            color: #1f2937;
+            overflow: hidden;
+            width: 360px;
             position: relative;
+            border: 1px solid rgba(229, 231, 235, 0.5);
           ">
+            <div style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(90deg, #3b82f6, #6366f1);
+            "></div>
+      
             <button 
               onclick="window.closeInfoWindow && window.closeInfoWindow('${location.url}')"
               style="
                 position: absolute;
-                top: 0.5rem;
-                right: 0.5rem;
-                padding: 0.25rem;
-                background: none;
-                border: none;
+                top: 0.6rem;
+                right: 0.6rem;
+                width: 24px;
+                height: 24px;
+                background: rgba(31,41,55,0.04);
+                border: 1px solid rgba(31,41,55,0.08);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 cursor: pointer;
-                font-size: 1.25rem;
-                line-height: 1;
-                color: #6b7280;
+                transition: all 0.3s ease;
+                z-index: 10;
               "
-            >×</button>
-            
-            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600; color: #1f2937; padding-right: 1.5rem;">
-              ${location.position_title}
-            </h4>
-            <p style="margin: 0.25rem 0; color: #4b5563;">
-              기업: <span style="font-weight: 600; color: #1f2937;">${location.company_name}</span>
-            </p>
-            <p style="margin: 0.25rem 0; color: #4b5563;">
-              위치: <span style="color: #1f2937;">${location.Address}</span>
-            </p>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-              <!-- 첫 번째 줄: 공고보기, AI 면접 -->
-              <button 
-                onclick="window.open('${location.url}', '_blank');"
-                style="display: inline-block; 
-                      padding: 0.5rem 1rem; 
-                      font-size: 0.875rem; 
-                      font-weight: 500; 
-                      color: #ffffff; 
-                      background-color: #3b82f6; 
-                      border-radius: 0.375rem; 
-                      text-decoration: none; 
-                      transition: background-color 0.3s ease;
-                      width: calc(50% - 0.5rem); /* 2개의 버튼을 첫 번째 줄에 배치 */
-                      box-sizing: border-box;"
-                onmouseover="this.style.backgroundColor='#2563eb'" 
-                onmouseout="this.style.backgroundColor='#3b82f6'">
-                공고보기
-              </button>
-              <button 
-                onclick="window.navigateToAIInterview && window.navigateToAIInterview('${encodeURIComponent(location.position_job_mid_code_name)}', '${encodeURIComponent(location.company_name)}')"
-                style="display: inline-block; 
-                      padding: 0.5rem 1rem; 
-                      font-size: 0.875rem; 
-                      font-weight: 500; 
-                      color: #ffffff; 
-                      background-color: #10b981; 
-                      border-radius: 0.375rem; 
-                      text-decoration: none; 
-                      transition: background-color 0.3s ease;
-                      width: calc(50% - 0.5rem);
-                      box-sizing: border-box;" 
-                onmouseover="this.style.backgroundColor='#059669'" 
-                onmouseout="this.style.backgroundColor='#10b981'">
-                AI 면접
-              </button>
-
-              <!-- 두 번째 줄: 길 찾기, 로드뷰 -->
-              <button 
-                onclick="window.drawRouteToJob && window.drawRouteToJob(${location.Latitude}, ${location.Longitude})" 
-                style="display: inline-block; 
-                      padding: 0.5rem 1rem; 
-                      font-size: 0.875rem; 
-                      font-weight: 500; 
-                      color: #ffffff; 
-                      background-color: #f59e0b; 
-                      border-radius: 0.375rem; 
-                      text-decoration: none; 
-                      transition: background-color 0.3s ease;
-                      width: calc(50% - 0.5rem); /* 2개의 버튼을 두 번째 줄에 배치 */
-                      box-sizing: border-box;" 
-                onmouseover="this.style.backgroundColor='#d97706'" 
-                onmouseout="this.style.backgroundColor='#f59e0b'">
-                길 찾기
-              </button>
-
-              <button 
-                onclick="window.showRoadview && window.showRoadview(${location.Latitude}, ${location.Longitude})" 
-                style="display: inline-block; 
-                      padding: 0.5rem 1rem; 
-                      font-size: 0.875rem; 
-                      font-weight: 500; 
-                      color: #ffffff; 
-                      background-color: #6366f1; 
-                      border-radius: 0.375rem; 
-                      text-decoration: none; 
-                      transition: background-color 0.3s ease;
-                      width: calc(50% - 0.5rem); /* 2개의 버튼을 두 번째 줄에 배치 */
-                      box-sizing: border-box;" 
-                onmouseover="this.style.backgroundColor='#4f46e5'" 
-                onmouseout="this.style.backgroundColor='#6366f1'">
-                로드뷰
-              </button>
+              onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.border='1px solid rgba(239,68,68,0.2)'"
+              onmouseout="this.style.background='rgba(31,41,55,0.04)'; this.style.border='1px solid rgba(31,41,55,0.08)'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+      
+            <div style="padding: 1.5rem; padding-top: 2rem; position: relative;">
+              <div style="display: flex; align-items: center; margin-bottom: 1.2rem;">
+                <div style="
+                  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+                  width: 48px;
+                  height: 48px;
+                  border-radius: 12px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-right: 1rem;
+                  box-shadow: 0 8px 15px -4px rgba(59,130,246,0.25);
+                ">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <h4 style="
+                    margin: 0; 
+                    font-size: 0.9rem; 
+                    font-weight: 700; 
+                    color: #1f2937;
+                    margin-bottom: 0.25rem;
+                    line-height: 1.2;
+                  ">
+                    ${location.position_title}
+                  </h4>
+                  <p style="
+                    margin: 0; 
+                    font-size: 0.75rem; 
+                    color: #6b7280;
+                    line-height: 1.3;
+                  ">
+                    ${location.company_name}
+                  </p>
+                </div>
+              </div>
+      
+              <div style="
+                background: #f4f5f7;
+                border-radius: 0.75rem;
+                padding: 0.9rem;
+                margin-bottom: 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                border: 1px solid rgba(229,231,235,0.7);
+              ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span style="color: #1f2937; font-size: 0.75rem;">${location.Address}</span>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                <button 
+                  onclick="window.open('${location.url}', '_blank');"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.6rem;
+                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    gap: 0.5rem;
+                    box-shadow: 0 6px 12px -4px rgba(59,130,246,0.3);
+                    font-size: 0.7rem;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 15px -5px rgba(59,130,246,0.4)'"
+                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 12px -4px rgba(59,130,246,0.3)'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                  공고보기
+                </button>
+                <button 
+                  onclick="window.navigateToAIInterview && window.navigateToAIInterview('${encodeURIComponent(location.position_job_mid_code_name)}', '${encodeURIComponent(location.company_name)}')"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.6rem;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    gap: 0.5rem;
+                    box-shadow: 0 6px 12px -4px rgba(16,185,129,0.3);
+                    font-size: 0.7rem;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 15px -5px rgba(16,185,129,0.4)'"
+                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 12px -4px rgba(16,185,129,0.3)'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  AI 면접
+                </button>
+      
+                <button 
+                  onclick="window.drawRouteToJob && window.drawRouteToJob(${location.Latitude}, ${location.Longitude})" 
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.6rem;
+                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    gap: 0.5rem;
+                    box-shadow: 0 6px 12px -4px rgba(245,158,11,0.3);
+                    font-size: 0.7rem;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 15px -5px rgba(245,158,11,0.4)'"
+                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 12px -4px rgba(245,158,11,0.3)'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 3h5v5"></path>
+                    <path d="M8 3H3v5"></path>
+                    <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L5 7"></path>
+                    <path d="m15 9 2.202 2.202a4 4 0 0 1 1.132 2.607v4.391"></path>
+                  </svg>
+                  길 찾기
+                </button>
+      
+                <button 
+                  onclick="window.showRoadview && window.showRoadview(${location.Latitude}, ${location.Longitude})" 
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.6rem;
+                    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    gap: 0.5rem;
+                    box-shadow: 0 6px 12px -4px rgba(99,102,241,0.3);
+                    font-size: 0.7rem;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 15px -5px rgba(99,102,241,0.4)'"
+                  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 12px -4px rgba(99,102,241,0.3)'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                  </svg>
+                  로드뷰
+                </button>
+              </div>
             </div>
           </div>
         `,
@@ -529,7 +734,7 @@ const Map: React.FC<MapProps> = ({
     };
   }, [markerPosition, jobs, onJobSelect, router]);
 
-  
+  // 선택된 잡 마커 처리 useEffect
   useEffect(() => {
     if (selectedJobId && jobMarkersMapRef.current[selectedJobId]) {
       const { marker, infoWindow } = jobMarkersMapRef.current[selectedJobId];
@@ -538,7 +743,7 @@ const Map: React.FC<MapProps> = ({
     }
   }, [selectedJobId]);
 
-  // markerPosition이 변경될 때 현재 길찾기 정보 업데이트
+  // 마커 위치 변경 시 현재 길찾기 정보 업데이트
   useEffect(() => {
     if (markerPosition && currentDestination) {
       drawRoute(markerPosition, currentDestination);
@@ -546,43 +751,46 @@ const Map: React.FC<MapProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markerPosition]);
 
+  // 로드뷰 모달 스타일
+  const roadviewModalProps = {
+    title: (
+      <div className="flex items-center gap-3 p-2">
+        <Compass className="w-6 h-6 text-blue-600" />
+        <span className="text-xl font-semibold text-gray-800">로드뷰</span>
+      </div>
+    ),
+    centered: true,
+    width: 1250,
+    bodyStyle: { 
+      padding: '1rem', 
+      backgroundColor: 'white',
+      borderRadius: '1rem',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
+    },
+    style: { top: 20 },
+    closeIcon: (
+      <X className="text-gray-500 hover:text-red-500 transition-colors" />
+    )
+  };
+
   return (
     <div className="relative w-full h-screen">
-      <div id="map" className="w-full h-full"></div>
+      {/* 지도 컨테이너 */}
+      <div 
+        id="map" 
+        className="w-full h-full shadow-lg rounded-xl overflow-hidden border-4 border-white/50 transition-all duration-300 hover:shadow-2xl"
+      />
+
+      {/* 로드뷰 모달 */}
       <Modal
-        title={
-          <div style={{
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            color: '#1f2937',
-            padding: '0.5rem 0'
-          }}>
-            🚗 로드뷰
-          </div>
-        }
+        {...roadviewModalProps}
         open={isRoadviewVisible}
         onCancel={() => setIsRoadviewVisible(false)}
-        width={1200}
-        centered
         footer={null}
-        styles={{
-          body: { 
-            padding: '1rem',
-            backgroundColor: 'white'
-          }
-        }}
-        style={{
-          top: 20
-        }}
       >
         <div 
           id="roadview" 
-          style={{ 
-            width: '100%', 
-            height: '600px',
-            borderRadius: '0.5rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-          }}
+          className="w-full h-[600px] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 transform transition-all duration-300 hover:scale-[1.005]"
         />
       </Modal>
     </div>

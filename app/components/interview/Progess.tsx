@@ -15,7 +15,10 @@ interface InterviewData {
   videoFiles: File[];
   generatedQuestions?: string[];
   interviewMode: 'practice' | 'mock';
-  
+  data: {
+    question: string;
+    answer: string;
+  }[];
 }
 
 interface ProgressProps {
@@ -206,14 +209,22 @@ export function InterviewProgress({ stream, interviewData,status }: ProgressProp
       setShowUploadModal(true);
       setUploadError(null);
       setUploadProgress(0);
-      
+       console.log('전체 interviewData:', interviewData);
       const formData = new FormData();
       formData.append('userUid', interviewData.userUid);
       formData.append('resumeUid', interviewData.resumeUid);
       formData.append('job_code', interviewData.job_code);
       formData.append('company', interviewData.company || ' ');
-     
       formData.append('resume_title', interviewData.resume_title);
+      
+      const interviewAnswers = interviewData.data.map(item => ({
+        question: item.question,
+        answer: item.answer
+      }));
+      console.log('정리된 데이터:', interviewAnswers);
+
+      formData.append('data', JSON.stringify(interviewAnswers));
+
       
       const timestamp = new Date().toISOString();
       formData.append('timestamp', timestamp);
@@ -451,89 +462,133 @@ export function InterviewProgress({ stream, interviewData,status }: ProgressProp
             </motion.div>
           )}
   
-        {/* 면접 진행 중 UI */}
-        {started && !completed && (
-          <div className="max-w-3xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-transparent rounded-full transform translate-x-1/2 -translate-y-1/2 opacity-50" />
-              
-              <div className="relative z-10">
-                <div className="flex justify-between items-center mb-10">
-                  <div className="space-y-2">
-                    <p className="text-lg text-gray-500 font-medium">현재 진행상황</p>
-                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                      <p className="text-4xl font-bold">
-                        질문 {currentQuestion + 1}/4
-                      </p>
-                    </div>
+  {started && !completed && (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 flex items-start justify-center p-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-[85%] bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100"
+          >
+            {/* 상단 헤더 */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                <span className="text-sm font-semibold">면접이 진행중입니다.</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-2">
+                  <div className="bg-white/20 px-2 py-1 rounded-full flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-medium">REC</span>
                   </div>
-                  <div className="text-center bg-gradient-to-br from-white to-blue-50 px-8 py-4 rounded-2xl shadow-lg">
-                    <p className="text-lg text-gray-500 font-medium">남은 시간</p>
-                    <p className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                      {timer}초
-                    </p>
+                  <div className="bg-white/20 px-2 py-1 rounded-full flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-medium">LIVE</span>
                   </div>
                 </div>
-                
-                <div className="w-full h-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full mb-10 overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
-                    initial={{ width: "100%" }}
-                    animate={{ width: `${(timer / 30) * 100}%` }}
-                    transition={{ duration: 1 }}
-                  />
-                </div>
+              </div>
+            </div>
 
-                <div className="space-y-8">
-                  <motion.div 
-                    className="bg-gradient-to-br from-white to-blue-50 p-8 rounded-2xl shadow-lg"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <h2 className="text-2xl font-semibold text-gray-800">
-                      {questions[currentQuestion]}
-                    </h2>
-                  </motion.div>
+            {/* 컨텐츠 섹션 */}
+            <div className="p-4 space-y-4">
+               {/* 타이머 */}
+               <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-[2px] rounded-2xl shadow-md">
+                <div className="bg-white p-4 rounded-2xl flex items-center space-x-6">
+                  <div className="flex items-center space-x-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-lg font-semibold text-gray-700">남은 시간</span>
+                  </div>
                   
-                  <div className="aspect-video bg-gray-900 rounded-2xl relative overflow-hidden shadow-2xl">
-                    {videoError ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-red-500 text-xl">
-                        {videoError}
-                      </div>
-                    ) : (
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  
-                    <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-                      <AudioVisualizer stream={stream} />
-                    </div>
-            
-                    <div className="absolute top-6 left-6 bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                      <span className="text-white font-medium">REC</span>
+                  <div className="flex-1 flex items-center space-x-4">
+                    <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      {timer}s
                     </div>
                     
-                    <div className="absolute top-6 right-6 bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                      <span className="text-white font-medium">MIC ON</span>
+                    <div className="flex-1 h-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
+                        initial={{ width: "100%" }}
+                        animate={{ width: `${(timer / 30) * 100}%` }}
+                        transition={{ 
+                          duration: 1,
+                          ease: "easeInOut"
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </div>
+
+{/* 질문 네비게이션 */}
+<div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+ <div className="flex items-center w-full">
+ <div className="flex gap-4 mr-6">
+  {[1, 2, 3, 4].map((num) => (
+    <motion.div
+      key={num}
+      className={`
+        w-10 h-10 rounded-full flex items-center justify-center 
+        transition-all duration-300 
+        relative
+        ${
+          currentQuestion + 1 === num 
+            ? 'bg-blue-600 text-white scale-110 shadow-4xl ring-4 ring-blue-300/50' 
+            : 'bg-gray-100 text-gray-400 hover:bg-blue-50 hover:text-blue-600'
+        }
+      `}
+      whileHover={{ scale: currentQuestion + 1 === num ? 1.1 : 1.05 }}
+    >
+      <div className="absolute -top-1 -right-1 w-6 h-6 bg-white/20 rounded-full"></div>
+      <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-white/20 rounded-full"></div>
+      
+      <div className="relative z-10 flex flex-col items-center">
+        <span className="font-black text-1xl">Q{num}</span>
+        {currentQuestion + 1 === num && (
+          <div className="mt-1 h-1 w-4 bg-white/50 rounded-full"></div>
         )}
+      </div>
+    </motion.div>
+  ))}
+</div>
+   <div className="flex-1 w-[1000px] overflow-hidden">
+     <motion.div 
+       key={currentQuestion}
+       initial={{ opacity: 0, y: 20 }}
+       animate={{ opacity: 1, y: 0 }}
+       className="w-full"
+     >
+       <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-4 rounded-xl shadow-md border-l-4 border-blue-500 h-[120px] flex items-center">
+         <p className="text-xl font-bold text-gray-800 tracking-wide line-clamp-2">
+           {questions[currentQuestion]}
+         </p>
+       </div>
+     </motion.div>
+   </div>
+ </div>
+</div>
+             
+
+              {/* 비디오 섹션 */}
+              <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden shadow-lg aspect-video max-w-[600px] mx-auto">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+
+                {/* 오디오 비주얼라이저 - 왼쪽으로 이동 및 크기 축소 */}
+                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-13">
+                  <AudioVisualizer stream={stream} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
         {/* 카운트다운 모달 */}
         {showCountdown && (
@@ -802,5 +857,5 @@ export function InterviewProgress({ stream, interviewData,status }: ProgressProp
     </div>
   );
 }
-
+console.log('a')
 export default InterviewProgress;

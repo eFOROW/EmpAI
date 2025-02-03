@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Typography, Tabs, Card, Progress, Alert  } from 'antd';
+import { Button, Input, Typography, Tabs, Card, Progress, Alert, Spin  } from 'antd';
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { User } from "firebase/auth";
 import { LeftOutlined, 
@@ -10,7 +10,7 @@ import { LeftOutlined,
   CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
   CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
-  BankOutlined, SafetyOutlined, QuestionCircleOutlined, CheckCircleOutlined  
+  BankOutlined, SafetyOutlined, QuestionCircleOutlined, CheckCircleOutlined,LoadingOutlined,RobotOutlined,LinkOutlined
 } from '@ant-design/icons';
 
 const { TabPane } = Tabs;
@@ -183,7 +183,7 @@ export default function FeedbackPage() {
 
   const getColorByScore = (score: number) => {
     if (score <= 3) return '#ff4d4f';      // 빨간색 (1-3점)
-    if (score <= 6) return '#ffa940';      // 주황색 (4-7점)
+    if (score <= 7) return '#ffa940';      // 주황색 (4-7점)
     return '#1890ff';                      // 파란색 (8-10점)
   };
   
@@ -238,15 +238,23 @@ export default function FeedbackPage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <div className="text-lg">Loading...</div>
+        <div className="flex justify-center items-center min-h-screen">
+      <Spin size="large" />
+    </div>
         </div>
       </div>
     );
   }
 
+  const getProgressColor = (score: number): string => {
+    if (score <= 3) return '#DC2626'; // 빨간색
+    if (score <= 5) return '#F97316'; // 주황색
+    if (score <= 7) return '#22C55E'; // 초록색
+    return '#3B82F6'; // 파란색
+  };
 
   return (
-    <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6">
+    <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start">
@@ -254,16 +262,16 @@ export default function FeedbackPage() {
             onClick={() => router.back()}
             icon={<LeftOutlined />}
             type="text"
-            className="mr-4 hover:bg-gray-100 rounded-full h-10 w-10 flex items-center justify-center"
+            className="mr-4 hover:bg-white/50 rounded-full h-12 w-12 flex items-center justify-center transition-all duration-200 shadow-sm"
           />
           <div className="w-full flex justify-center">
             <div>
-              <Typography.Title level={2} className="mb-2 text-center">
+              <Typography.Title level={2} className="mb-3 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                 {document.title}
               </Typography.Title>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 justify-center">
                 <Typography.Text
-                  className="text-xs px-2 py-1 rounded flex items-center gap-2 whitespace-nowrap"
+                  className="text-sm px-4 py-2 rounded-full flex items-center gap-2 whitespace-nowrap shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-105"
                   style={{
                     color: jobStyles[document.job_code]?.color ?? "#666",
                     backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
@@ -275,7 +283,7 @@ export default function FeedbackPage() {
                   {jobStyles[document.job_code]?.icon ?? null}
                   {document.job_code}
                 </Typography.Text>
-                <Typography.Text type="secondary" className="text-sm">
+                <Typography.Text type="secondary" className="text-sm bg-white/70 px-4 py-2 rounded-full shadow-sm backdrop-blur-sm">
                   최근 수정: {new Date(document.last_modified).toLocaleDateString()}{" "}
                   {new Date(document.last_modified).toLocaleTimeString()}
                 </Typography.Text>
@@ -285,15 +293,29 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      {/* AI Feedback Button */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-8">
         <Button
           type="primary"
           onClick={requestAIFeedback}
           loading={isLoading}
           size="large"
+          className="h-14 px-10 rounded-full shadow-lg hover:scale-105 transition-all duration-200"
+          style={{
+            background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
+            border: 'none',
+            fontSize: '17px',
+            fontWeight: '600'
+          }}
         >
-          {isLoading ? "분석중..." : "AI 분석 요청"}
+          {isLoading ? (
+            <span className="flex items-center gap-3">
+               분석중...
+            </span>
+          ) : (
+            <span className="flex items-center gap-3">
+              <RobotOutlined style={{ fontSize: '20px' }} /> AI 분석 요청
+            </span>
+          )}
         </Button>
       </div>
 
@@ -302,25 +324,22 @@ export default function FeedbackPage() {
         activeKey={activeTab} 
         onChange={setActiveTab}
         type="card"
-        className="mb-6"
+        className="mb-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
         style={{
-          padding: '10px 10px 0',
-          borderRadius: '8px'
-        }}
-        tabBarStyle={{
-          margin: 0,
-          background: 'transparent'
+          padding: '16px 16px 0',
+          borderRadius: '16px'
         }}
       >
         {document.data.map((item, index) => (
           <TabPane 
             tab={
               <div style={{ 
-                padding: '4px 16px',
+                padding: '8px 24px',
                 fontWeight: activeTab === index.toString() ? '600' : '400',
                 fontSize: '16px',
                 transition: 'all 0.3s',
-                borderBottom: activeTab === index.toString() ? '2px solid #1890ff' : 'none'
+                borderBottom: activeTab === index.toString() ? '2px solid #4F46E5' : 'none',
+                color: activeTab === index.toString() ? '#4F46E5' : '#64748B'
               }}>
                 Q{index + 1}
               </div>
@@ -331,19 +350,19 @@ export default function FeedbackPage() {
       </Tabs>
 
       <div 
-        className="flex transition-all duration-300 ease-in-out"
+        className="flex transition-all duration-500 ease-in-out"
         style={{ gap: '24px' }}
       >
         {/* Left: Question and Answer */}
         <div 
-          className="transition-all duration-300 ease-in-out"
+          className="transition-all duration-500 ease-in-out"
           style={{ 
             width: feedbackData ? '45%' : '100%', 
             minWidth: '35%', 
             flexShrink: 0,
-            position: 'sticky', // 고정 위치 설정
-            top: '50px', // 뷰포트 상단에서 50px 떨어진 위치에 고정
-            alignSelf: 'start', // 높이 설정이 있을 경우 정렬 보정
+            position: 'sticky',
+            top: '50px',
+            alignSelf: 'start',
           }}
         >
           <Card 
@@ -353,16 +372,22 @@ export default function FeedbackPage() {
                 wordBreak: 'break-word',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '12px',
                 fontSize: '18px',
                 fontWeight: 600
               }}>
-                <QuestionCircleOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
+                <QuestionCircleOutlined style={{ color: '#4F46E5', fontSize: '20px' }} />
                 {document.data[parseInt(activeTab)].question}
               </div>
             } 
-            className="h-full"
-            headStyle={{ backgroundColor: '#eff6ff' }}  
+            className="shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
+            style={{ borderRadius: '20px' }}
+            headStyle={{ 
+              backgroundColor: 'rgba(239, 246, 255, 0.8)',
+              borderTopLeftRadius: '20px',
+              borderTopRightRadius: '20px',
+              borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
+            }}  
           >
             <Input.TextArea
               value={document.data[parseInt(activeTab)].answer}
@@ -375,23 +400,33 @@ export default function FeedbackPage() {
                 });
               }}
               autoSize={{ minRows: 12, maxRows: 22 }}
-              className="mb-4 text-base"
+              className="mb-6 text-base rounded-xl border-gray-200 hover:border-blue-400 focus:border-indigo-500 transition-all duration-200"
+              style={{ padding: '16px' }}
             />
-            <Button 
-              type="primary"
-              onClick={handleUpdateDocument}  
-            >
-              수정하기
-            </Button>
+            <div className="flex justify-center">
+              <Button 
+                type="primary"
+                onClick={handleUpdateDocument}
+                className="h-12 px-10 rounded-xl hover:scale-105 transition-all duration-200 shadow-md"
+                style={{
+                  background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
+                  border: 'none',
+                  fontSize: '16px',
+                  fontWeight: '600'
+                }}
+              >
+                수정하기
+              </Button>
+            </div>
           </Card>
         </div>
         
-        {/* Right: Feedback */}
+        {/* 오른쪽 패널: 피드백 */}
         {feedbackData && (
           <div 
-            className="transition-all duration-300 ease-in-out"
+            className="transition-all duration-500 ease-in-out"
             style={{ 
-              width: '60%', //너비 수정
+              width: '60%',
               opacity: feedbackData ? 1 : 0,
               transform: feedbackData ? 'translateX(0)' : 'translateX(20px)'
             }}
@@ -401,127 +436,130 @@ export default function FeedbackPage() {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '12px',
                   fontSize: '18px',
                   fontWeight: 600
                 }}>
-                  <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '18px' }} />
+                  <CheckCircleOutlined style={{ color: '#10B981', fontSize: '20px' }} />
                   <span>첨삭 결과</span>
                 </div>
               } 
-              className="h-full"
-              headStyle={{ backgroundColor: '#eff6ff' }}
+              className="shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
+              style={{ borderRadius: '20px' }}
+              headStyle={{ 
+                backgroundColor: 'rgba(239, 246, 255, 0.8)',
+                borderTopLeftRadius: '20px',
+                borderTopRightRadius: '20px',
+                borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
+              }}
             >
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <Card size="small">
-                  <div className="text-center">
-                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>관련성</div>
-                    <Progress 
-                      percent={feedbackData.results[parseInt(activeTab)].relevance * 10} 
-                      showInfo={false}
-                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].relevance)}
-                      trailColor="#f5f5f5"
-                      strokeWidth={10}
-                    />
-                    <div className="text-lg font-bold mt-1">
-                      {feedbackData.results[parseInt(activeTab)].relevance}/10점
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                {[
+                  { title: '관련성', score: feedbackData.results[parseInt(activeTab)].relevance },
+                  { title: '구체성', score: feedbackData.results[parseInt(activeTab)].specificity },
+                  { title: '설득력', score: feedbackData.results[parseInt(activeTab)].persuasiveness }
+                ].map((item, index) => (
+                  <Card 
+                    key={index}
+                    size="small"
+                    className="hover:shadow-lg transition-all duration-300 bg-white"
+                    style={{ borderRadius: '16px' }}
+                  >
+                    <div className="text-center p-2">
+                      <div className="text-gray-700 mb-3 font-semibold text-lg">{item.title}</div>
+                      <Progress 
+                        percent={item.score * 10} 
+                        showInfo={false}
+                        strokeColor={getProgressColor(item.score)}
+                        trailColor="#f0f0f0"
+                        strokeWidth={10}
+                        className="mb-2"
+                      />
+                      <div className="text-2xl font-bold mt-2" style={{ color: getProgressColor(item.score) }}>
+                        {item.score}/10
+                      </div>
                     </div>
-                  </div>
-                </Card>
-                <Card size="small">
-                  <div className="text-center">
-                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>구체성</div>
-                    <Progress 
-                      percent={feedbackData.results[parseInt(activeTab)].specificity * 10} 
-                      showInfo={false}
-                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].specificity)}
-                      trailColor="#f5f5f5"
-                      strokeWidth={10}
-                    />
-                    <div className="text-lg font-bold mt-1">
-                      {feedbackData.results[parseInt(activeTab)].specificity}/10점
-                    </div>
-                  </div>
-                </Card>
-                <Card size="small">
-                  <div className="text-center">
-                    <div className="text-black-500 mb-2" style={{ fontSize: '16px', fontWeight: 600 }}>설득력</div>
-                    <Progress 
-                      percent={feedbackData.results[parseInt(activeTab)].persuasiveness * 10} 
-                      showInfo={false}
-                      strokeColor={getColorByScore(feedbackData.results[parseInt(activeTab)].persuasiveness)}
-                      trailColor="#f5f5f5"
-                      strokeWidth={10}
-                    />
-                    <div className="text-lg font-bold mt-1">
-                      {feedbackData.results[parseInt(activeTab)].persuasiveness}/10점
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                ))}
               </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Typography.Title level={4}>상세 피드백</Typography.Title>
-                    <Typography.Paragraph className="text-base">
+              {/* 상세 피드백 섹션 */}
+              <div className="space-y-8">
+                <div>
+                  <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
+                    <FileTextOutlined style={{ color: '#4F46E5' }} />
+                    상세 피드백
+                  </Typography.Title>
+                  <div className="bg-gray-50/70 p-6 rounded-xl border border-gray-100">
+                    <Typography.Paragraph className="text-base leading-relaxed text-gray-600">
                       {feedbackData.results[parseInt(activeTab)].feedback}
                     </Typography.Paragraph>
                   </div>
+                </div>
 
-                  {/* 유사 매칭 결과 */}
-                  <div className="mt-4 pt-4 border-t">
-                    <Typography.Title level={4}>자기소개서 매칭 결과</Typography.Title>
-                    
-                    {feedbackData.results[parseInt(activeTab)].using_gpt ? (
-                      <Alert
-                        type="info"
-                        message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
-                        showIcon
-                      />
-                    ) : (
-                      feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
-                        <div className="space-y-4">
-                          <Card size="small">
+                {/* 매칭 결과 섹션 */}
+                <div className="border-t pt-8">
+                  <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
+                    <LinkOutlined style={{ color: '#4F46E5' }} />
+                    자기소개서 매칭 결과
+                  </Typography.Title>
+                  
+                  {feedbackData.results[parseInt(activeTab)].using_gpt ? (
+                    <Alert
+                      type="info"
+                      message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
+                      showIcon
+                      className="rounded-xl shadow-sm"
+                    />
+                  ) : (
+                    feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
+                      <div className="space-y-4">
+                        {[
+                          { title: '합격한 회사', content: feedbackData.results[parseInt(activeTab)].similar_h2_tag },
+                          { title: '유사한 문항', content: feedbackData.results[parseInt(activeTab)].similar_question },
+                          { title: '유사한 답변', content: feedbackData.results[parseInt(activeTab)].similar_answer }
+                        ].map((item, index) => (
+                          <Card 
+                            key={index}
+                            size="small"
+                            className="hover:shadow-md transition-all duration-300 bg-gray-50/70"
+                            style={{ borderRadius: '12px' }}
+                          >
                             <div>
-                              <div className="text-gray-600 font-semibold mb-1">합격한 회사</div>
-                              <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_h2_tag}</div>
-                            </div>
-                          </Card>
-
-                          <Card size="small">
-                            <div>
-                              <div className="text-gray-600 font-semibold mb-1">유사한 문항</div>
-                              <div className="text-lg">{feedbackData.results[parseInt(activeTab)].similar_question}</div>
-                            </div>
-                          </Card>
-
-                          <Card size="small">
-                            <div>
-                              <div className="text-gray-600 font-semibold mb-1">유사한 답변</div>
-                              <div className="text-lg" style={{ whiteSpace: 'pre-wrap' }}>
-                                {feedbackData.results[parseInt(activeTab)].similar_answer}
+                              <div className="text-gray-500 font-medium mb-2">{item.title}</div>
+                              <div className="text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>
+                                {item.content}
                               </div>
                             </div>
                           </Card>
+                        ))}
 
-                          <Card size="small" className="bg-blue-50">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600 font-semibold">유사도</span>
-                              <span className="text-xl font-bold text-blue-600">
-                                {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
-                              </span>
-                            </div>
-                          </Card>
-                        </div>
-                      ) : (
-                        <Alert
-                          type="info"
-                          message="유사한 자기소개서가 없습니다."
-                          showIcon
-                        />
-                      )
-                    )}
-                  </div>
+                        <Card 
+                          size="small" 
+                          className="hover:shadow-md transition-all duration-300"
+                          style={{ 
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)'
+                          }}
+                        >
+                          <div className="flex items-center justify-between p-2">
+                            <span className="text-gray-700 font-medium">유사도</span>
+                            <span className="text-2xl font-bold text-blue-600">
+                              {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
+                            </span>
+                          </div>
+                        </Card>
+                      </div>
+                    ) : (
+                      <Alert
+                        type="info"
+                        message="유사한 자기소개서가 없습니다."
+                        showIcon
+                        className="rounded-xl shadow-sm"
+                      />
+                    )
+                  )}
+                </div>
               </div>
             </Card>
           </div>

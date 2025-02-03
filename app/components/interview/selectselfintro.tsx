@@ -18,7 +18,6 @@ interface InterviewData {
     answer: string;
   }[];
   generatedQuestions?: string[];
-  
 }
 
 type InterviewMode = 'practice' | 'mock';
@@ -31,8 +30,6 @@ interface ApiResponse {
     question: string;
     answer: string;
   }[];
-  
-
 }
 
 interface SelectSelfIntroProps {
@@ -42,6 +39,59 @@ interface SelectSelfIntroProps {
   company?: string;
   status: string;
 }
+
+const InterviewLimitModal = ({ onClose }: { onClose: () => void }) => {
+  const router = useRouter();  // useRouter 훅 추가
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <motion.div 
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.95 }}
+        className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center space-y-6"
+      >
+        <div className="relative w-20 h-20 mx-auto">
+          <div className="bg-red-100 w-full h-full rounded-full flex items-center justify-center">
+            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800">분석된 면접 정리 필요</h3>
+        <div className="space-y-2">
+          <p className="text-gray-600">
+            분석 가능한 면접 횟수를 모두 사용하셨습니다.
+          </p>
+          <p className="text-gray-600">
+            기존에 분석된 면접을 먼저 정리해주시거나<br/>
+            연습 면접을 이용해주세요.
+          </p>
+        </div>
+        <div className="flex justify-center space-x-4">
+          <Button
+            onClick={() => router.push('/ai-interview/results')}
+            type="primary"
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border-none rounded-full px-6"
+          >
+            정리하러 가기
+          </Button>
+          <Button
+            onClick={onClose}
+            className="rounded-full px-6"
+          >
+            취소
+          </Button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const GeneratingModal = () => (
   <motion.div 
@@ -82,7 +132,6 @@ const GeneratingModal = () => (
     </motion.div>
   </motion.div>
 );
-
 const jobOptions = [
   "전체", "기획·전략", "마케팅·홍보·조사", "회계·세무·재무", "인사·노무·HRD",
   "총무·법무·사무", "IT개발·데이터", "디자인", "영업·판매·무역", "고객상담·TM", "구매·자재·물류", 
@@ -99,9 +148,12 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [analysisCount, setAnalysisCount] = useState(0);
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState<'select' | 'interview'>('select');
   const [interviewMode, setInterviewMode] = useState<'practice' | 'mock' | null>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -112,11 +164,17 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
         const user = await getCurrentUser();
         if (user) {
           setCurrentUser(user);
-          const params = new URLSearchParams({
-            uid: user.uid,
-          });
-
           const token = await user.getIdToken();
+
+          // 분석된 면접 횟수 가져오기
+          const countResponse = await fetch(`/api/interview/result_request?uid=${user.uid}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const countData = await countResponse.json();
+          setAnalysisCount(countData.length);
+
           const response = await fetch(`/api/self-introduction?uid=${user.uid}`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -133,10 +191,7 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
             job_code: item.job_code,
             resume_title: item.title,
             data: item.data,
-            
-            
           }));
-          
 
           setAllIntroductions(filteredData);
           setFilteredIntroductions(filteredData);
@@ -152,7 +207,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
       initData();
     }
   }, [mounted]);
-
   useEffect(() => {
     if (selectedJob === "전체" && !job_Code) {
       setFilteredIntroductions(allIntroductions);
@@ -174,7 +228,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
         body: JSON.stringify({
           job_code: intro.job_code,
           data: intro.data,
-          
         }),
       });
 
@@ -199,9 +252,17 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
     setSelectedIntro(intro === selectedIntro ? null : intro);
   };
 
+  const handleMockInterviewClick = () => {
+    if (status === 'ok') {
+      if (analysisCount >= 4) {
+        setShowLimitModal(true);
+      } else {
+        setInterviewMode('mock');
+      }
+    }
+  };
+
   const handleSubmitInterview = async () => {
-    
-  
     if (selectedIntro && interviewMode) {
       setGeneratingQuestions(true);
       try {
@@ -230,14 +291,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
     }
   };
 
-  const handlePracticeInterview = () => {
-    console.log('연습 면접 시작');
-  };
-
-  const handleMockInterview = () => {
-    console.log('모의 면접 시작');
-  };
-
   if (loading || !mounted) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -248,7 +301,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-5 py-2 max-w-5xl">
       <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-4">
@@ -305,7 +357,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
                     ))}
                   </div>
                 </div>
-  
                 <div className="bg-gray-50 rounded-3xl p-6 h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                   <AnimatePresence>
                     {filteredIntroductions.length === 0 ? (
@@ -380,7 +431,6 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
                     )}
                   </AnimatePresence>
                 </div>
-  
                 <div className="mt-8 flex justify-end space-x-4">
                   <Button
                     type="primary"
@@ -448,11 +498,10 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
               AI가 분석한 최신 면접 트렌드와 직무별 맞춤 예상 질문을 제공합니다. 취업을 준비하는 과정에서 가장 중요한 면접 준비를 도와드립니다. - 피드백 제공 X
             </p>
           </motion.div>
-
           <motion.div
             whileHover={{ scale: status === 'ok' ? 1.03 : 1 }}
             whileTap={{ scale: status === 'ok' ? 0.98 : 1 }}
-            onClick={() => status === 'ok' && setInterviewMode('mock')}
+            onClick={handleMockInterviewClick}  // 수정된 부분
             className={`p-8 rounded-2xl cursor-pointer transition-all ${
               interviewMode === 'mock' && status === 'ok'
                 ? 'bg-white shadow-lg border-2 border-indigo-400'
@@ -481,27 +530,28 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
           </motion.div>
         </div>
         {interviewMode && (
-        <div className="mt-8 flex justify-center">
-          <Button
-            type="primary"
-            onClick={handleSubmitInterview}
-            disabled={!selectedIntro || generatingQuestions}
-            size="large"
-            className={`rounded-full px-12 ${
-              selectedIntro && !generatingQuestions
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border-none' 
-                : 'bg-gray-300'
-            }`}
-          >
-            {generatingQuestions ? '질문 생성 중...' : '면접 보기'}
-          </Button>
-        </div>
-      )}
+          <div className="mt-8 flex justify-center">
+            <Button
+              type="primary"
+              onClick={handleSubmitInterview}
+              disabled={!selectedIntro || generatingQuestions}
+              size="large"
+              className={`rounded-full px-12 ${
+                selectedIntro && !generatingQuestions
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border-none' 
+                  : 'bg-gray-300'
+              }`}
+            >
+              {generatingQuestions ? '질문 생성 중...' : '면접 보기'}
+            </Button>
+          </div>
+        )}
       </motion.div>
     )}
 
     <AnimatePresence>
       {generatingQuestions && <GeneratingModal />}
+      {showLimitModal && <InterviewLimitModal onClose={() => setShowLimitModal(false)} />}
     </AnimatePresence>
   </div>
 );

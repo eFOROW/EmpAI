@@ -1,11 +1,20 @@
-//  page.tsx(question)
-
 "use client";
 
-import { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "firebase/auth";
+import { 
+  ChevronDown, 
+  Filter, 
+  Search, 
+  BookOpen, 
+  Star, 
+  Award,
+  FileText,
+  Layers 
+} from "lucide-react";
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
+
 
 const interviewQuestions = [
   {
@@ -328,35 +337,36 @@ type QuestionCardProps = {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, isOpen, onToggle }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-4 hover:shadow-md transition-all duration-200">
+    <div className="bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
       <button
         onClick={onToggle}
-        className="w-full px-6 py-5 text-left flex justify-between items-start hover:bg-gray-50 transition-colors"
+        className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors group"
       >
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            <span className="px-3 py-1 text-sm rounded-full bg-blue-50 text-blue-600 font-medium">
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600 font-medium">
               {question.category}
             </span>
-            <span className="px-3 py-1 text-sm rounded-full bg-gray-50 text-gray-600 font-medium">
+            <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
               {question.level}
             </span>
           </div>
-          <span className="text-lg font-semibold text-gray-800">{question.question}</span>
+          <span className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+            {question.question}
+          </span>
         </div>
-        <span className="text-2xl text-gray-400 transition-transform duration-200" style={{
-          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
-        }}>
-          ⌵
-        </span>
+        <ChevronDown 
+          className={`w-6 h-6 text-gray-400 transition-transform duration-300 
+            ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
+        />
       </button>
       
       {isOpen && (
-        <div className="px-6 py-5 border-t border-gray-100 bg-gray-50">
+        <div className="px-6 py-5 bg-gray-50 border-t border-gray-200">
           <div className="space-y-6">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-blue-600 mb-4 flex items-center gap-2">
-                <span className="text-xl">💡</span> 답변 꿀팁
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="font-bold text-blue-600 mb-4 flex items-center gap-3">
+                <Star className="w-5 h-5 text-blue-500" /> 답변 꿀팁
               </h3>
               <ul className="space-y-3">
                 {question.tips.map((tip: string, index: number) => (
@@ -368,11 +378,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, isOpen, onToggle 
               </ul>
             </div>
             
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-green-600 mb-4 flex items-center gap-2">
-                <span className="text-xl">📝</span> 답변 예시
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="font-bold text-green-600 mb-4 flex items-center gap-3">
+                <BookOpen className="w-5 h-5 text-green-500" /> 답변 예시
               </h3>
-              <p className="text-gray-700 leading-relaxed">{question.example}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {question.example}
+              </p>
             </div>
           </div>
         </div>
@@ -388,6 +400,7 @@ export default function InterviewPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedLevel, setSelectedLevel] = useState("전체");
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -407,70 +420,87 @@ export default function InterviewPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="text-center">
-        <p className="text-lg mb-2">해당 서비스는 로그인 후 사용 가능합니다.</p>
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 to-white px-4">
+        <Award className="w-24 h-24 text-blue-500 mb-6" />
+        <p className="text-2xl font-bold text-gray-800 mb-4">로그인이 필요한 서비스입니다</p>
         <button
           onClick={() => router.push("/mypage")}
-          type="button"
-          className="mt-4 px-8 h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="px-10 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-md"
         >
-          로그인 하러 가기
+          <Star className="w-5 h-5" /> 로그인 하러 가기
         </button>
       </div>
     );
   }
+
   const filteredQuestions = interviewQuestions.filter(q => {
-    if (selectedCategory !== "전체" && q.category !== selectedCategory) return false;
-    if (selectedLevel !== "전체" && q.level !== selectedLevel) return false;
-    return true;
+    const matchCategory = selectedCategory === "전체" || q.category === selectedCategory;
+    const matchLevel = selectedLevel === "전체" || q.level === selectedLevel;
+    const matchSearch = searchTerm === "" || 
+      q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.category.includes(searchTerm);
+    
+    return matchCategory && matchLevel && matchSearch;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-5xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* 헤더 섹션 */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">면접 예상 질문</h1>
-          <p className="text-lg text-gray-600">실전 면접을 위한 예상 질문과 모범 답안을 준비했습니다</p>
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 mb-3">
+            면접 질문 가이드
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            실전 면접을 위한 맞춤형 질문과 전략적인 모범 답변을 제공합니다
+          </p>
         </div>
   
-        <div className="bg-white rounded-2xl shadow-md mb-8 p-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-3">카테고리</h3>
+        {/* 필터링 섹션 */}
+        <div className="bg-white rounded-2xl shadow-lg mb-8 p-6 border border-gray-100">
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* 카테고리 필터 */}
+            <div className="relative">
+              <label className="text-sm font-semibold text-gray-600 mb-3 block">
+                카테고리 필터
+              </label>
               <div className="flex flex-wrap gap-2">
                 {categories.map(category => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2
                       ${selectedCategory === category 
-                        ? "bg-blue-500 text-white shadow-sm" 
+                        ? "bg-blue-500 text-white shadow-md" 
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                   >
-                    {category}
+                    <Filter className="w-4 h-4" /> {category}
                   </button>
                 ))}
               </div>
             </div>
             
+            {/* 난이도 필터 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-3">난이도</h3>
-              <div className="flex gap-2">
+              <label className="text-sm font-semibold text-gray-600 mb-3 block">
+                난이도 필터
+              </label>
+              <div className="flex flex-wrap gap-2">
                 {levels.map(level => (
                   <button
                     key={level}
                     onClick={() => setSelectedLevel(level)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                       ${selectedLevel === level
-                        ? "bg-blue-500 text-white shadow-sm"
+                        ? "bg-blue-500 text-white shadow-md"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                   >
                     {level}
@@ -478,25 +508,50 @@ export default function InterviewPage() {
                 ))}
               </div>
             </div>
+  
+            {/* 질문 검색 */}
+            <div>
+              <label className="text-sm font-semibold text-gray-600 mb-3 block">
+                질문 검색
+              </label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="질문을 검색해보세요"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-300 transition-all"
+                />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
           </div>
         </div>
   
-        <div className="bg-white rounded-2xl shadow-md">
+        {/* 질문 리스트 섹션 */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="h-[650px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             <div className="p-6">
-              {filteredQuestions.map((question) => (
-                <QuestionCard
-                  key={question.id}
-                  question={question}
-                  isOpen={openQuestionId === question.id}
-                  onToggle={() => setOpenQuestionId(
-                    openQuestionId === question.id ? null : question.id
-                  )}
-                />
-              ))}
-              {filteredQuestions.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">해당하는 질문이 없습니다.</p>
+              {filteredQuestions.length > 0 ? (
+                filteredQuestions.map((question) => (
+                  <QuestionCard
+                    key={question.id}
+                    question={question}
+                    isOpen={openQuestionId === question.id}
+                    onToggle={() => setOpenQuestionId(
+                      openQuestionId === question.id ? null : question.id
+                    )}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                  <Search className="w-24 h-24 text-gray-300 mx-auto mb-6" />
+                  <p className="text-xl text-gray-500 font-medium">
+                    검색 결과가 없습니다
+                  </p>
+                  <p className="text-gray-400 mt-2">
+                    다른 키워드로 다시 검색해보세요
+                  </p>
                 </div>
               )}
             </div>

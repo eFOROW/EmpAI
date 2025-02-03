@@ -1,5 +1,9 @@
 
 import { NextResponse } from 'next/server';
+//https://driving-skylark-grand.ngrok-free.app
+//https://safe-harmless-shark.ngrok-free.app 셧다운
+const BASE_URL = 'https://driving-skylark-grand.ngrok-free.app';
+//https://52e6599bccb1c6.lhr.life 바뀜
 
 interface AnalysisResult {
  [key: string]: any;
@@ -19,7 +23,46 @@ export async function POST(request: Request) {
    const resume_title = formData.get('resume_title');
    const timestamp = formData.get('timestamp');
    const company = formData.get('company');
-   
+  
+   // 자기소개서 데이터를 JSON 문자열로 받아서 파싱
+   const rawData = formData.get('data');
+    
+    if (!rawData) {
+      return NextResponse.json(
+        { message: '인터뷰 데이터가 전송되지 않았습니다.' },
+        { status: 400 }
+      );
+    }
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(rawData.toString());
+      
+      // 배열 형태인지 확인
+      if (!Array.isArray(parsedData)) {
+        return NextResponse.json(
+          { message: '올바른 형식의 데이터가 아닙니다.' },
+          { status: 400 }
+        );
+      }
+      const isValidData = parsedData.every(item => 
+        item.question && 
+        item.answer
+      );
+      if (!isValidData) {
+        return NextResponse.json(
+          { message: '데이터 형식이 올바르지 않습니다.' },
+          { status: 400 }
+        );
+      }
+
+    } catch (e) {
+      console.error('JSON 파싱 에러:', e);
+      return NextResponse.json(
+        { message: 'JSON 파싱에 실패했습니다.' },
+        { status: 400 }
+      );
+    }
    // 질문들 추출
    const questions = [];
    for (let i = 0; i < 4; i++) {
@@ -35,7 +78,8 @@ export async function POST(request: Request) {
      resume_title,
      timestamp,
      company,
-     questions
+     questions,
+     rawData
    });
 
    // 데이터 검증
@@ -85,6 +129,8 @@ export async function POST(request: Request) {
    analyzeFormData.append('timestamp', timestamp as string);
    analyzeFormData.append('company', company as string);
    
+  analyzeFormData.append('data', JSON.stringify(parsedData));
+
    questions.forEach((question, index) => {
      analyzeFormData.append(`question_${index}`, question);
    });
@@ -94,19 +140,20 @@ export async function POST(request: Request) {
    });
 
    // FormData 내용 로깅
-   console.log('Sending to analysis server:', {
+  console.log('Sending to analysis server:', {
      userUid: analyzeFormData.get('userUid'),
      resumeUid: analyzeFormData.get('resumeUid'),
      company: analyzeFormData.get('company'),
      questionCount: questions.length,
-     videoCount: videoFiles.length
+     videoCount: videoFiles.length,
+     dataCount: analyzeFormData.get('data')  // 자기소개서 데이터 개수 로깅 추가
    });
 
    // 분석 서버로 전송
    const analyzeResponse = await fetch(process.env.AI_SERVER_URL + '/analyze', {
-     method: 'POST',
-     body: analyzeFormData
-   });
+    method: 'POST',
+    body: analyzeFormData
+  });
 
    // 응답 상태 로깅
    console.log('Analysis server status:', analyzeResponse.status);
@@ -159,6 +206,8 @@ export async function POST(request: Request) {
    );
  }
 }
+
+
 
 export async function GET() {
   try {
