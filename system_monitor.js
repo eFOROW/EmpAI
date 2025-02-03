@@ -5,7 +5,7 @@ const execPromise = util.promisify(exec);
 const si = require('systeminformation');
 
 // MongoDB Atlas 연결 문자열
-const mongoURI = 'mongodb+srv://bit_5:bit_5%40@cluster.zw98c.mongodb.net/EmpAI?retryWrites=true&w=majority&appName=Cluster';
+const mongoURI = process.env.MONGO_URI;
 
 // MongoDB 연결 설정
 mongoose.connect(mongoURI);

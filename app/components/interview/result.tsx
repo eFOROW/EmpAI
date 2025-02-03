@@ -974,14 +974,14 @@ interface VideoPlayerProps {
 
 const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis, averageScores }) => {
   const [activeTab, setActiveTab] = useState('tab-1');
-  const [activeEvalTab, setActiveEvalTab] = useState('attitude'); // 새로 추가된 상태
+  const [activeEvalTab, setActiveEvalTab] = useState('attitude');
   const [modalKey, setModalKey] = useState(0);
 
   useEffect(() => {
     if (visible) {
       setModalKey(prev => prev + 1);
       setActiveTab('tab-1');
-      setActiveEvalTab('attitude'); // 초기값 설정
+      setActiveEvalTab('attitude');
     }
 
     // 커스텀 탭 스타일 추가
@@ -1163,8 +1163,6 @@ const ResultModal: React.FC<ResultModalProps> = ({ visible, onClose, analysis, a
                         children: (
                           <div className="p-6">
                             <EvaluationCard
-                              title="답변 평가"
-                              icon={<FileTextOutlined className="text-blue-500 text-2xl" />}
                               content={{
                                 strengths: videoAnalysis.Evaluation?.답변강점 || "답변 강점 데이터가 없습니다.",
                                 improvements: videoAnalysis.Evaluation?.답변개선사항 || "개선사항 데이터가 없습니다.",
