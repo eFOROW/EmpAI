@@ -3,11 +3,10 @@ const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
 const si = require('systeminformation');
+require('dotenv').config({ path: '/home/EmpAI/Server/.env.local' });
 
 // MongoDB Atlas 연결 문자열
-const mongoURI = process.env.MONGO_URI;
-
-// MongoDB 연결 설정
+const mongoURI = process.env.MONGODB_URI;
 mongoose.connect(mongoURI);
 
 // MongoDB 스키마 및 모델 정의
