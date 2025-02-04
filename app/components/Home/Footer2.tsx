@@ -9,7 +9,7 @@ const Footer = () => (
     variants={footerVariants}
     initial="hidden"
     whileInView="show"
-    className="paddings py-8 relative"
+    className="paddings py-8 relative bg-gradient-to-br from-slate-50 to-blue-50"
   >
     <div className="footer-gradient" />
     <div className="innerWidth mx-auto flex flex-col gap-8">      

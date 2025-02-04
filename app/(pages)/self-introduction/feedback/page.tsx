@@ -254,7 +254,8 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
+      <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start">
@@ -262,7 +263,7 @@ export default function FeedbackPage() {
             onClick={() => router.back()}
             icon={<LeftOutlined />}
             type="text"
-            className="mr-4 hover:bg-white/50 rounded-full h-12 w-12 flex items-center justify-center transition-all duration-200 shadow-sm"
+            className="mr-4 rounded-full h-12 w-12 flex items-center justify-center transition-all duration-200"
           />
           <div className="w-full flex justify-center">
             <div>
@@ -564,6 +565,7 @@ export default function FeedbackPage() {
             </Card>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -445,10 +445,10 @@ const generateAttitudeEvaluation = (
 
   const getGradeText = (score: number, maxScore: number) => {
     const percentage = (score / maxScore) * 100;
-    if (percentage >= 90) return '탁월';
-    if (percentage >= 70) return '우수';
-    if (percentage >= 50) return '양호';
-    return '개선 필요';
+    if (percentage >= 80) return '매우 우수';
+    if (percentage >= 60) return '우수';
+    if (percentage >= 40) return '개선필요';
+    return '매우 미흡';
   };
 
   const evaluations = performanceCategories.map(category => {
@@ -685,10 +685,10 @@ const ScoreAnalysis = ({
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 90) return { text: '탁월', color: '#52C41A' };
-    if (score >= 80) return { text: '우수', color: '#1890FF' };
-    if (score >= 70) return { text: '양호', color: '#FAAD14' };
-    return { text: '개선 필요', color: '#FF4D4F' };
+    if (score >= 80) return { text: '매우 우수', color: '#52C41A' };
+    if (score >= 60) return { text: '우수', color: '#1890FF' };
+    if (score >= 40) return { text: '개선 필요', color: '#FAAD14' };
+    return { text: '매우 미흡', color: '#FF4D4F' };
   };
 
   const totalScore = Object.values(scores).reduce((acc, curr) => acc + curr, 0);
@@ -896,8 +896,17 @@ const ScoreAnalysis = ({
               <div className="bg-white p-4 rounded-xl shadow-md border border-blue-100">
                 <h4 className="text-lg font-bold text-gray-800 mb-2">종합 평가</h4>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 좋은 평가를 받았으며, 
-                  일부 개선점을 보완하면 더욱 좋은 결과를 얻을 수 있습니다.
+                  {
+                    scorePercentage >= 80 ? (
+                      "탁월한 면접 실력을 보여주셨습니다. 모든 영역에서 높은 점수를 기록하였으며, 면접 준비와 수행 모두 매우 완벽했습니다. 이번 면접을 통해 우수한 역량을 확실히 입증하셨습니다."
+                    ) : scorePercentage >= 60 ? (
+                      "우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 높은 평가를 받으셨고, 일부 세부 사항에서 개선 여지가 있지만, 전반적으로 매우 좋은 결과를 얻으셨습니다. 조금만 더 보완하신다면 더욱 뛰어난 면접을 완성할 수 있습니다."
+                    ) : scorePercentage >= 40 ? (
+                      "양호한 면접 실력을 보여주셨습니다. 다소 미비한 부분이 있었지만, 전반적으로 충분히 잘 진행되었습니다. 일부 영역에서 개선이 필요하며, 그 부분만 보완하시면 더욱 좋은 결과를 기대할 수 있습니다."
+                    ) : (
+                      "현재 면접 실력에는 많은 개선이 필요합니다. 여러 영역에서 보완할 점이 있으며, 집중적인 연습과 준비가 요구됩니다. 앞으로 충분한 노력을 통해 개선하고, 더 나은 결과를 도출할 수 있을 것입니다."
+                    )
+                  }
                 </p>
               </div>
             </motion.div>

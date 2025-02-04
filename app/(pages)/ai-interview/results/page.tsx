@@ -857,7 +857,7 @@ export default function AnalysisResultsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 ">
-      <div className="max-w-[1420px] mx-auto px-8 space-y-4">
+      <div className="max-w-[1420px] mx-auto px-8 space-y-4 pt-8">
         {/* 메인 대시보드 카드 */}
         <div className="relative bg-white/80 rounded-3xl overflow-hidden backdrop-blur-md shadow-xl border border-white/50">
           {/* 배경 효과 */}

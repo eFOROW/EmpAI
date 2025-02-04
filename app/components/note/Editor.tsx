@@ -237,6 +237,7 @@ export default function Editor({ noteId, onSaveStart, onSaveEnd }: EditorProps) 
         editor={editor} 
         slashMenu={false}
         spellCheck={false}
+        className="bg-white p-5 rounded-3xl"
       >
       <SuggestionMenuController
         triggerCharacter={"/"}
