@@ -72,9 +72,7 @@ interface VideoPlayerProps {
     setIsLoading(true);
     setPreviewRequested(true);
     setError(null);
-    try {
-      console.log('Sending preview request with:', { uid, filename });
-  
+    try {  
       const response = await fetch('/api/interview/video_request', {
         method: 'POST',
         headers: {
@@ -86,8 +84,6 @@ interface VideoPlayerProps {
           type: 'preview' 
         })
       });
-  
-      console.log('Response status:', response.status);
   
       if (!response.ok) {
         const errorText = await response.text();

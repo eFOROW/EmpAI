@@ -137,7 +137,7 @@ export default function Page() {
               {[
                 { number: "92%", label: "사용자 만족도" },
                 { number: "15,000+", label: "합격 자소서" },
-                { number: "25/1", label: "AI 지원" },
+                { number: "25/1", label: "AI 피드백" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -163,8 +163,8 @@ export default function Page() {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h2 className="text-4xl font-bold text-gray-900">주요 서비스</h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <h2 className="text-3xl font-bold text-gray-900">주요 서비스</h2>
+              <p className="mt-4 text-gray-600">
               자기소개서 작성의 모든 단계를 AI와 함께 준비하세요
               </p>
             </motion.div>

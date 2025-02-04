@@ -376,7 +376,7 @@ const CareerForm = ({ onSubmit, initialValues }: CareerFormProps) => {
                 {/* 제출 버튼 */}
                 <div className="flex justify-end mt-8">
                     <Button type="primary" size="large" onClick={handleSubmit}>
-                        제출하기
+                        저장하기
                     </Button>
                 </div>
             </Form>

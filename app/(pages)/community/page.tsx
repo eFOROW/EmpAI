@@ -88,7 +88,7 @@ export default function CommunityPage() {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [refreshDetail, setRefreshDetail] = useState(false);
-  const postsPerPage = 5;
+  const postsPerPage = 10;
   
   const resetWritePostStates = useCallback(() => {
     setShowWritePost(false);
@@ -221,7 +221,7 @@ export default function CommunityPage() {
       </main>
 
       <Modal
-        title="새 글 작성"
+        title=""
         open={showWritePost}
         onCancel={() => setShowWritePost(false)}
         

@@ -142,9 +142,9 @@ export default function Page() {
             {/* 통계 섹션 추가 */}
             <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
               {[
-                { number: "92%", label: "사용자 만족도" },
-                { number: "15,000+", label: "합격 자소서" },
-                { number: "25/1", label: "AI 지원" },
+                { number: "96%", label: "사용자 만족도" },
+                { number: "15,000+", label: "자소서 맞춤 질문" },
+                { number: "24/12", label: "실시간 피드백" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}

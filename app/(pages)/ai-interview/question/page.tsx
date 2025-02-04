@@ -460,7 +460,7 @@ export default function InterviewPage() {
             면접 질문 가이드
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            실전 면접을 위한 맞춤형 질문과 전략적인 모범 답변을 제공합니다
+          효율적인 면접 준비를 위한 핵심 질문과 전략적인 모범 답변을 제공합니다
           </p>
         </div>
   

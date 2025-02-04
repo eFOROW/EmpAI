@@ -42,9 +42,20 @@ export interface VideoAnalysis {
     답변평가: number;
   };
   Evaluation: {
+    세부점수: {
+      질문이해도와답변적합성: number; 
+      논리성과전달력: number;
+      자기소개서기반답변평가: number; 
+      실무전문성: number; 
+      문제해결력: number; // "0점" 형식
+      답변의완성도: number; // "0점" 형식
+    };
+    총점: string; // "-14점" 형식
     답변강점: string;
     답변개선사항: string;
     답변종합평가: string;
+    긍정키워드: string;
+    부정키워드: string;
   };
 }
 
