@@ -150,7 +150,6 @@ JSON 형식으로만 평가하세요. Markdown이나 다른 형식을 포함하�
       }
 
       const content = completion.choices[0].message.content;
-      console.log("Raw OpenAI response:", content); // 디버깅용 로그
 
       const aiResult = parseAIResponse(content);
 

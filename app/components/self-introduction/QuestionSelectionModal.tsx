@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button, Checkbox, message } from 'antd';
-
+import { Modal, Button, message } from 'antd';
+import { FolderOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons';
 interface QuestionSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -59,35 +59,30 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
 
     const handleAddQuestion = () => {
         if (newQuestion.trim()) {
+            if (customQuestions.includes(newQuestion.trim())) {
+                messageApi.warning('이미 존재하는 질문입니다.');
+                return;
+            }
             customQuestions.push(newQuestion.trim());
             setNewQuestion('');
+            messageApi.success('질문이 추가되었습니다.');
         }
     };
 
-    const handleCheckboxChange = (values: string[]) => {
-        // 현재 선택된 질문들과 새로 선택된 질문들을 합치기
-        const currentSelected = selectedQuestions.filter(q => 
-            (activeTab === 'common' ? customQuestions : commonQuestions).includes(q)
-        );
-        const newSelected = Array.from(new Set([...currentSelected, ...values]));
-        
-        if (newSelected.length <= 5) {
-            setSelectedQuestions(newSelected);
+    const handleQuestionSelect = (question: string) => {
+        const updatedSelection = selectedQuestions.includes(question)
+            ? selectedQuestions.filter(q => q !== question)
+            : [...selectedQuestions, question];
+
+        if (updatedSelection.length <= 5) {
+            setSelectedQuestions(updatedSelection);
         } else {
-            warning();
+            messageApi.warning('최대 5개까지 선택 가능합니다.');
         }
-    };
-
-    const warning = () => {
-        messageApi.open({
-            type: 'warning',
-            content: '총 2~5개까지 선택 가능합니다.',
-            duration: 2,
-        });
     };
 
     const handleConfirm = () => {
-        if (selectedQuestions.length >= 2 && selectedQuestions.length <= 6) {
+        if (selectedQuestions.length >= 2 && selectedQuestions.length <= 5) {
             onQuestionsConfirmed(selectedQuestions);
             onClose();
         } else {
@@ -97,115 +92,121 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
 
     return (
         <Modal
-            title="공통역량질문 선택"
-            open={isOpen}
-            onCancel={onClose}
-            footer={[
-                <div key="footer" className="flex justify-end items-center px-4 py-3">
-                    <div className="flex gap-2">
-                        <span className="text-sm text-gray-600 flex items-center">
-                            {selectedQuestions.length}개 선택
+            title={
+                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-bold text-gray-800">
+                            공통역량질문 선택
+                        </h2>
+                        <span className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-100 rounded-full">
+                            {selectedQuestions.length}/5
                         </span>
-                        <Button
-                            type="primary"
-                            disabled={selectedQuestions.length < 2 || selectedQuestions.length > 6}
-                            className="bg-blue-500"
-                            onClick={handleConfirm}
-                        >
-                            작성하기
-                        </Button>
                     </div>
                 </div>
-            ]}
-            centered
+            }
+            open={isOpen}
+            onCancel={onClose}
+            footer={null}
             width={1000}
-            className="rounded-xl [&_.ant-modal-content]:px-0 [&_.ant-modal-header]:pl-6 [&_.ant-modal-title]:text-lg [&_.ant-modal-title]:font-bold"
+            centered
+            className="rounded-lg"
         >
             {contextHolder}
-            <div className="flex" style={{ height: '500px' }}>
-                {/* 좌측 메뉴 */}
-                <div className="w-48 border-r pr-4 pt-[4%]">
+            <div className="flex h-[500px]">
+                {/* 좌측 탭 메뉴 */}
+                <div className="w-48 border-r border-gray-100">
                     <div 
-                        className={`p-3 cursor-pointer mb-2 relative ${
-                            activeTab === 'common' ? 'text-blue-600' : 'text-gray-500'
-                        }`}
                         onClick={() => setActiveTab('common')}
+                        className={`flex items-center gap-3 p-4 cursor-pointer transition-all
+                            ${activeTab === 'common' 
+                                ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-500' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
                     >
-                        {activeTab === 'common' && (
-                            <div className="absolute left-0 top-0 w-1 h-full bg-[#3B5FE0]" />
-                        )}
-                        <div className="text-base font-bold">기업 기출 질문</div>
+                        <FolderOutlined />
+                        <div>
+                            <div className="font-medium">기업 기출 질문</div>
+                            <div className="text-xs text-gray-500">{commonQuestions.length}개의 질문</div>
+                        </div>
                     </div>
+
                     <div 
-                        className={`p-3 cursor-pointer relative ${
-                            activeTab === 'custom' ? 'text-blue-600' : 'text-gray-500'
-                        }`}
                         onClick={() => setActiveTab('custom')}
+                        className={`flex items-center gap-3 p-4 cursor-pointer transition-all
+                            ${activeTab === 'custom' 
+                                ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-500' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
                     >
-                        {activeTab === 'custom' && (
-                            <div className="absolute left-0 top-0 w-1 h-full bg-[#3B5FE0]" />
-                        )}
-                        <div className="text-base font-bold">내가 만든 질문</div>
+                        <EditOutlined />
+                        <div>
+                            <div className="font-medium">내가 만든 질문</div>
+                            <div className="text-xs text-gray-500">{customQuestions.length}개의 질문</div>
+                        </div>
                     </div>
                 </div>
 
-                {/* 우측 질문 목록 */}
-                <div className="flex-1 pl-4 overflow-y-auto bg-gray-50 p-4 rounded-lg">
+                {/* 우측 컨텐츠 */}
+                <div className="flex-1 p-6">
                     {activeTab === 'custom' && (
-                        <div className="mb-4">
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={newQuestion}
-                                    onChange={(e) => setNewQuestion(e.target.value)}
-                                    placeholder="추가하고 싶은 질문을 입력해주세요."
-                                    className="flex-1 p-1.5 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
-                                />
-                                <Button
-                                    onClick={handleAddQuestion}
-                                    className="bg-gray-100 hover:bg-gray-200"
-                                >
-                                    등록하기
-                                </Button>
-                            </div>
+                        <div className="mb-4 flex gap-2">
+                            <input
+                                type="text"
+                                value={newQuestion}
+                                onChange={(e) => setNewQuestion(e.target.value)}
+                                placeholder="추가하고 싶은 질문을 입력해주세요"
+                                className="flex-1 px-4 py-2 text-gray-700 border border-gray-200 rounded-lg 
+                                         focus:outline-none focus:border-blue-500"
+                            />
+                            <Button
+                                onClick={handleAddQuestion}
+                                type="default"
+                                className="px-4"
+                            >
+                                등록하기
+                            </Button>
                         </div>
                     )}
-                    
-                    <div className="text-sm text-gray-500 mb-2">
-                        {activeTab === 'common' ? `${commonQuestions.length}개의 질문` : `${customQuestions.length}개의 질문`}
+
+                    <div className="space-y-2 overflow-y-auto max-h-[350px]">
+                        {(activeTab === 'common' ? commonQuestions : customQuestions).map((question, index) => (
+                            <div
+                                key={index}
+                                onClick={() => handleQuestionSelect(question)}
+                                className={`w-[95%] p-4 rounded-lg transition-all flex items-center gap-3
+                                    ${selectedQuestions.includes(question)
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-50 hover:bg-gray-100'
+                                    }`}
+                            >
+                                <span className="flex-shrink-0">
+                                    {selectedQuestions.includes(question) && <CheckOutlined />}
+                                </span>
+                                <span className="text-sm">{question}</span>
+                            </div>
+                        ))}
                     </div>
-                    
-                    <Checkbox.Group
-                        value={selectedQuestions.filter(q => 
-                            (activeTab === 'common' ? commonQuestions : customQuestions).includes(q)
-                        )}
-                        onChange={handleCheckboxChange}
-                    >
-                        <div className="flex flex-col gap-2">
-                            {(activeTab === 'common' ? commonQuestions : customQuestions).map((question, index) => (
-                                <Checkbox
-                                    key={`${activeTab}-${index}`}
-                                    value={question}
-                                    className="w-full [&>span:first-child]:hidden"
-                                >
-                                    <div className={`w-full p-4 rounded-lg ${
-                                        selectedQuestions.includes(question) 
-                                        ? 'bg-[#3B5FE0] text-white' 
-                                        : 'bg-white hover:bg-gray-100'
-                                    } flex items-center gap-2 cursor-pointer shadow-sm`}>
-                                        {selectedQuestions.includes(question) && (
-                                            <span className="text-white">✓</span>
-                                        )}
-                                        {question}
-                                    </div>
-                                </Checkbox>
-                            ))}
+
+                    {/* 하단 버튼 */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">
+                                {selectedQuestions.length}개 선택됨
+                            </span>
+                            <Button
+                                type="primary"
+                                onClick={handleConfirm}
+                                disabled={selectedQuestions.length < 2 || selectedQuestions.length > 5}
+                                className="px-8 h-10 bg-blue-500 hover:bg-blue-600 text-white"
+                            >
+                                작성하기
+                            </Button>
                         </div>
-                    </Checkbox.Group>
+                    </div>
                 </div>
             </div>
         </Modal>
     );
 };
 
-export default QuestionSelectionModal; 
+export default QuestionSelectionModal;
