@@ -168,7 +168,7 @@ const QuestionSelectionModal: React.FC<QuestionSelectionModalProps> = ({
                         </div>
                     )}
 
-                    <div className="space-y-2 overflow-y-auto max-h-[350px]">
+                    <div className="space-y-2 overflow-y-auto h-[90%]">
                         {(activeTab === 'common' ? commonQuestions : customQuestions).map((question, index) => (
                             <div
                                 key={index}

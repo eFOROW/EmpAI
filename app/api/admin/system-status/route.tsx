@@ -17,9 +17,13 @@ export async function GET(request: Request) {
         case '1w':
             startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 1주일 전
             break;
+        case '1m':
+            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 1달 전
+            break;
         case '1d':
-        default:
             startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 1일 전
+            break;
+        default:
             break;
     }
 

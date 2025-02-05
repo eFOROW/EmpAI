@@ -627,11 +627,16 @@ const generateAttitudeEvaluation = (
     document.head.appendChild(styleSheet);
   }
 
+  const isValidScore = (score: any) => {
+    return score !== undefined && score !== null && score !== 0;
+  };
+
   const performanceCategories = [
     {
       key: "emotion",
       icon: "😊",
       title: "감정 안정성",
+      validate: () => isValidScore(scores?.표정분석),
       score: scores.표정분석,
       color:
         scores.표정분석 >= 8
@@ -646,19 +651,27 @@ const generateAttitudeEvaluation = (
           ? "보통"
           : "개선 필요",
       description:
-        scores.표정분석 >= 8
-          ? "자신감 있고 안정적인 표정으로 면접에 임하고 있습니다. 표정이 자연스럽고 긍정적인 인상을 주고 있어요."
+        scores.표정분석 === 10
+          ? "완벽한 표정 관리를 보여주고 있습니다. 자연스러운 미소와 진중함의 균형이 매우 뛰어납니다."
+          : scores.표정분석 >= 8
+          ? "표정이 매우 안정적이며 자신감이 잘 드러납니다. 다만 때로는 더 자연스러운 표정 변화가 있으면 좋겠습니다."
           : scores.표정분석 >= 5
-          ? "표정이 다소 단조롭습니다. 적절한 표정 변화로 더 친근하고 적극적인 모습을 보여주세요."
-          : "긴장이 다소 있어 보입니다. 심호흡과 함께 편안한 마음가짐으로 임해보세요.",
+          ? "표정이 다소 경직되어 있습니다. 적절한 미소와 함께 더 자연스러운 표정을 지어보세요."
+          : "표정에서 긴장이 많이 느껴집니다. 심호흡을 통해 긴장을 풀고, 거울 연습으로 자연스러운 표정을 만들어보세요.",
       details: Object.entries(videoAnalysis["감정_%"] || {})
         .filter(([_, value]) => value > 0)
         .sort(([_, a], [__, b]) => b - a)
         .slice(0, 3),
       tip: "면접 중에는 적절한 미소와 진지함의 균형이 중요합니다. 너무 경직되지 않도록 주의하세요.",
       improvement:
-        scores.표정분석 >= 8
+        scores.표정분석 >= 10
           ? []
+          : scores.표정분석 >= 8
+          ? [
+              "자연스러운 표정 변화 연습하기",
+              "상황에 맞는 표정 만들기",
+              "적절한 미소 유지하기",
+            ]
           : [
               "거울을 보며 자연스러운 표정 연습하기",
               "긴장을 풀기 위한 심호흡 하기",
@@ -669,6 +682,7 @@ const generateAttitudeEvaluation = (
       key: "eyeTracking",
       icon: "👁️",
       title: "시선 처리",
+      validate: () => isValidScore(scores?.시선분석),
       score: scores.시선분석,
       color:
         scores.시선분석 >= 4
@@ -683,11 +697,13 @@ const generateAttitudeEvaluation = (
           ? "보통"
           : "불안정",
       description:
-        scores.시선분석 >= 4
-          ? "면접관과 자연스러운 아이컨택이 이루어지고 있습니다. 안정적인 시선 처리로 신뢰감을 주고 있어요."
+        scores.시선분석 === 5
+          ? "면접관과의 아이컨택이 완벽합니다. 안정적이고 자신감 있는 시선 처리로 신뢰감을 크게 높이고 있습니다."
+          : scores.시선분석 === 4
+          ? "면접관과의 아이컨택이 대체로 안정적입니다. 간혹 시선이 흔들릴 때가 있으니 조금 더 신경 써보세요."
           : scores.시선분석 >= 2
-          ? "시선이 다소 불안정합니다. 면접관의 눈을 자연스럽게 바라보며 대화를 이어가보세요."
-          : "시선이 자주 흔들립니다. 면접관과의 아이컨택을 더 자주 시도해보세요.",
+          ? "시선이 자주 흔들리고 불안정합니다. 면접관의 눈과 코 사이를 부드럽게 응시해보세요."
+          : "시선 처리가 매우 불안정합니다. 자신감 있게 면접관을 바라보며 대화하는 연습이 필요합니다.",
       details: [
         ["우측 시선", videoAnalysis["아이트래킹_%"]?.right ?? 0],
         ["중앙 응시", videoAnalysis["아이트래킹_%"]?.center ?? 0],
@@ -695,7 +711,7 @@ const generateAttitudeEvaluation = (
       ],
       tip: "면접관의 눈과 코 사이를 부드럽게 응시하면 자연스러운 아이컨택이 가능합니다.",
       improvement:
-        scores.시선분석 >= 4
+        scores.시선분석 === 5
           ? []
           : [
               "면접관의 눈과 코 사이 응시하기",
@@ -707,6 +723,10 @@ const generateAttitudeEvaluation = (
       key: "voiceAnalysis",
       icon: "🎤",
       title: "음성 분석",
+      validate: () =>
+        isValidScore(scores?.말하기속도) &&
+        isValidScore(scores?.목소리변동성) &&
+        isValidScore(scores?.["추임새/침묵"]),
       score: scores.말하기속도,
       color:
         scores.말하기속도 >= 8
@@ -716,11 +736,13 @@ const generateAttitudeEvaluation = (
           : "red",
       statusText: `${videoAnalysis.말하기속도} WPM`,
       description:
-        scores.말하기속도 >= 8
-          ? "말하기 속도와 톤이 매우 적절합니다. 청자가 이해하기 좋은 속도로 잘 전달하고 있어요."
+        scores.말하기속도 === 10
+          ? "말하기 속도와 톤이 완벽한 균형을 이루고 있습니다. 전문성과 안정감이 매우 뛰어난 발성입니다."
+          : scores.말하기속도 >= 8
+          ? "말하기 속도와 톤이 안정적입니다. 다만 중요한 부분에서는 조금 더 강약을 조절하면 좋겠습니다."
           : scores.말하기속도 >= 5
-          ? "말하기 속도를 조금 더 조절해보세요. 강조하고 싶은 부분에서는 속도를 늦추는 것이 좋습니다."
-          : "말하기 속도가 다소 빠르거나 느립니다. 보통 속도(120-150 WPM)를 유지해보세요.",
+          ? "말하기 속도가 때때로 빠르거나 느립니다. 중요한 내용은 조금 더 천천히 강조해서 말해보세요."
+          : "말하기 속도 조절이 필요합니다. 너무 빠르거나 느린 구간이 많으니 안정적인 속도로 연습해보세요.",
       details: [
         ["말하기 속도", videoAnalysis.말하기속도, "WPM"],
         ["음성 변화", videoAnalysis.목소리변동성, "%"],
@@ -731,8 +753,10 @@ const generateAttitudeEvaluation = (
       ],
       tip: "적절한 말하기 속도는 분당 120-150단어입니다. 중요한 내용은 조금 더 천천히 말하세요.",
       improvement:
-        scores.말하기속도 >= 8
+        scores.말하기속도 === 10
           ? []
+          : scores.말하기속도 >= 8
+          ? ["강조할 부분 찾기", "톤의 강약 조절하기", "감정을 담아 말하기"]
           : [
               "중요 문장은 천천히 말하기",
               "문장 끝에서 살짝 쉬어가기",
@@ -743,6 +767,7 @@ const generateAttitudeEvaluation = (
       key: "posture",
       icon: "👤",
       title: "자세 안정성",
+      validate: () => isValidScore(scores?.머리기울기),
       score: scores.머리기울기,
       color:
         scores.머리기울기 >= 4
@@ -757,11 +782,13 @@ const generateAttitudeEvaluation = (
           ? "보통"
           : "불안정",
       description:
-        scores.머리기울기 >= 4
-          ? "안정적이고 바른 자세를 잘 유지하고 있습니다. 전문적이고 신뢰감 있는 모습이에요."
+        scores.머리기울기 === 5
+          ? "완벽한 자세를 유지하고 있습니다. 전문적이고 안정적인 모습으로 면접관에게 강한 신뢰감을 주고 있습니다."
+          : scores.머리기울기 === 4
+          ? "전문적이고 안정적인 자세를 보여주고 있으나, 간혹 어깨가 기울어질 때가 있습니다. 조금 더 신경 써주세요."
           : scores.머리기울기 >= 2
-          ? "자세가 가끔 흐트러집니다. 등받이에 등을 살짝 기대어 안정감 있게 앉아보세요."
-          : "자세가 자주 흐트러집니다. 양쪽 어깨의 높이를 같게 하고 고개를 똑바로 유지해보세요.",
+          ? "자세가 때때로 흐트러집니다. 등받이를 활용하여 더 안정적인 자세를 유지해보세요."
+          : "자세가 불안정하고 자주 흐트러집니다. 어깨를 펴고 고개를 바로 하여 바른 자세를 만들어보세요.",
       details: [
         ["왼쪽 기울임", videoAnalysis["머리기울기_%"]?.left ?? 0],
         ["중앙", videoAnalysis["머리기울기_%"]?.center ?? 0],
@@ -769,8 +796,10 @@ const generateAttitudeEvaluation = (
       ],
       tip: "바른 자세는 자신감과 전문성을 보여줍니다. 등받이에 등을 살짝 기대어 편안하게 앉으세요.",
       improvement:
-        scores.머리기울기 >= 4
+        scores.머리기울기 === 5
           ? []
+          : scores.머리기울기 === 4
+          ? ["어깨 균형 체크하기", "고개 기울기 확인하기", "등받이 활용하기"]
           : ["어깨 높이 같게 유지하기", "고개 똑바로 하기", "등받이 활용하기"],
     },
   ];
@@ -792,31 +821,70 @@ const generateAttitudeEvaluation = (
   };
 
   const evaluations = performanceCategories.map((category) => {
+    const isValidData = () => {
+      switch (category.key) {
+        case "emotion":
+          return (
+            scores?.표정분석 !== undefined &&
+            scores?.표정분석 !== null &&
+            scores?.표정분석 !== 0
+          );
+        case "eyeTracking":
+          return (
+            scores?.시선분석 !== undefined &&
+            scores?.시선분석 !== null &&
+            scores?.시선분석 !== 0
+          );
+        case "voiceAnalysis":
+          return (
+            scores?.말하기속도 !== undefined &&
+            scores?.말하기속도 !== null &&
+            scores?.말하기속도 !== 0 &&
+            scores?.목소리변동성 !== undefined &&
+            scores?.목소리변동성 !== null &&
+            scores?.목소리변동성 !== 0 &&
+            scores?.["추임새/침묵"] !== undefined &&
+            scores?.["추임새/침묵"] !== null &&
+            scores?.["추임새/침묵"] !== 0
+          );
+        case "posture":
+          return (
+            scores?.머리기울기 !== undefined &&
+            scores?.머리기울기 !== null &&
+            scores?.머리기울기 !== 0
+          );
+        default:
+          return false;
+      }
+    };
+
     return (
       <div
         key={category.key}
         className="gradient-border p-[1px] rounded-xl hover:scale-[1.02] transition-transform duration-300"
       >
-        <div className="bg-white rounded-3xl p-6 h-full">
-          {/* 헤더 섹션 */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 
+        {isValidData() ? (
+          // 기존 정상 UI
+          <div className="bg-white rounded-3xl p-6 h-full">
+            {/* 헤더 섹션 */}
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 
                            flex items-center justify-center shadow-lg animate-[floatAnimation_3s_ease-in-out_infinite]"
-              >
-                <span className="text-4xl">{category.icon}</span>
-              </div>
-              <div>
-                <h3
-                  className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 
-                            bg-clip-text text-transparent"
                 >
-                  {category.title}
-                </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold
+                  <span className="text-4xl">{category.icon}</span>
+                </div>
+                <div>
+                  <h3
+                    className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 
+                            bg-clip-text text-transparent"
+                  >
+                    {category.title}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold
                     ${
                       category.color === "green"
                         ? "bg-green-100 text-green-700"
@@ -824,113 +892,131 @@ const generateAttitudeEvaluation = (
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
                     }`}
-                  >
-                    {category.statusText}
-                  </span>
-                  <span className="text-gray-400 text-sm">
-                    {getGradeText(category.score, 10)}
-                  </span>
+                    >
+                      {category.statusText}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      {getGradeText(category.score, 10)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 상세 데이터 */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {category.details.map(([label, value, unit]) => (
-              <div
-                key={label}
-                className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl
+            {/* 상세 데이터 */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {category.details.map(([label, value, unit]) => (
+                <div
+                  key={label}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl
                 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-2">
-                    {label === "추임새/침묵" ? (
-                      <div style={{ marginBottom: "20px" }}>
-                        {"추임새/침묵"}
+                >
+                  <div className="text-center">
+                    <div className="text-sm text-gray-600 mb-2">
+                      {label === "추임새/침묵" ? (
+                        <div style={{ marginBottom: "20px" }}>
+                          {"추임새/침묵"}
+                        </div>
+                      ) : (
+                        label
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-gray-800">
+                      {typeof value === "number"
+                        ? `${value.toFixed(1)}${unit ? unit : "%"}`
+                        : value}
+                    </div>
+                    {typeof value === "number" && (
+                      <div className="mt-2">
+                        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full bg-gradient-to-r ${getGradeColor(
+                              value,
+                              100
+                            )}
+                transition-all duration-500 animate-[scoreCount_1s_ease-out]`}
+                            style={{ width: `${value}%` }}
+                          />
+                        </div>
                       </div>
-                    ) : (
-                      label
                     )}
                   </div>
-                  <div className="text-2xl font-bold text-gray-800">
-                    {typeof value === "number"
-                      ? `${value.toFixed(1)}${unit ? unit : "%"}`
-                      : value}
-                  </div>
-                  {typeof value === "number" && (
-                    <div className="mt-2">
-                      <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${getGradeColor(
-                            value,
-                            100
-                          )}
-                transition-all duration-500 animate-[scoreCount_1s_ease-out]`}
-                          style={{ width: `${value}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* 설명 및 피드백 섹션 */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <span className="text-3xl">💡</span>
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    {category.description}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* 설명 및 피드백 섹션 */}
-          <div className="space-y-4">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
-              <div className="flex items-start gap-3">
-                <span className="text-3xl">💡</span>
-                <p className="text-gray-700 leading-relaxed text-lg">
-                  {category.description}
+              {/* 팁 섹션 */}
+              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-4 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <span className="text-3xl">✨</span>
+                  <div>
+                    <h4 className="font-semibold text-amber-700 mb-2 text-xl">
+                      전문가 팁
+                    </h4>
+                    <p className="text-gray-700 text-lg">{category.tip}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 개선사항 섹션 */}
+              {category.improvement && category.improvement.length > 0 && (
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl">🎯</span>
+                    <div>
+                      <h4 className="font-semibold text-purple-700 mb-2 text-xl">
+                        개선 포인트
+                      </h4>
+                      <ul className="space-y-2">
+                        {category.improvement.map((item, index) => (
+                          <li
+                            key={index}
+                            className="flex items-center gap-2 text-gray-700 text-lg"
+                          >
+                            <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-6 h-full flex flex-col justify-center">
+            <div className="flex items-center justify-center p-8 bg-gray-50 rounded-xl">
+              <div className="text-center">
+                <div className="bg-gray-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <ExperimentOutlined className="text-2xl text-gray-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-700 mb-1">
+                  {category.title} 분석 실패
+                </h3>
+                <p className="text-lg text-gray-500">
+                  {category.title} 데이터를 분석하는 중에
+                  <br />
+                  문제가 발생했습니다.
                 </p>
               </div>
             </div>
-
-            {/* 팁 섹션 */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-4 rounded-xl">
-              <div className="flex items-start gap-3">
-                <span className="text-3xl">✨</span>
-                <div>
-                  <h4 className="font-semibold text-amber-700 mb-2 text-xl">
-                    전문가 팁
-                  </h4>
-                  <p className="text-gray-700 text-lg">{category.tip}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 개선사항 섹션 */}
-            {category.improvement && category.improvement.length > 0 && (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">🎯</span>
-                  <div>
-                    <h4 className="font-semibold text-purple-700 mb-2 text-xl">
-                      개선 포인트
-                    </h4>
-                    <ul className="space-y-2">
-                      {category.improvement.map((item, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center gap-2 text-gray-700 text-lg"
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
     );
   });
-
   return (
     <div
       style={{
@@ -1026,7 +1112,6 @@ const ScoreAnalysis = ({
 }) => {
   if (!scores || !averageScores) return null;
 
-  // 기존 helper 함수들 유지
   const getCircleColor = (score: number) => {
     if (score >= 90)
       return {
@@ -1060,10 +1145,42 @@ const ScoreAnalysis = ({
     return { text: "개선 필요", color: "#FF4D4F" };
   };
 
-  const totalScore = Object.values(scores).reduce((acc, curr) => acc + curr, 0);
+  const calculateValidTotal = (values: number[]) => {
+    const validValues = values.filter(
+      (value) => value !== undefined && value !== null && !isNaN(value)
+    );
+    return validValues.reduce((acc, curr) => acc + curr, 0);
+  };
+
+  const totalScore = calculateValidTotal(Object.values(scores));
   const scorePercentage = (totalScore / 100) * 100;
   const scoreLabel = getScoreLabel(scorePercentage);
   const circleColor = getCircleColor(scorePercentage);
+
+  const maxScores = {
+    답변평가: 50,
+    표정분석: 10,
+    말하기속도: 10,
+    "추임새/침묵": 10,
+    목소리변동성: 10,
+    머리기울기: 5,
+    시선분석: 5,
+  };
+
+  const calculatePercentage = (value: number, maxScore: number) => {
+    if (value === undefined || value === null || isNaN(value)) return 0;
+    return (value / maxScore) * 100;
+  };
+
+  const calculateValidAverage = (scores: any[], maxScore: number) => {
+    const validScores = scores.filter(
+      (score) => score !== undefined && score !== null && !isNaN(score)
+    );
+    if (validScores.length === 0) return 0;
+    const average =
+      validScores.reduce((acc, curr) => acc + curr, 0) / validScores.length;
+    return (average / maxScore) * 100;
+  };
 
   const scoreItems = [
     {
@@ -1110,19 +1227,6 @@ const ScoreAnalysis = ({
     },
   ];
 
-  const maxScores = {
-    답변평가: 50,
-    표정분석: 10,
-    말하기속도: 10,
-    "추임새/침묵": 10,
-    목소리변동성: 10,
-    머리기울기: 5,
-    시선분석: 5,
-  };
-
-  const calculatePercentage = (value: number, maxScore: number) =>
-    (value / maxScore) * 100;
-
   const data = {
     labels: [
       "답변평가",
@@ -1161,28 +1265,46 @@ const ScoreAnalysis = ({
       {
         label: "내 평균",
         data: [
-          calculatePercentage(averageScores.답변평가, maxScores.답변평가),
-          calculatePercentage(averageScores.표정분석, maxScores.표정분석),
-          calculatePercentage(averageScores.말하기속도, maxScores.말하기속도),
-          calculatePercentage(
-            averageScores["추임새/침묵"],
+          calculateValidAverage([averageScores.답변평가], maxScores.답변평가),
+          calculateValidAverage([averageScores.표정분석], maxScores.표정분석),
+          calculateValidAverage(
+            [averageScores.말하기속도],
+            maxScores.말하기속도
+          ),
+          calculateValidAverage(
+            [averageScores["추임새/침묵"]],
             maxScores["추임새/침묵"]
           ),
-          calculatePercentage(
-            averageScores.목소리변동성,
+          calculateValidAverage(
+            [averageScores.목소리변동성],
             maxScores.목소리변동성
           ),
-          calculatePercentage(averageScores.머리기울기, maxScores.머리기울기),
-          calculatePercentage(averageScores.시선분석, maxScores.시선분석),
+          calculateValidAverage(
+            [averageScores.머리기울기],
+            maxScores.머리기울기
+          ),
+          calculateValidAverage([averageScores.시선분석], maxScores.시선분석),
         ],
         originalScores: [
-          averageScores.답변평가,
-          averageScores.표정분석,
-          averageScores.말하기속도,
-          averageScores["추임새/침묵"],
-          averageScores.목소리변동성,
-          averageScores.머리기울기,
-          averageScores.시선분석,
+          calculateValidAverage([averageScores.답변평가], maxScores.답변평가),
+          calculateValidAverage([averageScores.표정분석], maxScores.표정분석),
+          calculateValidAverage(
+            [averageScores.말하기속도],
+            maxScores.말하기속도
+          ),
+          calculateValidAverage(
+            [averageScores["추임새/침묵"]],
+            maxScores["추임새/침묵"]
+          ),
+          calculateValidAverage(
+            [averageScores.목소리변동성],
+            maxScores.목소리변동성
+          ),
+          calculateValidAverage(
+            [averageScores.머리기울기],
+            maxScores.머리기울기
+          ),
+          calculateValidAverage([averageScores.시선분석], maxScores.시선분석),
         ],
         backgroundColor: "rgba(255, 165, 0, 0.4)",
         borderColor: "#FFA500",
@@ -1190,6 +1312,7 @@ const ScoreAnalysis = ({
       },
     ],
   };
+
   const options = {
     scales: {
       r: {
@@ -1257,7 +1380,7 @@ const ScoreAnalysis = ({
         >
           <div
             className="absolute top-0 left-1/2 transform -translate-x-1/2 w-11/12 h-1 bg-gradient-to-r from-blue-400 
-     via-purple-400 to-pink-400"
+                     via-purple-400 to-pink-400"
           />
 
           {/* 헤더 */}
@@ -1334,9 +1457,17 @@ const ScoreAnalysis = ({
                   종합 평가
                 </h4>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 좋은
-                  평가를 받았으며, 일부 개선점을 보완하면 더욱 좋은 결과를 얻을
-                  수 있습니다.
+                  {
+                    scorePercentage >= 80 ? (
+                      "탁월한 면접 실력을 보여주셨습니다. 모든 영역에서 높은 점수를 기록하였으며, 면접 준비와 수행 모두 매우 완벽했습니다. 이번 면접을 통해 우수한 역량을 확실히 입증하셨습니다."
+                    ) : scorePercentage >= 60 ? (
+                      "우수한 면접 실력을 보여주셨습니다. 대부분의 영역에서 높은 평가를 받으셨고, 일부 세부 사항에서 개선 여지가 있지만, 전반적으로 매우 좋은 결과를 얻으셨습니다. 조금만 더 보완하신다면 더욱 뛰어난 면접을 완성할 수 있습니다."
+                    ) : scorePercentage >= 50 ? (
+                      "양호한 면접 실력을 보여주셨습니다. 다소 미비한 부분이 있었지만, 전반적으로 충분히 잘 진행되었습니다. 일부 영역에서 개선이 필요하며, 그 부분만 보완하시면 더욱 좋은 결과를 기대할 수 있습니다."
+                    ) : (
+                      "현재 면접 실력에는 많은 개선이 필요합니다. 여러 영역에서 보완할 점이 있으며, 집중적인 연습과 준비가 요구됩니다. 앞으로 충분한 노력을 통해 개선하고, 더 나은 결과를 도출할 수 있을 것입니다."
+                    )
+                  }
                 </p>
               </div>
             </motion.div>
@@ -1369,10 +1500,7 @@ const ScoreAnalysis = ({
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 * index }}
                 >
-                  <div
-                    className="bg-white p-3 rounded-lg shadow-sm border border-blue-50 
-                       hover:shadow-md transition-all duration-300"
-                  >
+                  <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-50 hover:shadow-md transition-all duration-300">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-700 font-medium">
                         {label}
@@ -1487,6 +1615,21 @@ const ResultModal: React.FC<ResultModalProps> = ({
         ),
         children: (
           <div className="p-4">
+            {/* 경고문 추가 */}
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-r-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <InfoCircleOutlined className="h-5 w-5 text-blue-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    AI 면접 분석 결과는 카메라 각도, 조명, 장비 성능 등 환경적
+                    요인에 따라 다소 차이가 있을 수 있습니다. 제공된 데이터는
+                    면접 준비를 위한 참고 자료로 활용해 주시기 바랍니다.
+                  </p>
+                </div>
+              </div>
+            </div>
             {videoAnalysis ? (
               <div className="space-y-8">
                 {/* 면접 질문과 영상 섹션 */}

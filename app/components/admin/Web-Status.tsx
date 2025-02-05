@@ -198,6 +198,7 @@ export default function WebStatus() {
             <Select.Option value="1h">최근 1시간</Select.Option>
             <Select.Option value="1d">최근 1일</Select.Option>
             <Select.Option value="1w">최근 1주일</Select.Option>
+            <Select.Option value="1m">최근 1달</Select.Option>
           </Select>
           <Button 
             onClick={() => fetchSystemStatus(timeRange)} 
