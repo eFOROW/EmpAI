@@ -181,13 +181,6 @@ export default function FeedbackPage() {
     }
   };
 
-  const getColorByScore = (score: number) => {
-    if (score <= 3) return '#ff4d4f';      // 빨간색 (1-3점)
-    if (score <= 7) return '#ffa940';      // 주황색 (4-7점)
-    return '#1890ff';                      // 파란색 (8-10점)
-  };
-  
-  
 
   const fetchData = useCallback(async (_id: string) => {
     if (!user) return;
@@ -254,318 +247,314 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
-      <div style={{ width: '100%', maxWidth: '1400px' }} className="mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start">
-          <Button
-            onClick={() => router.back()}
-            icon={<LeftOutlined />}
-            type="text"
-            className="mr-4 rounded-full h-12 w-12 flex items-center justify-center transition-all duration-200"
-          />
-          <div className="w-full flex justify-center">
-            <div>
-              <Typography.Title level={2} className="mb-3 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                {document.title}
-              </Typography.Title>
-              <div className="flex items-center gap-4 justify-center">
-                <Typography.Text
-                  className="text-sm px-4 py-2 rounded-full flex items-center gap-2 whitespace-nowrap shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-105"
-                  style={{
-                    color: jobStyles[document.job_code]?.color ?? "#666",
-                    backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
-                    border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
-                    width: 'fit-content',
-                    display: 'inline-flex'
-                  }}
-                >
-                  {jobStyles[document.job_code]?.icon ?? null}
-                  {document.job_code}
-                </Typography.Text>
-                <Typography.Text type="secondary" className="text-sm bg-white/70 px-4 py-2 rounded-full shadow-sm backdrop-blur-sm">
-                  최근 수정: {new Date(document.last_modified).toLocaleDateString()}{" "}
-                  {new Date(document.last_modified).toLocaleTimeString()}
-                </Typography.Text>
+    <div className='bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen'>
+      <div style={{ width: '70%', paddingBottom: '2rem' }} className="mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-start">
+            <Button
+              onClick={() => router.back()}
+              icon={<LeftOutlined />}
+              type="text"
+              className="mr-4 hover:bg-gray-100 rounded-full h-10 w-10 flex items-center justify-center"
+            />
+            <div className="w-full flex justify-center">
+              <div>
+                <Typography.Title level={2} className="mb-3 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                  {document.title}
+                </Typography.Title>
+                <div className="flex items-center gap-4 justify-center">
+                  <Typography.Text
+                    className="text-sm px-4 py-2 rounded-full flex items-center gap-2 whitespace-nowrap shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                    style={{
+                      color: jobStyles[document.job_code]?.color ?? "#666",
+                      backgroundColor: jobStyles[document.job_code]?.bgColor ?? "#f5f5f5",
+                      border: `1px solid ${jobStyles[document.job_code]?.borderColor ?? "#d9d9d9"}`,
+                      width: 'fit-content',
+                      display: 'inline-flex'
+                    }}
+                  >
+                    {jobStyles[document.job_code]?.icon ?? null}
+                    {document.job_code}
+                  </Typography.Text>
+                  <Typography.Text type="secondary" className="text-sm bg-white/70 px-4 py-2 rounded-full shadow-sm backdrop-blur-sm">
+                    최근 수정: {new Date(document.last_modified).toLocaleDateString()}{" "}
+                    {new Date(document.last_modified).toLocaleTimeString()}
+                  </Typography.Text>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="text-center mb-8">
-        <Button
-          type="primary"
-          onClick={requestAIFeedback}
-          loading={isLoading}
-          size="large"
-          className="h-14 px-10 rounded-full shadow-lg hover:scale-105 transition-all duration-200"
-          style={{
-            background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
-            border: 'none',
-            fontSize: '17px',
-            fontWeight: '600'
-          }}
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-3">
-               분석중...
-            </span>
-          ) : (
-            <span className="flex items-center gap-3">
-              <RobotOutlined style={{ fontSize: '20px' }} /> AI 분석 요청
-            </span>
-          )}
-        </Button>
-      </div>
-
-      {/* Main Content */}
-      <Tabs 
-        activeKey={activeTab} 
-        onChange={setActiveTab}
-        type="card"
-        className="mb-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
-        style={{
-          padding: '16px 16px 0',
-          borderRadius: '16px'
-        }}
-      >
-        {document.data.map((item, index) => (
-          <TabPane 
-            tab={
-              <div style={{ 
-                padding: '8px 24px',
-                fontWeight: activeTab === index.toString() ? '600' : '400',
-                fontSize: '16px',
-                transition: 'all 0.3s',
-                borderBottom: activeTab === index.toString() ? '2px solid #4F46E5' : 'none',
-                color: activeTab === index.toString() ? '#4F46E5' : '#64748B'
-              }}>
-                Q{index + 1}
-              </div>
-            }
-            key={index.toString()}
-          />
-        ))}
-      </Tabs>
-
-      <div 
-        className="flex transition-all duration-500 ease-in-out"
-        style={{ gap: '24px' }}
-      >
-        {/* Left: Question and Answer */}
-        <div 
-          className="transition-all duration-500 ease-in-out"
-          style={{ 
-            width: feedbackData ? '45%' : '100%', 
-            minWidth: '35%', 
-            flexShrink: 0,
-            position: 'sticky',
-            top: '50px',
-            alignSelf: 'start',
-          }}
-        >
-          <Card 
-            title={
-              <div style={{
-                whiteSpace: 'normal',
-                wordBreak: 'break-word',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontSize: '18px',
-                fontWeight: 600
-              }}>
-                <QuestionCircleOutlined style={{ color: '#4F46E5', fontSize: '20px' }} />
-                {document.data[parseInt(activeTab)].question}
-              </div>
-            } 
-            className="shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
-            style={{ borderRadius: '20px' }}
-            headStyle={{ 
-              backgroundColor: 'rgba(239, 246, 255, 0.8)',
-              borderTopLeftRadius: '20px',
-              borderTopRightRadius: '20px',
-              borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
-            }}  
+        <div className="text-center mb-8">
+          <Button
+            type="primary"
+            onClick={requestAIFeedback}
+            loading={isLoading}
+            size="large"
+            className="h-14 px-10 rounded-full shadow-lg hover:scale-105 transition-all duration-200"
+            style={{
+              background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
+              border: 'none',
+              fontSize: '17px',
+              fontWeight: '600'
+            }}
           >
-            <Input.TextArea
-              value={document.data[parseInt(activeTab)].answer}
-              onChange={(e) => {
-                const newData = [...document.data];
-                newData[parseInt(activeTab)].answer = e.target.value;
-                setDocument({
-                  ...document,
-                  data: newData
-                });
-              }}
-              autoSize={{ minRows: 12, maxRows: 22 }}
-              className="mb-6 text-base rounded-xl border-gray-200 hover:border-blue-400 focus:border-indigo-500 transition-all duration-200"
-              style={{ padding: '16px' }}
-            />
-            <div className="flex justify-center">
-              <Button 
-                type="primary"
-                onClick={handleUpdateDocument}
-                className="h-12 px-10 rounded-xl hover:scale-105 transition-all duration-200 shadow-md"
-                style={{
-                  background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
-                  border: 'none',
-                  fontSize: '16px',
-                  fontWeight: '600'
-                }}
-              >
-                수정하기
-              </Button>
-            </div>
-          </Card>
+            {isLoading ? (
+              <span className="flex items-center gap-3">
+                분석중...
+              </span>
+            ) : (
+              <span className="flex items-center gap-3">
+                <RobotOutlined style={{ fontSize: '20px' }} /> AI 분석 요청
+              </span>
+            )}
+          </Button>
         </div>
-        
-        {/* 오른쪽 패널: 피드백 */}
-        {feedbackData && (
+
+        {/* Main Content */}
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          type="card"
+          className="mb-6"
+          style={{
+            padding: '10px 10px 0',
+            borderRadius: '8px'
+          }}
+          tabBarStyle={{
+            margin: 0,
+            background: 'transparent'
+          }}
+        >
+          {document.data.map((item, index) => (
+            <TabPane 
+              tab={
+                <div style={{ 
+                  padding: '4px 16px',
+                  fontWeight: activeTab === index.toString() ? '600' : '400',
+                  fontSize: '16px',
+                  transition: 'all 0.3s',
+                  borderBottom: activeTab === index.toString() ? '2px solid #1890ff' : 'none'
+                }}>
+                  Q{index + 1}
+                </div>
+              }
+              key={index.toString()}
+            />
+          ))}
+        </Tabs>
+
+        <div 
+          className="flex transition-all duration-300 ease-in-out pb-8"
+          style={{ gap: '24px' }}
+        >
+          {/* Left: Question and Answer */}
           <div 
-            className="transition-all duration-500 ease-in-out"
+            className="transition-all duration-300 ease-in-out"
             style={{ 
-              width: '60%',
-              opacity: feedbackData ? 1 : 0,
-              transform: feedbackData ? 'translateX(0)' : 'translateX(20px)'
+              width: feedbackData ? '45%' : '100%', 
+              minWidth: '35%', 
+              flexShrink: 0,
+              position: 'sticky',
+              top: '50px',
+              alignSelf: 'start', // 높이 설정이 있을 경우 정렬 보정
             }}
           >
             <Card 
               title={
                 <div style={{
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-word',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
+                  gap: '8px',
                   fontSize: '18px',
                   fontWeight: 600
                 }}>
-                  <CheckCircleOutlined style={{ color: '#10B981', fontSize: '20px' }} />
-                  <span>첨삭 결과</span>
+                  <QuestionCircleOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
+                  {document.data[parseInt(activeTab)].question}
                 </div>
               } 
-              className="shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
-              style={{ borderRadius: '20px' }}
-              headStyle={{ 
-                backgroundColor: 'rgba(239, 246, 255, 0.8)',
-                borderTopLeftRadius: '20px',
-                borderTopRightRadius: '20px',
-                borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
-              }}
+              className="h-full"
+              headStyle={{ backgroundColor: '#eff6ff' }}  
             >
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                {[
-                  { title: '관련성', score: feedbackData.results[parseInt(activeTab)].relevance },
-                  { title: '구체성', score: feedbackData.results[parseInt(activeTab)].specificity },
-                  { title: '설득력', score: feedbackData.results[parseInt(activeTab)].persuasiveness }
-                ].map((item, index) => (
-                  <Card 
-                    key={index}
-                    size="small"
-                    className="hover:shadow-lg transition-all duration-300 bg-white"
-                    style={{ borderRadius: '16px' }}
-                  >
-                    <div className="text-center p-2">
-                      <div className="text-gray-700 mb-3 font-semibold text-lg">{item.title}</div>
-                      <Progress 
-                        percent={item.score * 10} 
-                        showInfo={false}
-                        strokeColor={getProgressColor(item.score)}
-                        trailColor="#f0f0f0"
-                        strokeWidth={10}
-                        className="mb-2"
-                      />
-                      <div className="text-2xl font-bold mt-2" style={{ color: getProgressColor(item.score) }}>
-                        {item.score}/10
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              {/* 상세 피드백 섹션 */}
-              <div className="space-y-8">
-                <div>
-                  <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
-                    <FileTextOutlined style={{ color: '#4F46E5' }} />
-                    상세 피드백
-                  </Typography.Title>
-                  <div className="bg-gray-50/70 p-6 rounded-xl border border-gray-100">
-                    <Typography.Paragraph className="text-base leading-relaxed text-gray-600">
-                      {feedbackData.results[parseInt(activeTab)].feedback}
-                    </Typography.Paragraph>
-                  </div>
-                </div>
-
-                {/* 매칭 결과 섹션 */}
-                <div className="border-t pt-8">
-                  <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
-                    <LinkOutlined style={{ color: '#4F46E5' }} />
-                    자기소개서 매칭 결과
-                  </Typography.Title>
-                  
-                  {feedbackData.results[parseInt(activeTab)].using_gpt ? (
-                    <Alert
-                      type="info"
-                      message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
-                      showIcon
-                      className="rounded-xl shadow-sm"
-                    />
-                  ) : (
-                    feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
-                      <div className="space-y-4">
-                        {[
-                          { title: '합격한 회사', content: feedbackData.results[parseInt(activeTab)].similar_h2_tag },
-                          { title: '유사한 문항', content: feedbackData.results[parseInt(activeTab)].similar_question },
-                          { title: '유사한 답변', content: feedbackData.results[parseInt(activeTab)].similar_answer }
-                        ].map((item, index) => (
-                          <Card 
-                            key={index}
-                            size="small"
-                            className="hover:shadow-md transition-all duration-300 bg-gray-50/70"
-                            style={{ borderRadius: '12px' }}
-                          >
-                            <div>
-                              <div className="text-gray-500 font-medium mb-2">{item.title}</div>
-                              <div className="text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>
-                                {item.content}
-                              </div>
-                            </div>
-                          </Card>
-                        ))}
-
-                        <Card 
-                          size="small" 
-                          className="hover:shadow-md transition-all duration-300"
-                          style={{ 
-                            borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)'
-                          }}
-                        >
-                          <div className="flex items-center justify-between p-2">
-                            <span className="text-gray-700 font-medium">유사도</span>
-                            <span className="text-2xl font-bold text-blue-600">
-                              {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
-                            </span>
-                          </div>
-                        </Card>
-                      </div>
-                    ) : (
-                      <Alert
-                        type="info"
-                        message="유사한 자기소개서가 없습니다."
-                        showIcon
-                        className="rounded-xl shadow-sm"
-                      />
-                    )
-                  )}
-                </div>
+              <Input.TextArea
+                value={document.data[parseInt(activeTab)].answer}
+                onChange={(e) => {
+                  const newData = [...document.data];
+                  newData[parseInt(activeTab)].answer = e.target.value;
+                  setDocument({
+                    ...document,
+                    data: newData
+                  });
+                }}
+                autoSize={{ minRows: 12, maxRows: 12 }}
+                className="mb-4 text-base"
+              />
+              <div className="flex justify-center">
+                <Button 
+                  type="primary"
+                  onClick={handleUpdateDocument}
+                  className="h-12 px-10 rounded-xl hover:scale-105 transition-all duration-200 shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #4F46E5 100%)',
+                    border: 'none',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}
+                >
+                  수정하기
+                </Button>
               </div>
             </Card>
           </div>
-        )}
-      </div>
+          
+          {/* 오른쪽 패널: 피드백 */}
+          {feedbackData && (
+            <div 
+              className="transition-all duration-500 ease-in-out"
+              style={{ 
+                width: '60%',
+                opacity: feedbackData ? 1 : 0,
+                transform: feedbackData ? 'translateX(0)' : 'translateX(20px)'
+              }}
+            >
+              <Card 
+                title={
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontSize: '18px',
+                    fontWeight: 600
+                  }}>
+                    <CheckCircleOutlined style={{ color: '#10B981', fontSize: '20px' }} />
+                    <span>첨삭 결과</span>
+                  </div>
+                } 
+                className="shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
+                style={{ borderRadius: '20px' }}
+                headStyle={{ 
+                  backgroundColor: 'rgba(239, 246, 255, 0.8)',
+                  borderTopLeftRadius: '20px',
+                  borderTopRightRadius: '20px',
+                  borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
+                }}
+              >
+                <div className="grid grid-cols-3 gap-6 mb-8">
+                  {[
+                    { title: '관련성', score: feedbackData.results[parseInt(activeTab)].relevance },
+                    { title: '구체성', score: feedbackData.results[parseInt(activeTab)].specificity },
+                    { title: '설득력', score: feedbackData.results[parseInt(activeTab)].persuasiveness }
+                  ].map((item, index) => (
+                    <Card 
+                      key={index}
+                      size="small"
+                      className="transition-all duration-300 bg-white"
+                      style={{ borderRadius: '16px' }}
+                    >
+                      <div className="text-center p-2">
+                        <div className="text-gray-700 mb-3 font-semibold text-lg">{item.title}</div>
+                        <Progress 
+                          percent={item.score * 10} 
+                          showInfo={false}
+                          strokeColor={getProgressColor(item.score)}
+                          trailColor="#f0f0f0"
+                          strokeWidth={10}
+                          className="mb-2"
+                        />
+                        <div className="text-2xl font-bold mt-2" style={{ color: getProgressColor(item.score) }}>
+                          {item.score}/10
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* 상세 피드백 섹션 */}
+                <div className="space-y-8">
+                  <div>
+                    <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
+                      <FileTextOutlined style={{ color: '#4F46E5' }} />
+                      상세 피드백
+                    </Typography.Title>
+                    <div className="bg-gray-50/70 p-6 rounded-xl border border-gray-100">
+                      <Typography.Paragraph className="text-base leading-relaxed text-gray-600">
+                        {feedbackData.results[parseInt(activeTab)].feedback}
+                      </Typography.Paragraph>
+                    </div>
+                  </div>
+
+                  {/* 매칭 결과 섹션 */}
+                  <div className="border-t pt-8">
+                    <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
+                      <LinkOutlined style={{ color: '#4F46E5' }} />
+                      자기소개서 매칭 결과
+                    </Typography.Title>
+                    
+                    {feedbackData.results[parseInt(activeTab)].using_gpt ? (
+                      <Alert
+                        type="info"
+                        message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
+                        showIcon
+                        className="rounded-xl shadow-sm"
+                      />
+                    ) : (
+                      feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
+                        <div className="space-y-4">
+                          {[
+                            { title: '합격한 회사', content: feedbackData.results[parseInt(activeTab)].similar_h2_tag },
+                            { title: '유사한 문항', content: feedbackData.results[parseInt(activeTab)].similar_question },
+                            { title: '유사한 답변', content: feedbackData.results[parseInt(activeTab)].similar_answer }
+                          ].map((item, index) => (
+                            <Card 
+                              key={index}
+                              size="small"
+                              className="hover:shadow-md transition-all duration-300 bg-gray-50/70"
+                              style={{ borderRadius: '12px' }}
+                            >
+                              <div>
+                                <div className="text-gray-500 font-medium mb-2">{item.title}</div>
+                                <div className="text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>
+                                  {item.content}
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+
+                          <Card 
+                            size="small" 
+                            className="hover:shadow-md transition-all duration-300"
+                            style={{ 
+                              borderRadius: '12px',
+                              background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)'
+                            }}
+                          >
+                            <div className="flex items-center justify-between p-2">
+                              <span className="text-gray-700 font-medium">유사도</span>
+                              <span className="text-2xl font-bold text-blue-600">
+                                {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
+                              </span>
+                            </div>
+                          </Card>
+                        </div>
+                      ) : (
+                        <Alert
+                          type="info"
+                          message="유사한 자기소개서가 없습니다."
+                          showIcon
+                          className="rounded-xl shadow-sm"
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

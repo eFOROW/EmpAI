@@ -46,31 +46,7 @@ interface Post {
   };
 }
 
-const HeaderSection = () => {
-  return (
-    <div className="relative w-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 opacity-90" />
-      <div className="relative px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
-            취업 커뮤니티
-          </h1>
-          <div className="mt-6 space-y-4">
-            <p className="text-xm text-gray-100">
-              취업을 준비하는 취준생들을 위한 이야기 공간
-            </p>
-            <p className="text-xl text-gray-100">
-              면접 후기부터 기술 스택까지, 모든 정보를 공유해요
-            </p>
-            <p className="text-xl text-gray-100">
-              여러분의 소중한 경험이 다른 누군가에게 힘이 됩니다
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+
 
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -89,7 +65,7 @@ export default function CommunityPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [refreshDetail, setRefreshDetail] = useState(false);
   const postsPerPage = 10;
-  
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const resetWritePostStates = useCallback(() => {
     setShowWritePost(false);
     setSelectedPost(null);
@@ -97,13 +73,13 @@ export default function CommunityPage() {
 
   
   const fetchPosts = useCallback(async () => {
-    if (!user) return;
+    if (!user) return [];  // 빈 배열 반환
     
     setIsLoading(true);
     try {
       const token = await user.getIdToken();
       const response = await fetch(
-        `/api/community/posts?page=${currentPage}&limit=${postsPerPage}&category=${selectedCategory}&sortBy=${sortBy}&search=${searchQuery}`,
+        `/api/community/posts?page=${currentPage}&limit=${postsPerPage}&category=${selectedCategory}&sortBy=${sortBy}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -116,7 +92,6 @@ export default function CommunityPage() {
       const data = await response.json();
       
       if (data.posts && typeof data.total === 'number') {
-        // createdAt과 updatedAt을 Date 객체로 변환
         const formattedPosts = data.posts.map((post: Post) => ({
           ...post,
           createdAt: new Date(post.createdAt),
@@ -125,18 +100,41 @@ export default function CommunityPage() {
   
         setCurrentPosts(formattedPosts);
         setTotalPosts(data.total);
+        setAllPosts(data.posts);
+  
+        return data.posts;  // 데이터 반환 추가
       }
-    
-      return data.posts;
+      return [];  // 데이터가 없을 경우 빈 배열 반환
     } catch (error) {
       console.error('Failed to fetch posts:', error);
       message.error('게시글을 불러오는 데 실패했습니다.');
-      return [];
+      return [];  // 에러 발생 시 빈 배열 반환
     } finally {
       setIsLoading(false);
     }
-  }, [user, currentPage, postsPerPage, selectedCategory, sortBy, searchQuery]);
+  }, [user, currentPage, postsPerPage, selectedCategory, sortBy]);
+  // 검색 전용 함수 추가
+  const onSearch = useCallback((value: string) => {
+    if (!value.trim()) {
+      // 검색어가 없을 경우 전체 게시글 보여주기
+      setCurrentPosts(allPosts);
+      setTotalPosts(allPosts.length);
+      setSearchQuery('');
+      return;
+    }
   
+    const lowercasedValue = value.toLowerCase();
+    const filteredPosts = allPosts.filter(post =>
+      post.title.toLowerCase().includes(lowercasedValue) ||
+      post.content.toLowerCase().includes(lowercasedValue) ||
+      post.author.name.toLowerCase().includes(lowercasedValue)
+    );
+  
+    setSearchQuery(value);
+    setCurrentPosts(filteredPosts);
+    setCurrentPage(1);
+    setTotalPosts(filteredPosts.length);
+  }, [allPosts]);
   
   useEffect(() => {
     if (user) {
@@ -194,19 +192,14 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc]">
-      <HeaderSection />
-
-      <main className="max-w-7xl mx-auto px-3 -mt-5">
+    <div className="w-full px-0">
+      <main className="w-full px-0">
       <PostList 
         user={user}
         currentPosts={currentPosts}
         totalPosts={totalPosts}
         currentPage={currentPage}
-        onSearch={(value) => {
-          setSearchQuery(value);
-          setCurrentPage(1); // 페이지 리셋 추가
-        }}
+        onSearch={onSearch}
         onSortChange={setSortBy}
         onPostClick={(post) => {
             setSelectedPost(post);

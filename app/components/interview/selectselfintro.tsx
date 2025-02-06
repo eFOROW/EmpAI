@@ -72,6 +72,9 @@ const InterviewLimitModal = ({ onClose }: { onClose: () => void }) => {
             기존에 분석된 면접을 먼저 정리해주시거나<br/>
             연습 면접을 이용해주세요.
           </p>
+          <p className="text-gray-400 text-sm">
+            최대 12회까지 저장 가능합니다.
+          </p>
         </div>
         <div className="flex justify-center space-x-4">
           <Button
@@ -254,7 +257,7 @@ export function Select_Self_Intro({ onSelect, onBack, job_Code, company, status 
 
   const handleMockInterviewClick = () => {
     if (status === 'ok') {
-      if (analysisCount >= 4) {
+      if (analysisCount >= 12) {
         setShowLimitModal(true);
       } else {
         setInterviewMode('mock');

@@ -9,7 +9,6 @@ export default function RootLayout({
       <div>
         <Navbar2 />
         {children}
-        <Footer2 />
       </div>
     );
   }
