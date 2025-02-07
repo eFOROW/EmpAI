@@ -420,24 +420,46 @@ const Map: React.FC<MapProps> = ({
 
   // 잡 마커 생성 useEffect
   useEffect(() => {
-    if (!mapRef.current || !markerPosition || !jobs.length) return;
+  // 기존의 모든 마커와 정보창을 제거
+  jobMarkersRef.current.forEach(marker => {
+    if (marker) marker.setMap(null);
+  });
+  jobMarkersRef.current = [];
   
-    // 기존 마커 제거
-    jobMarkersRef.current.forEach(marker => {
-      if (marker) marker.setMap(null);
+  // 기존의 모든 정보창 닫기
+  Object.values(jobMarkersMapRef.current).forEach(({ infoWindow }) => {
+    infoWindow.close();
+  });
+  
+  // 경로 제거
+  if (polylineRef.current) {
+    polylineRef.current.forEach((polyline: any) => {
+      polyline.setMap(null);
     });
-    jobMarkersRef.current = [];
+    polylineRef.current = [];
+  }
   
-    jobs.forEach((location, index) => {
-      const jobMarker = new naver.maps.Marker({
-        position: new naver.maps.LatLng(location.Latitude, location.Longitude),
-        map: mapRef.current,
-        icon: {
-          url: "./job-marker.svg",
-          size: new naver.maps.Size(35, 35),
-          anchor: new naver.maps.Point(12, 12)
-        }
-      });
+  // 길찾기 정보 InfoWindow 닫기
+  if (routeInfoWindowRef.current) {
+    routeInfoWindowRef.current.close();
+  }
+  
+  setCurrentDestination(null);
+  
+  // jobs가 비어있으면 더 이상 진행하지 않음
+  if (!mapRef.current || !markerPosition || !jobs.length) return;
+
+  // 이하 기존 코드 동일...
+  jobs.forEach((location, index) => {
+    const jobMarker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(location.Latitude, location.Longitude),
+      map: mapRef.current,
+      icon: {
+        url: "./job-marker.svg",
+        size: new naver.maps.Size(35, 35),
+        anchor: new naver.maps.Point(12, 12)
+      }
+    });
   
       const jobInfoWindow = new naver.maps.InfoWindow({
         content: `
