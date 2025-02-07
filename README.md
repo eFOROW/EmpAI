@@ -1,7 +1,5 @@
 # EmpAI
-
-## 👨‍🏫 프로젝트 소개 [EmpAI]
-**비트 고급 과정 5조**의 프로젝트로, AI를 활용한 맞춤형 취업 플랫폼입니다. 
+**비트 고급과정**의 프로젝트로, AI를 활용한 맞춤형 취업 플랫폼입니다. 
 Employment with AI
 
 AI 취업 플랫폼(EmpAI)은 맞춤형 채용정보 및 자기소개서, 면접서비스를 제공하는 플랫폼이다.
@@ -11,17 +9,17 @@ AI 취업 플랫폼(EmpAI)은 맞춤형 채용정보 및 자기소개서, 면접
 ## ⏲️ 프로젝트 기간
 - **주제선정 & 기획**    : 2024.11.25 - 2024.12.06
 - **공부 & 개발**    : 2024.12.09 - 2025.02.07 (평일 38일)
-- **문서화 & 발표**  : 2025.02.07 - 2025.02.18
+- **문서화 & 정리**  : 2025.02.07 - 2025.02.18
 
 ## 🧑‍🤝‍🧑 팀원 소개
 
-| 이름       | 담당          |
-|------------|---------------|
-| [김민수](https://github.com/mayway777)| Team LeadㆍFull-StackㆍAI Video Analysis |
-| [김원형](https://github.com/eFOROW)| Technical LeadㆍFull-StackㆍCloud Infra & Deployment |
-| [이강민](https://github.com/lkmsdf159)| Frontend DeveloperㆍRAG-based AI Feedback |
-| [장소영](https://github.com/sy56)| Frontend DeveloperㆍQA Engineer |
-| [정형준](https://github.com/Junghyeongjun)| External API IntegrationㆍQA Engineer |
+| 이름       | 담당                                       | 학과(2024)              |
+|------------|--------------------------------------------|-------------------|
+| [김민수](https://github.com/mayway777) | Team LeadㆍFull-StackㆍAI Video Analysis     | 컴퓨터정보ㆍ보안전공 4학년 |
+| [김원형](https://github.com/eFOROW)    | Technical LeadㆍFull-StackㆍCloud Infra & Deployment | 컴퓨터ㆍ소프트웨어전공 2학년 |
+| [이강민](https://github.com/lkmsdf159)  | Frontend DeveloperㆍRAG-based AI Feedback     | AI빅데이터학과 3학년 |
+| [장소영](https://github.com/sy56)        | Frontend DeveloperㆍQA Engineer               | 컴퓨터정보ㆍ보안전공 3학년 |
+| [정형준](https://github.com/Junghyeongjun) | External API IntegrationㆍQA Engineer          | 컴퓨터정보ㆍ보안전공 3학년 |
 
 
 ### 설계의 주안점
