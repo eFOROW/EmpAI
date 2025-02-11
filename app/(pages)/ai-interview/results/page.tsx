@@ -430,10 +430,10 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({
       okType: "danger",
       cancelText: "취소",
       onOk() {
-        console.log("Deleting analysis:", {
-          analysisId: analysisId, // $oid 값만 넘겨줌
-          uid,
-        });
+        // console.log("Deleting analysis:", {
+        //   analysisId: analysisId, // $oid 값만 넘겨줌
+        //   uid,
+        // });
         onDelete(analysisId, uid); // analysisId.$oid 값만 넘기기
       },
     });
@@ -1250,8 +1250,8 @@ export default function AnalysisResultsPage() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {paginatedResults.map((analysis) => {
-                  console.log("Analysis Item:", analysis); // 전체 분석 결과 로그 출력
-                  console.log("Analysis _id:", analysis._id); // _id 로그 출력
+                  // console.log("Analysis Item:", analysis); // 전체 분석 결과 로그 출력
+                  // console.log("Analysis _id:", analysis._id); // _id 로그 출력
                   const analysisId =
                     typeof analysis._id === "object"
                       ? analysis._id?.$oid

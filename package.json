@@ -14,6 +14,8 @@
     "@blocknote/mantine": "^0.22.0",
     "@blocknote/react": "^0.22.0",
     "@google-analytics/data": "^4.12.0",
+    "@tensorflow-models/blazeface": "^0.1.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/js-cookie": "^3.0.6",
     "@types/navermaps": "^3.7.8",
     "antd": "^5.22.5",
