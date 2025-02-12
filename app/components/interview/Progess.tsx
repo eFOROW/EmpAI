@@ -342,7 +342,7 @@ export function InterviewProgress({
             clearInterval(progressInterval);
             setTimeout(() => {
               setShowUploadModal(false);
-            }, 10000);
+            }, 5000);
             return 100;
           }
           return prev + 10;
@@ -406,33 +406,39 @@ export function InterviewProgress({
 
   // 타이머 효과
 // 타이머 관련 useEffect 수정
+// 타이머 관련 useEffect 수정
 useEffect(() => {
   let interval: NodeJS.Timeout | undefined;
   
-  // 처음 10초 동안은 버튼 비활성화
+  // 처음 3초 동안은 버튼 비활성화
   if (started && !completed && timer === answerTime) {
     setIsSkipButtonEnabled(false);
     setTimeout(() => {
       setIsSkipButtonEnabled(true);
-    }, 3000); // 10초 후 활성화
+    }, 3000);
   }
   
   if (started && !completed && timer > 0 && !showCountdown) {
     interval = setInterval(() => {
       setTimer(prev => prev - 1);
     }, 1000);
-  } else if (timer === 0 && currentQuestion < questions.length - 1) {
+  } else if (timer === 0 && !showCountdown) { // 타이머가 0이 되었을 때
     stopRecording();
-    setShowCountdown(true);
-  } else if (timer === 0 && currentQuestion === questions.length - 1) {
-    stopRecording();
-    setCompleted(true);
+    if (currentQuestion < questions.length - 1) {
+      // 다음 질문이 있는 경우
+      setShowCountdown(true);
+      setCountdown(preparationTime);
+      setTimer(answerTime);
+    } else {
+      // 마지막 질문인 경우
+      setCompleted(true);
+    }
   }
-
+  
   return () => {
     if (interval) clearInterval(interval);
   };
-}, [started, timer, currentQuestion, completed, showCountdown, questions.length, stopRecording, answerTime]);
+}, [started, timer, completed, showCountdown, currentQuestion, questions.length, stopRecording, answerTime, preparationTime]);
 
 // 질문 변경 시 버튼 상태 초기화
 useEffect(() => {
