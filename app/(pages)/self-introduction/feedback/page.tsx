@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Typography, Tabs, Card, Progress, Alert, Spin  } from 'antd';
+import { Button, Input, Typography, Tabs, Card, Progress, Alert, Spin } from 'antd';
 import getCurrentUser from "@/lib/firebase/auth_state_listener";
 import { User } from "firebase/auth";
 import { LeftOutlined, 
@@ -10,7 +10,7 @@ import { LeftOutlined,
   CustomerServiceOutlined, ShopOutlined, ShoppingCartOutlined, CarOutlined,
   CoffeeOutlined, ExperimentOutlined, BuildOutlined, MedicineBoxOutlined,
   ExperimentOutlined as ResearchIcon, ReadOutlined, PlaySquareOutlined,
-  BankOutlined, SafetyOutlined, QuestionCircleOutlined, CheckCircleOutlined,LoadingOutlined,RobotOutlined,LinkOutlined
+  BankOutlined, SafetyOutlined, QuestionCircleOutlined, CheckCircleOutlined,LoadingOutlined,RobotOutlined,LinkOutlined, SearchOutlined
 } from '@ant-design/icons';
 
 const { TabPane } = Tabs;
@@ -39,11 +39,14 @@ interface AIResponse {
     relevance: number;
     specificity: number;
     persuasiveness: number;
-    feedback: string;
+    relevance평가: string;
+    specificity평가: string;
+    persuasiveness평가: string;
     similar_h2_tag: string;
     similar_question: string;
     similar_answer: string;
     similarity: number;
+    reference_analysis: string;
     using_gpt?: boolean;
   }[];
 }
@@ -240,9 +243,10 @@ export default function FeedbackPage() {
   }
 
   const getProgressColor = (score: number): string => {
-    if (score <= 3) return '#DC2626'; // 빨간색
-    if (score <= 5) return '#F97316'; // 주황색
-    if (score <= 7) return '#22C55E'; // 초록색
+    if (score <= 20) return '#DC2626'; // 빨간색
+    if (score <= 40) return '#F97316'; // 주황색
+    if (score <= 60) return '#FFD700'; // 초록색
+    if (score <= 75) return '#22C55E'; // 초록색
     return '#3B82F6'; // 파란색
   };
 
@@ -443,6 +447,28 @@ export default function FeedbackPage() {
                   borderBottom: '1px solid rgba(219, 234, 254, 0.5)'
                 }}
               >
+                <div className="flex justify-end gap-3 mb-4">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full shadow-sm bg-[#DC2626]" />
+                  <span className="text-xs text-gray-500">미흡</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full shadow-sm bg-[#F97316]" />
+                  <span className="text-xs text-gray-500">부족</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full shadow-sm bg-[#FFD700]" />
+                  <span className="text-xs text-gray-500">보통</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full shadow-sm bg-[#22C55E]" />
+                  <span className="text-xs text-gray-500">우수</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full shadow-sm bg-[#3B82F6]" />
+                  <span className="text-xs text-gray-500">탁월</span>
+                </div>
+              </div>
                 <div className="grid grid-cols-3 gap-6 mb-8">
                   {[
                     { title: '관련성', score: feedbackData.results[parseInt(activeTab)].relevance },
@@ -457,17 +483,17 @@ export default function FeedbackPage() {
                     >
                       <div className="text-center p-2">
                         <div className="text-gray-700 mb-3 font-semibold text-lg">{item.title}</div>
+                        <div className="text-2xl font-bold mt-2" style={{ color: getProgressColor(item.score) }}>
+                          {item.score}점
+                        </div>
                         <Progress 
-                          percent={item.score * 10} 
+                          percent={item.score} 
                           showInfo={false}
                           strokeColor={getProgressColor(item.score)}
                           trailColor="#f0f0f0"
                           strokeWidth={10}
                           className="mb-2"
                         />
-                        <div className="text-2xl font-bold mt-2" style={{ color: getProgressColor(item.score) }}>
-                          {item.score}/10
-                        </div>
                       </div>
                     </Card>
                   ))}
@@ -475,81 +501,140 @@ export default function FeedbackPage() {
 
                 {/* 상세 피드백 섹션 */}
                 <div className="space-y-8">
-                  <div>
-                    <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
-                      <FileTextOutlined style={{ color: '#4F46E5' }} />
-                      상세 피드백
-                    </Typography.Title>
-                    <div className="bg-gray-50/70 p-6 rounded-xl border border-gray-100">
-                      <Typography.Paragraph className="text-base leading-relaxed text-gray-600">
-                        {feedbackData.results[parseInt(activeTab)].feedback}
-                      </Typography.Paragraph>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <FileTextOutlined className="text-indigo-600" />
+                    상세 피드백
+                  </h4>
+                  <div className="space-y-4">
+                    {/* 관련성 피드백 */}
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-start gap-3 mb-3">
+                        <TeamOutlined className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <h5 className="font-medium text-gray-900 mb-2">관련성 평가</h5>
+                          <p className="text-gray-600 leading-relaxed">
+                            {feedbackData.results[parseInt(activeTab)].relevance평가}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 구체성 피드백 */}
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-start gap-3 mb-3">
+                        <CheckCircleOutlined className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <h5 className="font-medium text-gray-900 mb-2">구체성 평가</h5>
+                          <p className="text-gray-600 leading-relaxed">
+                            {feedbackData.results[parseInt(activeTab)].specificity평가}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 설득력 피드백 */}
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                      <div className="flex items-start gap-3 mb-3">
+                        <BuildOutlined className="w-5 h-5 text-yellow-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <h5 className="font-medium text-gray-900 mb-2">설득력 평가</h5>
+                          <p className="text-gray-600 leading-relaxed">
+                            {feedbackData.results[parseInt(activeTab)].persuasiveness평가}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
+      
 
                   {/* 매칭 결과 섹션 */}
                   <div className="border-t pt-8">
-                    <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
-                      <LinkOutlined style={{ color: '#4F46E5' }} />
-                      자기소개서 매칭 결과
-                    </Typography.Title>
-                    
-                    {feedbackData.results[parseInt(activeTab)].using_gpt ? (
+                  <Typography.Title level={4} className="text-gray-800 mb-4 flex items-center gap-2">
+                    <LinkOutlined style={{ color: '#4F46E5' }} />
+                    자기소개서 매칭 결과
+                  </Typography.Title>
+                  
+                  {feedbackData.results[parseInt(activeTab)].reference_analysis && (
+                    <div className="mb-8">
+                      <Card 
+                        size="small"
+                        className="hover:shadow-md transition-all duration-300 bg-indigo-50/70"
+                        style={{ borderRadius: '12px' }}
+                      >
+                        <div>
+                          <div className="text-gray-500 font-medium mb-2 flex items-center gap-2">
+                            <SearchOutlined className="text-indigo-600" />
+                            참고할점
+                          </div>
+                          <div 
+                            className="text-gray-800 prose prose-sm max-w-none"
+                            style={{ whiteSpace: 'pre-wrap' }}
+                          >
+                            {feedbackData.results[parseInt(activeTab)].reference_analysis}
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+                  
+                  {feedbackData.results[parseInt(activeTab)].using_gpt ? (
+                    <Alert
+                      type="info"
+                      message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
+                      showIcon
+                      className="rounded-xl shadow-sm"
+                    />
+                  ) : (
+                    feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
+                      <div className="space-y-4">
+                        {[
+                          { title: '합격한 회사', content: feedbackData.results[parseInt(activeTab)].similar_h2_tag },
+                          { title: '유사한 문항', content: feedbackData.results[parseInt(activeTab)].similar_question },
+                          { title: '유사한 답변', content: feedbackData.results[parseInt(activeTab)].similar_answer }
+                        ].map((item, index) => (
+                          <Card 
+                            key={index}
+                            size="small"
+                            className="hover:shadow-md transition-all duration-300 bg-gray-50/70"
+                            style={{ borderRadius: '12px' }}
+                          >
+                            <div>
+                              <div className="text-gray-500 font-medium mb-2">{item.title}</div>
+                              <div className="text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>
+                                {item.content}
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+
+                        <Card 
+                          size="small" 
+                          className="hover:shadow-md transition-all duration-300"
+                          style={{ 
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)'
+                          }}
+                        >
+                          <div className="flex items-center justify-between p-2">
+                            <span className="text-gray-700 font-medium">유사도</span>
+                            <span className="text-2xl font-bold text-blue-600">
+                              {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
+                            </span>
+                          </div>
+                        </Card>
+                      </div>
+                    ) : (
                       <Alert
                         type="info"
-                        message="자사 서버 문제로 유사도 측정이 일시적으로 불가능합니다."
+                        message="유사한 자기소개서가 없습니다."
                         showIcon
                         className="rounded-xl shadow-sm"
                       />
-                    ) : (
-                      feedbackData.results[parseInt(activeTab)].similarity > 0 ? (
-                        <div className="space-y-4">
-                          {[
-                            { title: '합격한 회사', content: feedbackData.results[parseInt(activeTab)].similar_h2_tag },
-                            { title: '유사한 문항', content: feedbackData.results[parseInt(activeTab)].similar_question },
-                            { title: '유사한 답변', content: feedbackData.results[parseInt(activeTab)].similar_answer }
-                          ].map((item, index) => (
-                            <Card 
-                              key={index}
-                              size="small"
-                              className="hover:shadow-md transition-all duration-300 bg-gray-50/70"
-                              style={{ borderRadius: '12px' }}
-                            >
-                              <div>
-                                <div className="text-gray-500 font-medium mb-2">{item.title}</div>
-                                <div className="text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>
-                                  {item.content}
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-
-                          <Card 
-                            size="small" 
-                            className="hover:shadow-md transition-all duration-300"
-                            style={{ 
-                              borderRadius: '12px',
-                              background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)'
-                            }}
-                          >
-                            <div className="flex items-center justify-between p-2">
-                              <span className="text-gray-700 font-medium">유사도</span>
-                              <span className="text-2xl font-bold text-blue-600">
-                                {feedbackData.results[parseInt(activeTab)].similarity.toFixed(1)}%
-                              </span>
-                            </div>
-                          </Card>
-                        </div>
-                      ) : (
-                        <Alert
-                          type="info"
-                          message="유사한 자기소개서가 없습니다."
-                          showIcon
-                          className="rounded-xl shadow-sm"
-                        />
-                      )
-                    )}
-                  </div>
+                    )
+                  )}
+                </div>
                 </div>
               </Card>
             </div>

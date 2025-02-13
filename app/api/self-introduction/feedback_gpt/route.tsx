@@ -22,23 +22,45 @@ function parseAIResponse(content: string) {
   try {
     const jsonResult = JSON.parse(content);
     
+    const requiredFields = [
+      'relevance', 'specificity', 'persuasiveness',
+      'relevance평가', 'specificity평가', 'persuasiveness평가'
+    ];
+
+    for (const field of requiredFields) {
+      if (!jsonResult[field]) {
+        throw new Error(`Missing required field: ${field}`);
+      }
+    }
+    
+    // 점수 필드 검증 및 정규화 (1-100 범위)
+    const scoreFields = ['relevance', 'specificity', 'persuasiveness'];
+    for (const field of scoreFields) {
+      const score = Number(jsonResult[field]);
+      if (isNaN(score) || score < 1 || score > 100) {
+        jsonResult[field] = 0; 
+      }
+    }
+
     return {
-      relevance: jsonResult.relevance || 7,
-      specificity: jsonResult.specificity || 7,
-      persuasiveness: jsonResult.persuasiveness || 7,
-      feedback: jsonResult.feedback
-        .replace(/relevance:?\s*/gi, '')
-        .replace(/specificity:?\s*/gi, '')
-        .replace(/persuasiveness:?\s*/gi, '')
-        .trim() || '평가 처리 중 오류가 발생했습니다.'
+      relevance: jsonResult.relevance,
+      specificity: jsonResult.specificity,
+      persuasiveness: jsonResult.persuasiveness,
+      relevance평가: jsonResult.relevance평가?.trim() || '평가 처리 중 오류가 발생했습니다.',
+      specificity평가: jsonResult.specificity평가?.trim() || '평가 처리 중 오류가 발생했습니다.',
+      persuasiveness평가: jsonResult.persuasiveness평가?.trim() || '평가 처리 중 오류가 발생했습니다.',
+      using_gpt: true
     };
   } catch (error) {
     console.error('GPT 응답 파싱 실패:', error);
     return {
-      relevance: 7,
-      specificity: 7,
-      persuasiveness: 7,
-      feedback: '평가 처리 중 오류가 발생했습니다.'
+      relevance: 0,
+      specificity: 0,
+      persuasiveness: 0,
+      relevance평가: '평가 처리 중 오류가 발생했습니다.',
+      specificity평가: '평가 처리 중 오류가 발생했습니다.',
+      persuasiveness평가: '평가 처리 중 오류가 발생했습니다.',
+      using_gpt: true
     };
   }
 }
@@ -87,35 +109,65 @@ export async function POST(request: Request) {
           relevance: 0,
           specificity: 0,
           persuasiveness: 0,
-          feedback: "답변이 100자 미만입니다. 질문의 요구사항을 충분히 반영하여 구체적으로 작성해주세요.",
+          relevance평가 : "답변이 100자 미만입니다. 질문의 요구사항을 충분히 반영하여 구체적으로 작성해주세요.",
+          specificity평가 : "답변이 100자 미만입니다. 질문의 요구사항을 충분히 반영하여 구체적으로 작성해주세요.",
+          persuasiveness평가 : "답변이 100자 미만입니다. 질문의 요구사항을 충분히 반영하여 구체적으로 작성해주세요.",
           using_gpt: true
         };
       }
 
-      const prompt = `[직무 맥락: ${requestData.job_code}] 당신은 ${requestData.job_code} 직무에 대한 자기소개서만을 평가하는 자기소개 전문가입니다. 직무와 관계 없는 자기소개인지 판단하고 평가하세요 예시를 들어서 출력해주세요.
+      const prompt = `[직무 맥락: ${requestData.job_code}] 당신은 자기소개서만을 평가하는 자기소개 전문가입니다. 직무와 관계 없는 자기소개인지 판단하고 평가하세요 예시를 들어서 출력해주세요.
 
 [평가 대상]
 질문: ${item.question}
 답변: ${item.answer}
 
-상세 평가 기준:
 [세부 평가 지표]
 1. Relevance (연관성) - 직무 적합성 및 질문 이해도:
-- 10점: ${requestData.job_code} 직군의 핵심 역량이 3개 이상 구체적으로 드러나고, 질문 의도를 완벽히 파악하여 추가 인사이트 제공
-- 8-9점: ${requestData.job_code} 핵심 역량이 1-2개 포함되고, 질문 의도를 정확히 파악
-- 5-6점: ${requestData.job_code} 관련 내용이 있으나 직무 연관성이 부족하거나 질문 의도를 부분적으로만 이해
-- 3-4점: ${requestData.job_code} 관련 내용이 모호하고 다른 직무 경험 위주로 서술
-- 1-2점: ${requestData.job_code}와 관계없는 내용이거나 질문 의도를 전혀 파악하지 못함
+- [평가 대상]이 ${requestData.job_code}직무와 관련이 있을 경우: 직무 적합성과 질문 이해도를 모두 평가
+- [평가 대상]이 ${requestData.job_code} 직무와 관련이 없을 경우: 질문 이해도만 평가하며, 직무 적합성은 감점 요소에서 제외
+
+점수 기준:
+- 90~100점: ${requestData.job_code} 직군의 핵심 역량/경험이 명확히 드러나며, 질문 의도를 완벽히 파악하여 추가 인사이트까지 제공
+- 80~90점: ${requestData.job_code} 관련성이 매우 높으며 질문의 핵심 요소를 잘 반영
+- 70~80점: 직무 관련 내용이 주를 이루며, 질문 의도를 상당 부분 반영
+- 60~70점: 직무 관련 내용이 많지만 일부 보완 필요
+- 50~60점: 직무 연관성이 존재하나 개선이 필요
+- 40~50점: 직무 관련성이 다소 낮고 질문과의 연결성이 부족
+- 30~40점: 직무 관련 내용이 거의 없으며 일반적인 경험 서술
+- 20~30점: 직무 연관성이 거의 없고 질문과 동떨어진 답변
+- 10~20점: 직무와 무관한 내용을 중심으로 서술 (이 경우 질문 이해도만 평가)
+- 1~10점: 직무와 전혀 무관한 다른 경험만을 서술하거나 질문 의도를 전혀 이해하지 못함
 
 2. Specificity (구체성) - 경험과 실적의 구체화:
-- 8점 ~ 10점: 3개 이상의 구체적 수치/성과와 상세한 실행 과정이 포함됨, 1-2개의 구체적 수치/성과와 실행 과정이 포함됨
-- 4점 ~ 8점: 실행 과정은 있으나 구체적 수치/성과 없음
-- 4점 이하: 일반적이고 추상적인 설명만 존재, 구체적 내용이 전혀 없거나 두루뭉술한 서술
+- 90~100점: 모든 주장이 구체적 수치, 사례, 경험으로 뒷받침됨
+- 80~90점: 대부분의 주장이 구체적 증거로 뒷받침됨
+- 70~80점: 중요한 경험이 구체적으로 서술되었으나 일부 부족한 부분이 있음
+- 60~70점: 경험이 구체적으로 제시되었으나 추가 보완 필요
+- 50~60점: 일부 구체적 사례가 있으나 개선 필요
+- 40~50점: 경험이 대체로 추상적으로 서술됨
+- 30~40점: 대부분 추상적 설명에 그침
+- 20~30점: 구체적인 사례나 수치가 거의 없음
+- 10~20점: 구체적 내용이 전혀 없으며 전반적으로 모호한 설명
+- 1~10점: 실제 경험이 없어 보이며, 내용이 매우 부실함
 
 3. Persuasiveness (설득력) - 논리성과 차별성:
-- 8점 ~ 10점: 논리적 구성이 명확하고 차별성이 있으나, 일부 보완이 필요 / 명확한 인과관계, 독창적 관점, 강력한 동기부여가 완벽하게 제시됨
-- 4점 ~ 8점: 기본적인 논리는 있으나 차별성이 부족하고 설득력이 약함
-- 4점 이하: 논리적 구조 없이 단순 나열식 서술, 주장과 근거의 연결이 없음
+- 90~100점: 명확한 인과관계, 독창적 관점, 강력한 동기부여가 모두 포함
+- 80~90점: 논리적 구성과 차별성이 있으며 설득력이 높음
+- 70~80점: 논리적인 흐름이 잘 정리되어 있으며 차별성이 어느 정도 있음
+- 60~70점: 기본적인 논리를 갖추고 있으나 차별성이 부족
+- 50~60점: 논리가 다소 부족하고 설득력이 약함
+- 40~50점: 논리적 전개가 매끄럽지 않으며 설득력이 낮음
+- 30~40점: 주장과 근거의 연결이 미약함
+- 20~30점: 논리적 흐름이 부실하고 차별성이 거의 없음
+- 10~20점: 설득력이 거의 없으며 논리적 연결이 부족
+- 1~10점: 논리가 없거나 내용이 매우 부실함
+
+[평가 시 필수 고려사항]
+1. {job_code} 직군과 내용이 관계성이 있는지 판단
+2. 각 점수대별 명확한 근거 제시
+3. [참고 사례]와의 구체적인 비교 분석
+4. 실천 가능한 개선 방향 제시
 
 
 
@@ -124,7 +176,9 @@ JSON 형식으로만 평가하세요. Markdown이나 다른 형식을 포함하�
     "relevance": <점수>,
     "specificity": <점수>,
     "persuasiveness": <점수>,
-    "feedback": "<점수에 대한 구체적 근거, 건설적인 피드백 , 맞춤법 오류에 대한 피드백>"
+    "relevance평가": "<relevance 점수에 대한 근거, 건설적인 피드백>",
+    "specificity평가": "<specificity 점수에 대한 근거, 건설적인 피드백>",
+    "persuasiveness평가": "<persuasiveness 점수에 대한 근거, 건설적인 피드백>"
    
 }}
 
@@ -154,7 +208,7 @@ JSON 형식으로만 평가하세요. Markdown이나 다른 형식을 포함하�
       const aiResult = parseAIResponse(content);
 
       // 필수 필드 검증
-      if (!aiResult.relevance || !aiResult.specificity || !aiResult.persuasiveness || !aiResult.feedback) {
+      if (!aiResult.relevance || !aiResult.specificity || !aiResult.persuasiveness || !aiResult.relevance평가 || !aiResult.specificity평가 || !aiResult.persuasiveness평가 ) {
         console.error("Missing required fields in parsed result:", aiResult);
         throw new Error('Missing required fields in AI response');
       }
@@ -163,7 +217,9 @@ JSON 형식으로만 평가하세요. Markdown이나 다른 형식을 포함하�
         relevance: aiResult.relevance,
         specificity: aiResult.specificity,
         persuasiveness: aiResult.persuasiveness,
-        feedback: aiResult.feedback,
+        relevance평가: aiResult.relevance평가,
+        specificity평가: aiResult.specificity평가,
+        persuasiveness평가: aiResult.persuasiveness평가,
         using_gpt: true
       };
     }));
