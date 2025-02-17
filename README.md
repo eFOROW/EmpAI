@@ -53,7 +53,7 @@ AI 취업 플랫폼(EmpAI)은 맞춤형 채용정보 및 자기소개서, 면접
 
 **자기소개서 피드백 LLM 서버** : https://github.com/lkmsdf159/EemAI_self-introduction_ai_server
 
-**영상 분석 AI 서버** : 
+**영상 분석 AI 서버** : https://github.com/mayway777/AI_Interview_Server
 
 (LOC 91k)
 
