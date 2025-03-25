@@ -19,7 +19,7 @@ AI 취업 플랫폼(EmpAI)은 맞춤형 채용정보 및 자기소개서, 면접
 | [김원형](https://github.com/eFOROW)    | Technical LeadㆍFull-StackㆍCloud Infra & Deployment | 컴퓨터ㆍ소프트웨어전공 2학년 |
 | [이강민](https://github.com/lkmsdf159)  | Frontend DeveloperㆍRAG-based AI Feedback     | AIㆍ빅데이터학과 3학년 |
 | [장소영](https://github.com/sy56)        | Frontend DeveloperㆍQA Engineer               | 컴퓨터정보ㆍ보안전공 3학년 |
-| [정형준](https://github.com/Junghyeongjun) | External API IntegrationㆍQA Engineer          | 컴퓨터정보ㆍ보안전공 3학년 |
+| [정형준](https://github.com/Junghyeongjun) | External API IntegrationㆍPrompt Engineer          | 컴퓨터정보ㆍ보안전공 3학년 |
 
 
 ### 설계의 주안점
